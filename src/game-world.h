@@ -42,6 +42,9 @@ protected:
 	Mylib::Matrix<Cell> *map;
 	OO_ENCAPSULATE_READONLY(uint32_t, w)
 	OO_ENCAPSULATE_READONLY(uint32_t, h)
+	OO_ENCAPSULATE_READONLY(uint32_t, n_walls)
+	OO_ENCAPSULATE_READONLY(uint32_t, pacman_start_x)
+	OO_ENCAPSULATE_READONLY(uint32_t, pacman_start_y)
 
 public:
 	Map ();
@@ -68,7 +71,7 @@ protected:
 	OO_ENCAPSULATE(SDL_GLContext, sdl_gl_context)
 	OO_ENCAPSULATE(uint32_t, screen_width_px)
 	OO_ENCAPSULATE(uint32_t, screen_height_px)
-	OO_ENCAPSULATE(World*, game_world)
+	OO_ENCAPSULATE(World*, world)
 	OO_ENCAPSULATE(bool, alive)
 	OO_ENCAPSULATE_READONLY(State, state)
 	OO_ENCAPSULATE_READONLY(Opengl::Circle_factory*, opengl_circle_factory_low_def)
@@ -130,6 +133,7 @@ public:
 
 	void event_keydown (SDL_Keycode key);
 	void physics (float dt, const Uint8 *keys);
+	void render_map ();
 	void render (float dt);
 };
 

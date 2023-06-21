@@ -7,6 +7,17 @@ void Game::Object::physics (float dt)
 	this->y += this->vy * dt;
 }
 
+void Game::Shape::apply_delta (uint32_t n_vertices, float *x, float *y, uint32_t stride)
+{
+	uint32_t j = 0;
+
+	for (uint32_t i=0; i<n_vertices; i++) {
+		x[j] += this->dx;
+		y[j] += this->dy;
+		j += stride;
+	}
+}
+
 uint32_t Game::Shape_circle::get_n_vertices ()
 {
 	return this->factory->get_n_vertices();
@@ -14,14 +25,48 @@ uint32_t Game::Shape_circle::get_n_vertices ()
 
 void Game::Shape_circle::push_vertices (float *x, float *y, uint32_t stride)
 {
-	uint32_t n = this->get_n_vertices();
+	const uint32_t n = this->get_n_vertices();
 
 	this->factory->fill_vertex_buffer(this->radius, x, y, stride);
+	this->apply_delta(n, x, y, stride);
+}
 
-	for (uint32_t i=0; i<n; i+=stride) {
-		x[i] += this->dx;
-		y[i] += this->dy;
-	}
+uint32_t Game::Shape_rect::get_n_vertices ()
+{
+	return fast_get_n_vertices();
+}
+
+void Game::Shape_rect::push_vertices (float *x, float *y, uint32_t stride)
+{
+	const float half_w = this->w * 0.5f;
+	const float half_h = this->h * 0.5f;
+	uint32_t i = 0;
+
+	// let's draw clockwise
+
+	// first triangle
+	x[i] = -half_w;
+	y[i] = -half_h;
+	i += stride;
+	x[i] = half_w;
+	y[i] = half_h;
+	i += stride;
+	x[i] = -half_w;
+	y[i] = half_h;
+
+	i += stride;
+
+	// second triangle
+	x[i] = -half_w;
+	y[i] = -half_h;
+	i += stride;
+	x[i] = half_w;
+	y[i] = -half_h;
+	i += stride;
+	x[i] = half_w;
+	y[i] = half_h;
+
+	this->apply_delta(fast_get_n_vertices(), x, y, stride);
 }
 
 Game::Player::Player ()

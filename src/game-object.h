@@ -30,7 +30,8 @@ class Shape
 {
 public:
 	enum class Type {
-		circle
+		circle,
+		rect
 	};
 protected:
 	OO_ENCAPSULATE_READONLY(Type, type)
@@ -52,6 +53,13 @@ public:
 	inline Shape (Type type)
 		: Shape (type, nullptr)
 	{
+	}
+
+	void apply_delta (uint32_t n_vertices, float *x, float *y, uint32_t stride);
+	
+	inline void apply_delta (float *x, float *y, uint32_t stride)
+	{
+		this->apply_delta( this->get_n_vertices(), x, y, stride );
 	}
 
 	virtual uint32_t get_n_vertices () = 0;
@@ -82,8 +90,50 @@ public:
 	{
 	}
 
+	inline Shape_circle (Opengl::Circle_factory *factory)
+		: Shape_circle (nullptr, 0.0f, factory)
+	{
+	}
+
 	uint32_t get_n_vertices () override;
 	void push_vertices (float *x, float *y, uint32_t stride) override;
+};
+
+// ---------------------------------------------------
+
+class Shape_rect: public Shape
+{
+protected:
+	OO_ENCAPSULATE(float, w)
+	OO_ENCAPSULATE(float, h)
+
+public:
+	inline Shape_rect (Object *object, float w, float h)
+		: Shape (Type::rect, object)
+	{
+		this->w = w;
+		this->h = h;
+
+		dprint( "rect created w=" << this->w << " h=" << this->h << std::endl )
+	}
+
+	inline Shape_rect (float w, float h)
+		: Shape_rect (nullptr, w, h)
+	{
+	}
+
+	inline Shape_rect ()
+		: Shape_rect (nullptr, 0.0f, 0.0f)
+	{
+	}
+
+	uint32_t get_n_vertices () override;
+	void push_vertices (float *x, float *y, uint32_t stride) override;
+
+	constexpr uint32_t fast_get_n_vertices ()
+	{
+		return 6; // 2 triangles
+	}
 };
 
 // ---------------------------------------------------

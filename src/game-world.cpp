@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <chrono>
+#include <limits>
 
 #include "game-world.h"
 
@@ -15,30 +16,36 @@ Game::Map::Map ()
 	
 	std::string map_string = "00000000"
 	                         "0p     0"
+	                         "0    0 0"
+	                         "0    0 0"
 	                         "0      0"
-	                         "0      0"
-	                         "0      0"
-	                         "0      0"
+	                         "0 0000 0"
 	                         "0      0"
 	                         "00000000";
 
 	ASSERT(map_string.length() == (this->w * this->h))
 
+	this->n_walls = 0;
+	this->pacman_start_x = std::numeric_limits<uint32_t>::max();
+
 	uint32_t k = 0;
-	for (uint32_t i=0; i<this->h; i++) {
-		for (uint32_t j=0; j<this->w; j++) {
+	for (uint32_t y=0; y<this->h; y++) {
+		for (uint32_t x=0; x<this->w; x++) {
 			switch (map_string[k]) {
 				case ' ':
-					m(i, j) = Cell::empty;
-					break;
+					m(y, x) = Cell::empty;
+				break;
 				
 				case '0':
-					m(i, j) = Cell::wall;
-					break;
+					m(y, x) = Cell::wall;
+					this->n_walls++;
+				break;
 				
 				case 'p':
-					m(i, j) = Cell::pacman_start;
-					break;
+					m(y, x) = Cell::pacman_start;
+					this->pacman_start_x = x;
+					this->pacman_start_y = y;
+				break;
 				
 				default:
 					ASSERT(0)
@@ -47,6 +54,8 @@ Game::Map::Map ()
 			k++;
 		}
 	}
+
+	ASSERT(this->pacman_start_x != std::numeric_limits<uint32_t>::max())
 }
 
 Game::Map::~Map ()
@@ -125,8 +134,8 @@ void Game::Main::load ()
 
 	this->load_opengl_programs();
 
-	this->game_world = nullptr;
-	this->game_world = new World();
+	this->world = nullptr;
+	this->world = new World();
 
 	dprint( "loaded world" << std::endl )
 
@@ -181,7 +190,7 @@ void Game::Main::run ()
 				case SDL_KEYDOWN:
 					switch (this->state) {
 						case State::playing:
-							this->game_world->event_keydown(event.key.keysym.sym);
+							this->world->event_keydown(event.key.keysym.sym);
 						break;
 					}
 			}
@@ -196,8 +205,8 @@ void Game::Main::run ()
 
 		switch (this->state) {
 			case State::playing:
-				this->game_world->physics(virtual_dt, keys);
-				this->game_world->render(virtual_dt);
+				this->world->physics(virtual_dt, keys);
+				this->world->render(virtual_dt);
 			break;
 			
 			default:
@@ -235,15 +244,8 @@ Game::World::World ()
 	this->player = new Player;
 	this->add_object(player);
 
-	// find pacman start position
-	for (uint32_t y=0; y<this->map.get_h(); y++) {
-		for (uint32_t x=0; x<this->map.get_w(); x++) {
-			if (this->map(y, x) == Map::Cell::pacman_start) {
-				this->player->set_x( static_cast<float>(x) );
-				this->player->set_y( static_cast<float>(y) );
-			}
-		}
-	}
+	this->player->set_x( static_cast<float>( this->map.get_pacman_start_x() ) + 0.5f );
+	this->player->set_y( static_cast<float>( this->map.get_pacman_start_y() ) + 0.5f );
 }
 
 Game::World::~World ()
@@ -283,9 +285,54 @@ void Game::World::physics (float dt, const Uint8 *keys)
 	}
 }
 
+void Game::World::render_map ()
+{
+	Opengl::Program_triangle::Vertex *vertices;
+	Opengl::Program_triangle *program = Main::get()->get_opengl_program_triangle();
+
+	Shape_rect rect(Config::map_tile_size, Config::map_tile_size);
+	const uint32_t n_rects = this->map.get_n_walls();
+	const uint32_t total_n_vertices = rect.fast_get_n_vertices() * n_rects;
+
+	dprint( "map allocating space for " << total_n_vertices << " vertices in vertex_buffer" << std::endl )
+
+	vertices = program->alloc_vertices(total_n_vertices);
+	Opengl::Program_triangle::Vertex *rect_vertices = vertices;
+
+	for (uint32_t y=0; y<this->map.get_h(); y++) {
+		for (uint32_t x=0; x<this->map.get_w(); x++) {
+			switch (this->map(y, x)) {
+				case Map::Cell::wall:
+					rect.set_dx( static_cast<float>(x) + 0.5f );
+					rect.set_dy( static_cast<float>(y) + 0.5f );
+					rect.push_vertices( &(rect_vertices->x), &(rect_vertices->y), program->get_stride() );
+					rect_vertices += rect.fast_get_n_vertices();
+				break;
+			}
+		}
+	}
+
+	for (uint32_t i=0; i<total_n_vertices; i++) {
+		vertices[i].offset_x = 0.0f;
+		vertices[i].offset_y = 0.0f;
+		vertices[i].r = 0.0f;
+		vertices[i].g = 0.0f;
+		vertices[i].b = 1.0f;
+		vertices[i].a = 1.0f;
+
+	#if 0
+		dprint( "map vertex[" << i << "] x = " << vertices[i].x << "  y =" << vertices[i].y
+		        << " offset_x = " << vertices[i].offset_x
+				<< " offset_y = " << vertices[i].offset_y << std::endl )
+	#endif
+	}
+}
+
 void Game::World::render (float dt)
 {
 	Main::get()->get_opengl_program_triangle()->clear();
+
+	this->render_map();
 
 	for (Object *obj: this->objects) {
 		obj->render(dt);
