@@ -16,38 +16,41 @@
 #include "lib.h"
 #include "opengl.h"
 
-// ---------------------------------------------------
-
-class game_world_t;
-class game_object_t;
-
-enum class shape_type_t {
-	circle
-};
-
-// ---------------------------------------------------
-
-class shape_t
+namespace Game
 {
+
+// ---------------------------------------------------
+
+class World;
+class Object;
+
+// ---------------------------------------------------
+
+class Shape
+{
+public:
+	enum class Type {
+		circle
+	};
 protected:
-	OO_ENCAPSULATE_READONLY(shape_type_t, shape_type)
-	OO_ENCAPSULATE(game_object_t*, object)
+	OO_ENCAPSULATE_READONLY(Type, type)
+	OO_ENCAPSULATE(Object*, object)
 
 	// distance from the center of the shape to the center of the object
 	OO_ENCAPSULATE(float, dx)
 	OO_ENCAPSULATE(float, dy)
 
 public:
-	inline shape_t (shape_type_t shape_type, game_object_t *object)
+	inline Shape (Type type, Object *object)
 	{
-		this->shape_type = shape_type;
+		this->type = type;
 		this->object = object;
 		this->dx = 0.0f;
 		this->dy = 0.0f;
 	}
 
-	inline shape_t (shape_type_t shape_type)
-		: shape_t (shape_type, nullptr)
+	inline Shape (Type type)
+		: Shape (type, nullptr)
 	{
 	}
 
@@ -57,16 +60,16 @@ public:
 
 // ---------------------------------------------------
 
-class shape_circle_t: public shape_t
+class Shape_circle: public Shape
 {
 protected:
-	opengl_circle_factory_t *factory;
+	Opengl::Circle_factory *factory;
 
 	OO_ENCAPSULATE(float, radius)
 
 public:
-	inline shape_circle_t (game_object_t *object, float radius, opengl_circle_factory_t *factory)
-		: shape_t (shape_type_t::circle, object)
+	inline Shape_circle (Object *object, float radius, Opengl::Circle_factory *factory)
+		: Shape (Type::circle, object)
 	{
 		this->factory = factory;
 		this->radius = radius;
@@ -74,8 +77,8 @@ public:
 		dprint( "circle created r=" << this->radius << std::endl )
 	}
 
-	inline shape_circle_t (float radius, opengl_circle_factory_t *factory)
-		: shape_circle_t (nullptr, radius, factory)
+	inline Shape_circle (float radius, Opengl::Circle_factory *factory)
+		: Shape_circle (nullptr, radius, factory)
 	{
 	}
 
@@ -85,14 +88,14 @@ public:
 
 // ---------------------------------------------------
 
-class game_object_t
+class Object
 {
 protected:
 	OO_ENCAPSULATE(float, x)
 	OO_ENCAPSULATE(float, y)
 	OO_ENCAPSULATE(float, vx)
 	OO_ENCAPSULATE(float, vy)
-	OO_ENCAPSULATE(game_world_t*, game_world)
+	OO_ENCAPSULATE(World*, game_world)
 
 public:
 	void physics (float dt);
@@ -101,16 +104,20 @@ public:
 
 // ---------------------------------------------------
 
-class game_player_t: public game_object_t
+class Player: public Object
 {
 protected:
-	shape_circle_t *shape;
+	Shape_circle *shape;
 
 public:
-	game_player_t ();
-	~game_player_t ();
+	Player ();
+	~Player ();
 
 	void render (float dt) override;
 };
+
+// ---------------------------------------------------
+
+} // end namespace Game
 
 #endif

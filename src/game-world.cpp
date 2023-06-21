@@ -4,14 +4,14 @@
 
 #include "game-world.h"
 
-game_main_t *game_main = nullptr;
+Game::Main *Game::game_main = nullptr;
 
-game_map_t::game_map_t ()
+Game::Map::Map ()
 {
 	this->w = 8;
 	this->h = 8;
-	this->map = new matrix_t<cell_t>(this->w, this->h);
-	matrix_t<cell_t>& m = *(this->map);
+	this->map = new Mylib::Matrix<Cell>(this->w, this->h);
+	auto& m = *(this->map);
 	
 	std::string map_string = "00000000"
 	                         "0p     0"
@@ -29,15 +29,15 @@ game_map_t::game_map_t ()
 		for (uint32_t j=0; j<this->w; j++) {
 			switch (map_string[k]) {
 				case ' ':
-					m(i, j) = cell_t::empty;
+					m(i, j) = Cell::empty;
 					break;
 				
 				case '0':
-					m(i, j) = cell_t::wall;
+					m(i, j) = Cell::wall;
 					break;
 				
 				case 'p':
-					m(i, j) = cell_t::pacman_start;
+					m(i, j) = Cell::pacman_start;
 					break;
 				
 				default:
@@ -49,27 +49,27 @@ game_map_t::game_map_t ()
 	}
 }
 
-game_map_t::~game_map_t ()
+Game::Map::~Map ()
 {
 	if (this->map != nullptr)
 		delete this->map;
 }
 
-game_main_t::game_main_t ()
+Game::Main::Main ()
 {
 	ASSERT(game_main == nullptr)
 }
 
-game_main_t::~game_main_t ()
+Game::Main::~Main ()
 {
 }
 
-void game_main_t::load ()
+void Game::Main::load ()
 {
 	std::cout << std::setprecision(4);
 	std::cout << std::fixed;
 
-	this->state = game_state_t::initializing;
+	this->state = State::initializing;
 
 	SDL_Init( SDL_INIT_EVERYTHING );
 
@@ -103,8 +103,8 @@ void game_main_t::load ()
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glViewport(0, 0, this->screen_width_px, this->screen_height_px);
 
-	this->opengl_circle_factory_low_def = new opengl_circle_factory_t(CONFIG_OPENGL_LOW_DEF_CIRCLES_TRIANGLES);
-	//this->opengl_circle_factory_high_def = new opengl_circle_factory_t(CONFIG_OPENGL_HIGH_DEF_CIRCLES_TRIANGLES);
+	this->opengl_circle_factory_low_def = new Opengl::Circle_factory(Config::opengl_low_def_triangles);
+	//this->opengl_circle_factory_high_def = new Opengl::Circle_factory(Config::opengl_high_def_triangles);
 
 	dprint( "loaded opengl stuff" << std::endl )
 
@@ -113,16 +113,16 @@ void game_main_t::load ()
 	this->load_opengl_programs();
 
 	this->game_world = nullptr;
-	this->game_world = new game_world_t( new game_map_t() );
+	this->game_world = new World( new Map() );
 
 	dprint( "loaded world" << std::endl )
 
 	this->alive = true;
 }
 
-void game_main_t::load_opengl_programs ()
+void Game::Main::load_opengl_programs ()
 {
-	this->opengl_program_triangle = new opengl_program_triangle_t;
+	this->opengl_program_triangle = new Opengl::Program_triangle;
 
 	dprint( "loaded opengl triangle program" << std::endl )
 
@@ -136,7 +136,7 @@ void game_main_t::load_opengl_programs ()
 	dprint( "generated and binded opengl world vertex array/buffer" << std::endl )
 }
 
-void game_main_t::run ()
+void Game::Main::run ()
 {
 	SDL_Event event;
 	const Uint8 *keys;
@@ -145,7 +145,7 @@ void game_main_t::run ()
 	const float target_fps = 60.0f;
 	const float target_dt = 1.0f / target_fps;
 
-	this->state = game_state_t::playing;
+	this->state = State::playing;
 
 	keys = SDL_GetKeyboardState(nullptr);
 
@@ -167,7 +167,7 @@ void game_main_t::run ()
 				
 				case SDL_KEYDOWN:
 					switch (this->state) {
-						case game_state_t::playing:
+						case State::playing:
 							this->game_world->event_keydown(event.key.keysym.sym);
 						break;
 					}
@@ -176,13 +176,13 @@ void game_main_t::run ()
 
 		glClear( GL_COLOR_BUFFER_BIT );
 
-		//glBufferData( GL_ARRAY_BUFFER, sizeof(gl_vertex_t) * circle_factory.get_n_vertices(), g_vertex_buffer_data, GL_DYNAMIC_DRAW );
+		//glBufferData( GL_ARRAY_BUFFER, sizeof(Vertex) * circle_factory.get_n_vertices(), g_vertex_buffer_data, GL_DYNAMIC_DRAW );
 
 		//glBindVertexArray( vao );
 		//glDrawArrays( GL_TRIANGLES, 0, circle_factory.get_n_vertices() );
 
 		switch (this->state) {
-			case game_state_t::playing:
+			case State::playing:
 				this->game_world->physics(virtual_dt, keys);
 				this->game_world->render(virtual_dt);
 			break;
@@ -201,14 +201,14 @@ void game_main_t::run ()
 	}
 }
 
-void game_main_t::cleanup ()
+void Game::Main::cleanup ()
 {
 	SDL_GL_DeleteContext(this->sdl_gl_context);
 	SDL_DestroyWindow(this->sdl_window);
 	SDL_Quit();
 }
 
-game_world_t::game_world_t (game_map_t *map_)
+Game::World::World (Map *map_)
 : map(*map_)
 {
 	this->w = static_cast<float>( this->map.get_w() );
@@ -220,13 +220,13 @@ game_world_t::game_world_t (game_map_t *map_)
 								  );
 	game_main->get_opengl_program_triangle()->upload_projection_matrix(this->projection_matrix);
 
-	this->player = new game_player_t;
+	this->player = new Player;
 	this->add_object(player);
 
 	// find pacman start position
 	for (uint32_t y=0; y<this->map.get_h(); y++) {
 		for (uint32_t x=0; x<this->map.get_w(); x++) {
-			if (this->map(y, x) == game_map_t::cell_t::pacman_start) {
+			if (this->map(y, x) == Map::Cell::pacman_start) {
 				this->player->set_x( static_cast<float>(x) );
 				this->player->set_y( static_cast<float>(y) );
 			}
@@ -234,52 +234,52 @@ game_world_t::game_world_t (game_map_t *map_)
 	}
 }
 
-game_world_t::~game_world_t ()
+Game::World::~World ()
 {
 	delete this->player;
 }
 
-void game_world_t::event_keydown (SDL_Keycode key)
+void Game::World::event_keydown (SDL_Keycode key)
 {
 	switch (key) {
 		case SDLK_LEFT:
-			this->player->set_vx(-CONFIG_PACMAN_SPEED);
+			this->player->set_vx(-Config::pacman_speed);
 			this->player->set_vy(0.0f);
 		break;
 
 		case SDLK_RIGHT:
-			this->player->set_vx(CONFIG_PACMAN_SPEED);
+			this->player->set_vx(Config::pacman_speed);
 			this->player->set_vy(0.0f);
 		break;
 
 		case SDLK_UP:
 			this->player->set_vx(0.0f);
-			this->player->set_vy(-CONFIG_PACMAN_SPEED);
+			this->player->set_vy(-Config::pacman_speed);
 		break;
 
 		case SDLK_DOWN:
 			this->player->set_vx(0.0f);
-			this->player->set_vy(CONFIG_PACMAN_SPEED);
+			this->player->set_vy(Config::pacman_speed);
 		break;
 	}
 }
 
-void game_world_t::physics (float dt, const Uint8 *keys)
+void Game::World::physics (float dt, const Uint8 *keys)
 {
-	for (game_object_t *obj: this->objects) {
+	for (Object *obj: this->objects) {
 		obj->physics(dt);
 	}
 }
 
-void game_world_t::render (float dt)
+void Game::World::render (float dt)
 {
 	game_main->get_opengl_program_triangle()->clear();
 
-	for (game_object_t *obj: this->objects) {
+	for (Object *obj: this->objects) {
 		obj->render(dt);
 	}
 
-	//this->opengl_program_triangle->debug(); exit(1);
+	//this->Programriangle->debug(); exit(1);
 
 	game_main->get_opengl_program_triangle()->upload_vertex_buffer();
 	game_main->get_opengl_program_triangle()->draw();
@@ -287,13 +287,13 @@ void game_world_t::render (float dt)
 
 int main (int argc, char **argv)
 {
-	game_main = new game_main_t;
+	Game::game_main = new Game::Main;
 	
-	game_main->load();
-	game_main->run();
-	game_main->cleanup();
+	Game::game_main->load();
+	Game::game_main->run();
+	Game::game_main->cleanup();
 
-	delete game_main;
+	delete Game::game_main;
 
 	return 0;
 }

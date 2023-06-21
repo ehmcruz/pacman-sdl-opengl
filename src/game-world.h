@@ -20,31 +20,34 @@
 #include "opengl.h"
 #include "game-object.h"
 
+namespace Game
+{
+
 // ---------------------------------------------------
 
-class game_world_t;
+class World;
 
 // ---------------------------------------------------
 
-class game_map_t
+class Map
 {
 public:
-	enum class cell_t {
+	enum class Cell {
 		empty,
 		wall,
 		pacman_start
 	};
 
 protected:
-	matrix_t<cell_t> *map;
+	Mylib::Matrix<Cell> *map;
 	OO_ENCAPSULATE_READONLY(uint32_t, w)
 	OO_ENCAPSULATE_READONLY(uint32_t, h)
 
 public:
-	game_map_t ();
-	~game_map_t ();
+	Map ();
+	~Map ();
 
-	inline cell_t operator() (int row, int col)
+	inline Cell operator() (int row, int col)
 	{
 		return this->map->get(row, col);
 	}
@@ -52,10 +55,10 @@ public:
 
 // ---------------------------------------------------
 
-class game_main_t
+class Main
 {
 public:
-	enum class game_state_t {
+	enum class State {
 		initializing,
 		playing
 	};
@@ -65,16 +68,16 @@ protected:
 	OO_ENCAPSULATE(SDL_GLContext, sdl_gl_context)
 	OO_ENCAPSULATE(uint32_t, screen_width_px)
 	OO_ENCAPSULATE(uint32_t, screen_height_px)
-	OO_ENCAPSULATE(game_world_t*, game_world)
+	OO_ENCAPSULATE(World*, game_world)
 	OO_ENCAPSULATE(bool, alive)
-	OO_ENCAPSULATE_READONLY(game_state_t, state)
-	OO_ENCAPSULATE_READONLY(opengl_circle_factory_t*, opengl_circle_factory_low_def)
-	OO_ENCAPSULATE_READONLY(opengl_circle_factory_t*, opengl_circle_factory_high_def)
-	OO_ENCAPSULATE_READONLY(opengl_program_triangle_t*, opengl_program_triangle)
+	OO_ENCAPSULATE_READONLY(State, state)
+	OO_ENCAPSULATE_READONLY(Opengl::Circle_factory*, opengl_circle_factory_low_def)
+	OO_ENCAPSULATE_READONLY(Opengl::Circle_factory*, opengl_circle_factory_high_def)
+	OO_ENCAPSULATE_READONLY(Opengl::Program_triangle*, opengl_program_triangle)
 
 public:
-	game_main_t ();
-	~game_main_t ();
+	Main ();
+	~Main ();
 	void load ();
 	void load_opengl_programs ();
 	void run ();
@@ -83,10 +86,10 @@ public:
 
 // ---------------------------------------------------
 
-class game_world_t
+class World
 {
 protected:
-	projection_matrix_t projection_matrix;
+	Opengl::Projection_matrix projection_matrix;
 
 	// width and height of screen
 	// the screen coordinates here are in game world coords (not opengl, neither pixels)
@@ -95,19 +98,19 @@ protected:
 	OO_ENCAPSULATE_READONLY(float, h)
 	//OO_ENCAPSULATE(float, world_to_opengl_conversion)
 
-	OO_ENCAPSULATE_REFERENCE_READONLY(game_player_t*, player)
+	OO_ENCAPSULATE_REFERENCE_READONLY(Player*, player)
 
 protected:
-	std::vector< game_object_t* > objects;
-	game_map_t& map;
+	std::vector< Object* > objects;
+	Map& map;
 
 public:
-	game_world_t (game_map_t *map_);
-	~game_world_t ();
+	World (Map *map_);
+	~World ();
 
 	void bind_vertex_buffer ();
 
-	inline void add_object (game_object_t *obj)
+	inline void add_object (Object *obj)
 	{
 		obj->set_game_world(this);
 		this->objects.push_back(obj);
@@ -120,6 +123,10 @@ public:
 
 // ---------------------------------------------------
 
-extern game_main_t *game_main;
+extern Main *game_main;
+
+// ---------------------------------------------------
+
+} // end namespace Game
 
 #endif

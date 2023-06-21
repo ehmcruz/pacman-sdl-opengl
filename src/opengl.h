@@ -17,13 +17,16 @@
 
 #include "lib.h"
 
+namespace Opengl
+{
+
 // ---------------------------------------------------
 
-class opengl_program_t;
+class Program;
 
 // ---------------------------------------------------
 
-class shader_t
+class Shader
 {
 protected:
 	OO_ENCAPSULATE_READONLY(GLuint, shader_id)
@@ -31,15 +34,15 @@ protected:
 	OO_ENCAPSULATE_REFERENCE(std::string, fname)
 
 public:
-	shader_t (GLenum shader_type, const char *fname);
+	Shader (GLenum shader_type, const char *fname);
 	void compile ();
 
-	friend class opengl_program_t;
+	friend class Program;
 };
 
 // ---------------------------------------------------
 
-class projection_matrix_t: public static_matrix_t<float, 4, 4>
+class Projection_matrix: public Mylib::Static_matrix<float, 4, 4>
 {
 public:
 	void setup (float left, float right, float bottom, float top, float znear, float zfar);
@@ -47,15 +50,15 @@ public:
 
 // ---------------------------------------------------
 
-class opengl_program_t
+class Program
 {
 protected:
 	OO_ENCAPSULATE_READONLY(GLuint, program_id)
-	OO_ENCAPSULATE(shader_t*, vs)
-	OO_ENCAPSULATE(shader_t*, fs)
+	OO_ENCAPSULATE(Shader*, vs)
+	OO_ENCAPSULATE(Shader*, fs)
 
 public:
-	opengl_program_t ();
+	Program ();
 	void attach_shaders ();
 	void link_program ();
 	void use_program ();
@@ -64,7 +67,7 @@ public:
 // ---------------------------------------------------
 
 template <typename T, int grow_factor=4096>
-class vertex_buffer_t
+class Vertex_buffer
 {
 protected:
 	uint32_t vertex_buffer_capacity;
@@ -89,7 +92,7 @@ protected:
 	}
 
 public:
-	vertex_buffer_t ()
+	Vertex_buffer ()
 	{
 		static_assert(grow_factor > 0);
 
@@ -99,7 +102,7 @@ public:
 		this->vertex_buffer_used = 0;
 	}
 
-	~vertex_buffer_t ()
+	~Vertex_buffer ()
 	{
 		if (this->vertex_buffer != nullptr)
 			delete[] this->vertex_buffer;
@@ -133,17 +136,17 @@ public:
 
 // ---------------------------------------------------
 
-class opengl_program_triangle_t: public opengl_program_t
+class Program_triangle: public Program
 {
 protected:
-	enum gl_attrib_t {
+	enum Attrib {
 		attrib_position,
 		attrib_offset,
 		attrib_color
 	} t_attrib_id;
 
 public:
-	struct gl_vertex_t {
+	struct Vertex {
 		GLfloat x; // local x,y coords
 		GLfloat y;
 		GLfloat offset_x; // global x,y coords, which are added to the local coords
@@ -158,14 +161,14 @@ public:
 	OO_ENCAPSULATE_READONLY(GLuint, vbo) // vertex buffer id
 
 protected:
-	vertex_buffer_t<gl_vertex_t, 8192> triangle_buffer;
+	Vertex_buffer<Vertex, 8192> triangle_buffer;
 
 public:
-	opengl_program_triangle_t ();
+	Program_triangle ();
 
 	inline uint32_t get_stride ()
 	{
-		return (sizeof(gl_vertex_t) / sizeof(GLfloat));
+		return (sizeof(Vertex) / sizeof(GLfloat));
 	}
 
 	inline void clear ()
@@ -173,7 +176,7 @@ public:
 		this->triangle_buffer.clear();
 	}
 
-	inline gl_vertex_t* alloc_vertices (uint32_t n)
+	inline Vertex* alloc_vertices (uint32_t n)
 	{
 		return this->triangle_buffer.alloc_vertices(n);
 	}
@@ -182,7 +185,7 @@ public:
 	void bind_vertex_buffer ();
 	void setup_vertex_array ();
 	void upload_vertex_buffer ();
-	void upload_projection_matrix (projection_matrix_t& m);
+	void upload_projection_matrix (Projection_matrix& m);
 	void draw ();
 
 	void debug ();
@@ -190,7 +193,7 @@ public:
 
 // ---------------------------------------------------
 
-class opengl_circle_factory_t
+class Circle_factory
 {
 private:
 	float *table_sin;
@@ -198,8 +201,8 @@ private:
 	uint32_t n_triangles;
 
 public:
-	opengl_circle_factory_t (uint32_t n_triangles);
-	~opengl_circle_factory_t ();
+	Circle_factory (uint32_t n_triangles);
+	~Circle_factory ();
 
 	inline uint32_t get_n_vertices ()
 	{
@@ -208,5 +211,9 @@ public:
 
 	void fill_vertex_buffer (float radius, float *x, float *y, uint32_t stride);
 };
+
+// ---------------------------------------------------
+
+} // end namespace Opengl
 
 #endif

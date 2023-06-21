@@ -9,14 +9,14 @@
 
 #define MY_PI M_PI
 
-shader_t::shader_t (GLenum shader_type, const char *fname)
+Opengl::Shader::Shader (GLenum shader_type, const char *fname)
 {
 	this->shader_type = shader_type;
 	this->fname = fname;
 	this->shader_id = glCreateShader(this->shader_type);
 }
 
-void shader_t::compile ()
+void Opengl::Shader::compile ()
 {
 	// First, read the whole shader file to memory.
 	// I usually do this in C, but wanted to do in C++ for a change, but Jesus...
@@ -53,39 +53,39 @@ void shader_t::compile ()
 	}
 }
 
-opengl_program_t::opengl_program_t ()
+Opengl::Program::Program ()
 {
 	this->vs = nullptr;
 	this->fs = nullptr;
 	this->program_id = glCreateProgram();
 }
 
-void opengl_program_t::attach_shaders ()
+void Opengl::Program::attach_shaders ()
 {
 	glAttachShader(this->program_id, this->vs->shader_id);
 	glAttachShader(this->program_id, this->fs->shader_id);
 }
 
-void opengl_program_t::link_program ()
+void Opengl::Program::link_program ()
 {
 	glLinkProgram(this->program_id);
 }
 
-void opengl_program_t::use_program ()
+void Opengl::Program::use_program ()
 {
 	glUseProgram(this->program_id);
 }
 
-opengl_program_triangle_t::opengl_program_triangle_t ()
-	: opengl_program_t ()
+Opengl::Program_triangle::Program_triangle ()
+	: Program ()
 {
-	static_assert(sizeof(gl_vertex_t) == 32);
-	static_assert((sizeof(gl_vertex_t) / sizeof(GLfloat)) == 8);
+	static_assert(sizeof(Vertex) == 32);
+	static_assert((sizeof(Vertex) / sizeof(GLfloat)) == 8);
 
-	this->vs = new shader_t(GL_VERTEX_SHADER, "shaders/triangles.vert");
+	this->vs = new Shader(GL_VERTEX_SHADER, "shaders/triangles.vert");
 	this->vs->compile();
 
-	this->fs = new shader_t(GL_FRAGMENT_SHADER, "shaders/triangles.frag");
+	this->fs = new Shader(GL_FRAGMENT_SHADER, "shaders/triangles.frag");
 	this->fs->compile();
 
 	this->attach_shaders();
@@ -100,17 +100,17 @@ opengl_program_triangle_t::opengl_program_triangle_t ()
 	glGenBuffers(1, &(this->vbo));
 }
 
-void opengl_program_triangle_t::bind_vertex_array ()
+void Opengl::Program_triangle::bind_vertex_array ()
 {
 	glBindVertexArray(this->vao);
 }
 
-void opengl_program_triangle_t::bind_vertex_buffer ()
+void Opengl::Program_triangle::bind_vertex_buffer ()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
 }
 
-void opengl_program_triangle_t::setup_vertex_array ()
+void Opengl::Program_triangle::setup_vertex_array ()
 {
 	uint32_t pos, length;
 
@@ -120,41 +120,41 @@ void opengl_program_triangle_t::setup_vertex_array ()
 
 	pos = 0;
 	length = 2;
-	glVertexAttribPointer( attrib_position, length, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_t), ( void * )(pos * sizeof(float)) );
+	glVertexAttribPointer( attrib_position, length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
 	
 	pos += length;
 	length = 2;
-	glVertexAttribPointer( attrib_offset, length, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_t), ( void * )(pos * sizeof(float)) );
+	glVertexAttribPointer( attrib_offset, length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
 	
 	pos += length;
 	length = 4;
-	glVertexAttribPointer( attrib_color, length, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_t), ( void * )(pos * sizeof(float)) );
+	glVertexAttribPointer( attrib_color, length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
 }
 
-void opengl_program_triangle_t::upload_vertex_buffer ()
+void Opengl::Program_triangle::upload_vertex_buffer ()
 {
 	uint32_t n = this->triangle_buffer.get_vertex_buffer_used();
-	glBufferData(GL_ARRAY_BUFFER, sizeof(gl_vertex_t) * n, this->triangle_buffer.get_vertex_buffer(), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * n, this->triangle_buffer.get_vertex_buffer(), GL_DYNAMIC_DRAW);
 }
 
-void opengl_program_triangle_t::upload_projection_matrix (projection_matrix_t& m)
+void Opengl::Program_triangle::upload_projection_matrix (Projection_matrix& m)
 {
 	glUniformMatrix4fv( glGetUniformLocation(this->program_id, "u_projection_matrix"), 1, GL_FALSE, m.get_raw() );
 	dprint( "projection matrix sent to GPU" << std::endl )
 }
 
-void opengl_program_triangle_t::draw ()
+void Opengl::Program_triangle::draw ()
 {
 	uint32_t n = this->triangle_buffer.get_vertex_buffer_used();
 	glDrawArrays(GL_TRIANGLES, 0, n);
 }
 
-void opengl_program_triangle_t::debug ()
+void Opengl::Program_triangle::debug ()
 {
 	uint32_t n = this->triangle_buffer.get_vertex_buffer_used();
 
 	for (uint32_t i=0; i<n; i++) {
-		gl_vertex_t *v = this->triangle_buffer.get_vertex(i);
+		Vertex *v = this->triangle_buffer.get_vertex(i);
 
 		if ((i % 3) == 0)
 			std::cout << std::endl;
@@ -172,7 +172,7 @@ void opengl_program_triangle_t::debug ()
 	}
 }
 
-opengl_circle_factory_t::opengl_circle_factory_t (uint32_t n_triangles)
+Opengl::Circle_factory::Circle_factory (uint32_t n_triangles)
 {
 	double angle, delta;
 	
@@ -214,13 +214,13 @@ opengl_circle_factory_t::opengl_circle_factory_t (uint32_t n_triangles)
 	}
 }
 
-opengl_circle_factory_t::~opengl_circle_factory_t ()
+Opengl::Circle_factory::~Circle_factory ()
 {
 	delete[] this->table_cos;
 	delete[] this->table_sin;
 }
 
-void opengl_circle_factory_t::fill_vertex_buffer (float radius, float *x, float *y, uint32_t stride)
+void Opengl::Circle_factory::fill_vertex_buffer (float radius, float *x, float *y, uint32_t stride)
 {
 	uint32_t j;
 	float previous_x, previous_y;
@@ -261,12 +261,12 @@ void opengl_circle_factory_t::fill_vertex_buffer (float radius, float *x, float 
 	}
 }
 
-void projection_matrix_t::setup (float left, float right, 
-                                 float bottom, float top,
-								 float znear, float zfar
-								 )
+void Opengl::Projection_matrix::setup (float left, float right, 
+                                       float bottom, float top,
+								       float znear, float zfar
+								      )
 {
-	projection_matrix_t& m = *this;
+	Projection_matrix& m = *this;
 
 	m(0,0) = 2.0f / (right - left);
 	m(0,1) = 0.0f;

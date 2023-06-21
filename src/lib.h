@@ -4,6 +4,9 @@
 #include <iostream>
 #include <string>
 
+namespace Mylib
+{
+
 // ---------------------------------------------------
 
 #define DEBUG
@@ -78,7 +81,7 @@
 // ---------------------------------------------------
 
 template<typename T, int w, int h>
-class static_matrix_t
+class Static_matrix
 {
 private:
 	T storage[h * w];
@@ -98,7 +101,7 @@ public:
 // ---------------------------------------------------
 
 template<typename T>
-class matrix_t
+class Matrix
 {
 private:
 	T *storage;
@@ -106,14 +109,14 @@ private:
 	OO_ENCAPSULATE_READONLY(uint32_t, h)
 
 public:
-	matrix_t (uint32_t w, uint32_t h)
+	Matrix (uint32_t w, uint32_t h)
 	{
 		this->storage = new T[w*h];
 		this->w = w;
 		this->h = h;
 	}
 
-	~matrix_t ()
+	~Matrix ()
 	{
 		delete[] this->storage;
 	}
@@ -133,5 +136,9 @@ public:
 		return this->get(row, col);
 	}
 };
+
+// ---------------------------------------------------
+
+} // end namespace Mylib
 
 #endif

@@ -1,10 +1,26 @@
 #ifndef __PACMAN_SDL_OPENGL_CONFIG_HEADER_H__
 #define __PACMAN_SDL_OPENGL_CONFIG_HEADER_H__
 
-#define CONFIG_OPENGL_LOW_DEF_CIRCLES_TRIANGLES    64
-#define CONFIG_OPENGL_HIGH_DEF_CIRCLES_TRIANGLES   1024
+#include <stdint.h>
 
-#define CONFIG_PACMAN_RADIUS    0.45f
-#define CONFIG_PACMAN_SPEED     1.5f
+namespace Game
+{
+namespace Config
+{
+
+// ---------------------------------------------------
+
+inline const uint32_t opengl_low_def_triangles = 64;
+
+inline const uint32_t opengl_high_def_triangles = 1024;
+
+inline const float pacman_radius = 0.45f;
+
+inline const float pacman_speed = 1.5f;
+
+// ---------------------------------------------------
+
+} // end namespace Config
+} // end namespace Game
 
 #endif
