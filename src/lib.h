@@ -80,11 +80,11 @@ namespace Mylib
 
 // ---------------------------------------------------
 
-template<typename T, int w, int h>
+template<typename T, int rows, int cols>
 class Static_matrix
 {
 private:
-	T storage[h * w];
+	T storage[rows * cols];
 
 public:
 	inline T* get_raw ()
@@ -92,9 +92,9 @@ public:
 		return this->storage;
 	}
 
-	inline T& operator() (int j, int i)
+	inline T& operator() (int row, int col)
 	{
-		return this->storage[j*w + i];
+		return this->storage[row*cols + col];
 	}
 };
 
@@ -105,20 +105,34 @@ class Matrix
 {
 private:
 	T *storage;
-	OO_ENCAPSULATE_READONLY(uint32_t, w)
-	OO_ENCAPSULATE_READONLY(uint32_t, h)
+	OO_ENCAPSULATE_READONLY(uint32_t, rows)
+	OO_ENCAPSULATE_READONLY(uint32_t, cols)
 
 public:
-	Matrix (uint32_t w, uint32_t h)
+	Matrix ()
 	{
-		this->storage = new T[w*h];
-		this->w = w;
-		this->h = h;
+		this->storage = nullptr;
+	}
+
+	Matrix (uint32_t rows, uint32_t cols)
+	{
+		this->storage = nullptr;
+		this->setup(rows, cols);
 	}
 
 	~Matrix ()
 	{
-		delete[] this->storage;
+		if (this->storage != nullptr)
+			delete[] this->storage;
+	}
+
+	void setup (uint32_t rows, uint32_t cols)
+	{
+		if (this->storage != nullptr)
+			delete[] this->storage;
+		this->storage = new T[rows * cols];
+		this->rows = rows;
+		this->cols = cols;
 	}
 
 	inline T* get_raw ()
@@ -128,7 +142,7 @@ public:
 
 	inline T& get (int row, int col)
 	{
-		return this->storage[row*this->w + col];
+		return this->storage[row*this->cols + col];
 	}
 
 	inline T& operator() (int row, int col)

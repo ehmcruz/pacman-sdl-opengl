@@ -75,13 +75,25 @@ protected:
 	OO_ENCAPSULATE_READONLY(Opengl::Circle_factory*, opengl_circle_factory_high_def)
 	OO_ENCAPSULATE_READONLY(Opengl::Program_triangle*, opengl_program_triangle)
 
-public:
+protected:
+	static Main *instance;
+
 	Main ();
 	~Main ();
+
+public:
 	void load ();
 	void load_opengl_programs ();
 	void run ();
 	void cleanup ();
+
+	static inline Main* get ()
+	{
+		return instance;
+	}
+
+	static void allocate ();
+	static void deallocate ();
 };
 
 // ---------------------------------------------------
@@ -102,10 +114,10 @@ protected:
 
 protected:
 	std::vector< Object* > objects;
-	Map& map;
+	Map map;
 
 public:
-	World (Map *map_);
+	World ();
 	~World ();
 
 	void bind_vertex_buffer ();
@@ -120,10 +132,6 @@ public:
 	void physics (float dt, const Uint8 *keys);
 	void render (float dt);
 };
-
-// ---------------------------------------------------
-
-extern Main *game_main;
 
 // ---------------------------------------------------
 

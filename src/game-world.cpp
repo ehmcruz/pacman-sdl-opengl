@@ -4,13 +4,13 @@
 
 #include "game-world.h"
 
-Game::Main *Game::game_main = nullptr;
+Game::Main* Game::Main::instance = nullptr;
 
 Game::Map::Map ()
 {
 	this->w = 8;
 	this->h = 8;
-	this->map = new Mylib::Matrix<Cell>(this->w, this->h);
+	this->map = new Mylib::Matrix<Cell>(this->h, this->w);
 	auto& m = *(this->map);
 	
 	std::string map_string = "00000000"
@@ -57,11 +57,24 @@ Game::Map::~Map ()
 
 Game::Main::Main ()
 {
-	ASSERT(game_main == nullptr)
 }
 
 Game::Main::~Main ()
 {
+}
+
+void Game::Main::allocate ()
+{
+	ASSERT(instance == nullptr)
+
+	instance = new Main;
+}
+
+void Game::Main::deallocate ()
+{
+	ASSERT(instance != nullptr)
+
+	delete instance;
 }
 
 void Game::Main::load ()
@@ -113,7 +126,7 @@ void Game::Main::load ()
 	this->load_opengl_programs();
 
 	this->game_world = nullptr;
-	this->game_world = new World( new Map() );
+	this->game_world = new World();
 
 	dprint( "loaded world" << std::endl )
 
@@ -208,8 +221,7 @@ void Game::Main::cleanup ()
 	SDL_Quit();
 }
 
-Game::World::World (Map *map_)
-: map(*map_)
+Game::World::World ()
 {
 	this->w = static_cast<float>( this->map.get_w() );
 	this->h = static_cast<float>( this->map.get_h() );
@@ -218,7 +230,7 @@ Game::World::World (Map *map_)
 	                              this->h, 0.0f,
 								  0.0f, 100.0f
 								  );
-	game_main->get_opengl_program_triangle()->upload_projection_matrix(this->projection_matrix);
+	Main::get()->get_opengl_program_triangle()->upload_projection_matrix(this->projection_matrix);
 
 	this->player = new Player;
 	this->add_object(player);
@@ -273,7 +285,7 @@ void Game::World::physics (float dt, const Uint8 *keys)
 
 void Game::World::render (float dt)
 {
-	game_main->get_opengl_program_triangle()->clear();
+	Main::get()->get_opengl_program_triangle()->clear();
 
 	for (Object *obj: this->objects) {
 		obj->render(dt);
@@ -281,19 +293,19 @@ void Game::World::render (float dt)
 
 	//this->Programriangle->debug(); exit(1);
 
-	game_main->get_opengl_program_triangle()->upload_vertex_buffer();
-	game_main->get_opengl_program_triangle()->draw();
+	Main::get()->get_opengl_program_triangle()->upload_vertex_buffer();
+	Main::get()->get_opengl_program_triangle()->draw();
 }
 
 int main (int argc, char **argv)
 {
-	Game::game_main = new Game::Main;
+	Game::Main::allocate();
 	
-	Game::game_main->load();
-	Game::game_main->run();
-	Game::game_main->cleanup();
+	Game::Main::get()->load();
+	Game::Main::get()->run();
+	Game::Main::get()->cleanup();
 
-	delete Game::game_main;
+	Game::Main::deallocate();
 
 	return 0;
 }

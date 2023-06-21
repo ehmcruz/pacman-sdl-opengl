@@ -26,7 +26,7 @@ void Game::Shape_circle::push_vertices (float *x, float *y, uint32_t stride)
 
 Game::Player::Player ()
 {
-	this->shape = new Shape_circle( this, Config::pacman_radius, game_main->get_opengl_circle_factory_low_def() );
+	this->shape = new Shape_circle( this, Config::pacman_radius, Main::get()->get_opengl_circle_factory_low_def() );
 	this->x = 0.0f;
 	this->y = 0.0f;
 	this->vx = 0.0f;
@@ -49,7 +49,7 @@ void Game::Player::render (float dt)
 	n_vertices = this->shape->get_n_vertices();
 	dprint( "player allocating space for " << n_vertices << " vertices in vertex_buffer" << std::endl )
 
-	program = game_main->get_opengl_program_triangle();
+	program = Main::get()->get_opengl_program_triangle();
 	vertices = program->alloc_vertices(n_vertices);
 
 	this->shape->push_vertices( &(vertices->x), &(vertices->y), program->get_stride() );
