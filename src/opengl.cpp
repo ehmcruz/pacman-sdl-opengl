@@ -1,13 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <numbers>
 
 #include <cstdlib>
 #include <cmath>
 
 #include "opengl.h"
-
-#define MY_PI M_PI
 
 Opengl::Shader::Shader (GLenum shader_type, const char *fname)
 {
@@ -191,7 +190,7 @@ Opengl::Circle_factory::Circle_factory (uint32_t n_triangles)
 		2*pi radians is equal to 360 degrees
 	*/
 
-	delta = (2.0 * MY_PI) / static_cast<double>(this->n_triangles);
+	delta = (2.0 * std::numbers::pi) / static_cast<double>(this->n_triangles);
 	angle = delta;
 
 /*
@@ -261,30 +260,27 @@ void Opengl::Circle_factory::fill_vertex_buffer (float radius, float *x, float *
 	}
 }
 
-void Opengl::Projection_matrix::setup (float left, float right, 
-                                       float bottom, float top,
-								       float znear, float zfar
-								      )
+void Opengl::Projection_matrix::setup (Args&& args)
 {
 	Projection_matrix& m = *this;
 
-	m(0,0) = 2.0f / (right - left);
+	m(0,0) = 2.0f / (args.right - args.left);
 	m(0,1) = 0.0f;
 	m(0,2) = 0.0f;
 	m(0,3) = 0.0f;
 
 	m(1,0) = 0.0f;
-	m(1,1) = 2.0f / (top - bottom);
+	m(1,1) = 2.0f / (args.top - args.bottom);
 	m(1,2) = 0.0f;
 	m(1,3) = 0.0f;
 
 	m(2,0) = 0.0f;
 	m(2,1) = 0.0f;
-	m(2,2) = -2.0f / (zfar - znear);
+	m(2,2) = -2.0f / (args.zfar - args.znear);
 	m(2,3) = 0.0f;
 
-	m(3,0) = -(right + left) / (right - left);
-	m(3,1) = -(top + bottom) / (top - bottom);
-	m(3,2) = -(zfar + znear) / (zfar - znear);
+	m(3,0) = -(args.right + args.left) / (args.right - args.left);
+	m(3,1) = -(args.top + args.bottom) / (args.top - args.bottom);
+	m(3,2) = -(args.zfar + args.znear) / (args.zfar - args.znear);
 	m(3,3) = 1.0f;
 }

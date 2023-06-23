@@ -46,7 +46,16 @@ public:
 class Projection_matrix: public Mylib::StaticMatrix<float, 4, 4>
 {
 public:
-	void setup (float left, float right, float bottom, float top, float znear, float zfar);
+	struct Args {
+		float left;
+		float right;
+		float top;
+		float bottom;
+		float znear;
+		float zfar;
+	};
+
+	void setup (Args&& args);
 };
 
 // ---------------------------------------------------

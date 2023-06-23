@@ -235,10 +235,15 @@ Game::World::World ()
 	this->w = static_cast<float>( this->map.get_w() );
 	this->h = static_cast<float>( this->map.get_h() );
 
-	this->projection_matrix.setup(0.0f, this->w,
-	                              this->h, 0.0f,
-								  0.0f, 100.0f
-								  );
+	this->projection_matrix.setup( Opengl::Projection_matrix::Args{
+		.left = 0.0f,
+		.right = this->w,
+		.top = 0.0f,
+		.bottom = this->h,
+		.znear = 0.0f,
+		.zfar = 100.0f
+		} );
+
 	Main::get()->get_opengl_program_triangle()->upload_projection_matrix(this->projection_matrix);
 
 	this->player = new Player;

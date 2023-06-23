@@ -6,18 +6,18 @@ BIN = pacman.exe
 MYLIB = ../my-lib
 
 # Windows
-CPPFLAGS = `sdl2-config --cflags` -I$(MYLIB)/include -g -mconsole #-O2
-LDFLAGS = `sdl2-config --libs` -mconsole -lglew32 -lopengl32 -lm
+CPPFLAGS = -std=c++20 `sdl2-config --cflags` -I$(MYLIB)/include -g -mconsole #-O2
+LDFLAGS = -std=c++20 `sdl2-config --libs` -mconsole -lglew32 -lopengl32 -lm
 
 # Linux
-#CPPFLAGS = `sdl2-config --cflags` -I$(MYLIB)/include -g #-O2
-#LDFLAGS = `sdl2-config --libs` -lGL -lGLEW -lm
+#CPPFLAGS = -std=c++20 `sdl2-config --cflags` -I$(MYLIB)/include -g #-O2
+#LDFLAGS = -std=c++20 `sdl2-config --libs` -lGL -lGLEW -lm
 
 # ----------------------------------
 
 OBJS := $(patsubst %.cpp,%.o,$(wildcard src/*.cpp))
 
-HEADERS = $(wildcard src/*.h) $(wildcard src/*.h)
+HEADERS = $(wildcard src/*.h) $(wildcard $(MYLIB)/include/my-lib/*.h)
 
 # ----------------------------------
 
