@@ -10,12 +10,13 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
-#include <stdint.h>
-#include <string.h>
+#include <cstring>
 
 #include <string>
 
-#include "lib.h"
+#include <my-lib/std.h>
+#include <my-lib/macros.h>
+#include <my-lib/matrix.h>
 
 namespace Opengl
 {
@@ -42,7 +43,7 @@ public:
 
 // ---------------------------------------------------
 
-class Projection_matrix: public Mylib::Static_matrix<float, 4, 4>
+class Projection_matrix: public Mylib::StaticMatrix<float, 4, 4>
 {
 public:
 	void setup (float left, float right, float bottom, float top, float znear, float zfar);
@@ -119,7 +120,7 @@ public:
 
 		free_space = this->vertex_buffer_capacity - this->vertex_buffer_used;
 
-		if (bunlikely(free_space < n))
+		if (free_space < n) [[unlikely]]
 			this->realloc(this->vertex_buffer_used + n);
 		
 		T *vertices = this->vertex_buffer + this->vertex_buffer_used;

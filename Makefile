@@ -1,12 +1,16 @@
 CPP = g++
 BIN = pacman.exe
 
+# get my-lib:
+# https://github.com/ehmcruz/my-lib
+MYLIB = ../my-lib
+
 # Windows
-CPPFLAGS = `sdl2-config --cflags` -g -mconsole #-O2
+CPPFLAGS = `sdl2-config --cflags` -I$(MYLIB)/include -g -mconsole #-O2
 LDFLAGS = `sdl2-config --libs` -mconsole -lglew32 -lopengl32 -lm
 
 # Linux
-#CPPFLAGS = `sdl2-config --cflags` -g #-O2
+#CPPFLAGS = `sdl2-config --cflags` -I$(MYLIB)/include -g #-O2
 #LDFLAGS = `sdl2-config --libs` -lGL -lGLEW -lm
 
 # ----------------------------------

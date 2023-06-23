@@ -1,7 +1,7 @@
 #ifndef __PACMAN_SDL_OPENGL_CONFIG_HEADER_H__
 #define __PACMAN_SDL_OPENGL_CONFIG_HEADER_H__
 
-#include <stdint.h>
+#include <my-lib/std.h>
 
 namespace Game
 {

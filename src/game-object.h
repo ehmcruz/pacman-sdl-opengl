@@ -10,10 +10,11 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
-#include <stdint.h>
+#include <my-lib/std.h>
+#include <my-lib/macros.h>
+#include <my-lib/matrix.h>
 
 #include "config.h"
-#include "lib.h"
 #include "opengl.h"
 
 namespace Game
