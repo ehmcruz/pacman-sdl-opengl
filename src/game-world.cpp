@@ -165,7 +165,7 @@ void Game::Main::run ()
 	SDL_Event event;
 	const Uint8 *keys;
 	Clock::time_point tbegin, tend;
-	float real_dt, virtual_dt;
+	float real_dt, virtual_dt, required_dt, sleep_dt;
 
 	this->state = State::playing;
 
@@ -173,13 +173,15 @@ void Game::Main::run ()
 
 	real_dt = 0.0f;
 	virtual_dt = 0.0f;
+	required_dt = 0.0f;
+	sleep_dt = 0.0f;
 
 	while (this->alive) {
 		tbegin = Clock::now();
 
 		virtual_dt = (real_dt > Config::max_dt) ? Config::max_dt : real_dt;
 
-		dprint( "start new frame render real_dt=" << real_dt << " virtual_dt=" << virtual_dt << std::endl )
+		dprint( "start new frame render required_dt=" << required_dt << " real_dt=" << real_dt << " sleep_dt=" << sleep_dt << " virtual_dt=" << virtual_dt << " max_dt=" << Config::max_dt << std::endl )
 
 		while ( SDL_PollEvent( &event ) ) {
 			switch (event.type) {
@@ -215,9 +217,22 @@ void Game::Main::run ()
 
 		SDL_GL_SwapWindow(this->sdl_window);
 
+		tend = Clock::now();
+		std::chrono::duration<float> elapsed_ = std::chrono::duration_cast<std::chrono::duration<float>>(tend - tbegin);
+		required_dt = elapsed_.count();
+
+		if (required_dt < Config::sleep_threshold) {
+			sleep_dt = Config::sleep_threshold - required_dt;
+			uint32_t delay = static_cast<uint32_t>(sleep_dt * 1000.0f);
+			dprint( "sleeping for " << delay << "ms..." << std::endl )
+			SDL_Delay(delay);
+		}
+		else
+			sleep_dt = 0.0f;
+
 		do {
 			tend = Clock::now();
-			std::chrono::duration<float> elapsed_ = std::chrono::duration_cast<std::chrono::duration<float>>(tend - tbegin);
+			elapsed_ = std::chrono::duration_cast<std::chrono::duration<float>>(tend - tbegin);
 			real_dt = elapsed_.count();
 		} while (real_dt < Config::target_dt);
 	}

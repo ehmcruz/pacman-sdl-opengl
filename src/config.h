@@ -31,6 +31,8 @@ inline constexpr float target_dt = 1.0f / target_fps;
 
 inline constexpr float max_dt = 1.0f / min_fps;
 
+inline constexpr float sleep_threshold = max_dt * 0.9f;
+
 // ---------------------------------------------------
 
 } // end namespace Config
