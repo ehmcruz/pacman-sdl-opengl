@@ -6,8 +6,8 @@ BIN = pacman.exe
 MYLIB = ../my-lib
 
 # Windows
-CPPFLAGS = -std=c++20 `sdl2-config --cflags` -I$(MYLIB)/include -g -mconsole #-O2
-LDFLAGS = -std=c++20 `sdl2-config --libs` -mconsole -lglew32 -lopengl32 -lm
+CPPFLAGS = -std=c++23 `sdl2-config --cflags` -I$(MYLIB)/include -g -mconsole #-O2
+LDFLAGS = -std=c++23 `sdl2-config --libs` -mconsole -lglew32 -lopengl32 -lm
 
 # Linux
 #CPPFLAGS = -std=c++20 `sdl2-config --cflags` -I$(MYLIB)/include -g #-O2

@@ -20,9 +20,21 @@ inline constexpr float pacman_speed = 2.0f;
 
 inline constexpr float map_tile_size = 1.0f;
 
+inline constexpr float target_fps = 60.0f;
+
+// if fps gets lower than min_fps, we slow down the simulation
+inline constexpr float min_fps = 30.0f;
+
+// here we put derived config
+
+inline constexpr float target_dt = 1.0f / target_fps;
+
+inline constexpr float max_dt = 1.0f / min_fps;
+
 // ---------------------------------------------------
 
 } // end namespace Config
+
 } // end namespace Game
 
 #endif

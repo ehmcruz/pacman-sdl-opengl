@@ -50,8 +50,8 @@ public:
 		this->dy = 0.0f;
 	}
 
-	inline Shape (const Type type)
-		: Shape (type, nullptr)
+	inline Shape (const Type type_)
+		: Shape (type_, nullptr)
 	{
 	}
 
@@ -76,22 +76,21 @@ protected:
 	OO_ENCAPSULATE(float, radius)
 
 public:
-	inline ShapeCircle (const Object *object, const float radius, const Opengl::CircleFactory *factory)
-		: Shape (Type::circle, object)
+	inline ShapeCircle (const Object *object_, const float radius_, const Opengl::CircleFactory *factory_)
+		: Shape (Type::circle, object_),
+		  factory(factory_),
+		  radius(radius_)
 	{
-		this->factory = factory;
-		this->radius = radius;
-
 		dprint( "circle created r=" << this->radius << std::endl )
 	}
 
-	inline ShapeCircle (const float radius, const Opengl::CircleFactory *factory)
-		: ShapeCircle (nullptr, radius, factory)
+	inline ShapeCircle (const float radius_, const Opengl::CircleFactory *factory_)
+		: ShapeCircle (nullptr, radius_, factory_)
 	{
 	}
 
-	inline ShapeCircle (const Opengl::CircleFactory *factory)
-		: ShapeCircle (nullptr, 0.0f, factory)
+	inline ShapeCircle (const Opengl::CircleFactory *factory_)
+		: ShapeCircle (nullptr, 0.0f, factory_)
 	{
 	}
 
@@ -108,17 +107,15 @@ protected:
 	OO_ENCAPSULATE(float, h)
 
 public:
-	inline ShapeRect (const Object *object, const float w, const float h)
-		: Shape (Type::rect, object)
+	inline ShapeRect (const Object *object_, const float w_, const float h_)
+		: Shape (Type::rect, object_),
+		  w(w_), h(h_)
 	{
-		this->w = w;
-		this->h = h;
-
 		dprint( "rect created w=" << this->w << " h=" << this->h << std::endl )
 	}
 
-	inline ShapeRect (const float w, const float h)
-		: ShapeRect (nullptr, w, h)
+	inline ShapeRect (const float w_, const float h_)
+		: ShapeRect (nullptr, w_, h_)
 	{
 	}
 
@@ -127,9 +124,14 @@ public:
 	{
 	}
 
+	consteval static uint32_t fast_get_n_vertices ()
+	{
+		return 6; // 2 triangles
+	}
+
 	constexpr uint32_t get_n_vertices () override
 	{
-		return 6;
+		return fast_get_n_vertices();
 	};
 	
 	void push_vertices (float *x, float *y, uint32_t const stride) override;
@@ -156,13 +158,15 @@ public:
 class Player: public Object
 {
 protected:
-	ShapeCircle *shape;
+	ShapeCircle shape;
 
 public:
 	Player ();
 	~Player ();
 
 	void render (const float dt) override;
+
+	void event_keydown (const SDL_Keycode key);
 };
 
 // ---------------------------------------------------

@@ -2,16 +2,17 @@
 #include <fstream>
 #include <sstream>
 #include <numbers>
+#include <utility>
 
 #include <cstdlib>
 #include <cmath>
 
 #include "opengl.h"
 
-Opengl::Shader::Shader (const GLenum shader_type, const char *fname)
+Opengl::Shader::Shader (const GLenum shader_type_, const char *fname_)
+: shader_type(shader_type_),
+  fname(fname_)
 {
-	this->shader_type = shader_type;
-	this->fname = fname;
 	this->shader_id = glCreateShader(this->shader_type);
 }
 
@@ -89,9 +90,9 @@ Opengl::ProgramTriangle::ProgramTriangle ()
 
 	this->attach_shaders();
 
-	glBindAttribLocation(this->program_id, attrib_position, "i_position");
-	glBindAttribLocation(this->program_id, attrib_offset, "i_offset");
-	glBindAttribLocation(this->program_id, attrib_color, "i_color");
+	glBindAttribLocation(this->program_id, std::to_underlying(Attrib::position), "i_position");
+	glBindAttribLocation(this->program_id, std::to_underlying(Attrib::offset), "i_offset");
+	glBindAttribLocation(this->program_id, std::to_underlying(Attrib::color), "i_color");
 
 	this->link_program();
 
@@ -113,21 +114,21 @@ void Opengl::ProgramTriangle::setup_vertex_array ()
 {
 	uint32_t pos, length;
 
-	glEnableVertexAttribArray( attrib_position );
-	glEnableVertexAttribArray( attrib_offset );
-	glEnableVertexAttribArray( attrib_color );
+	glEnableVertexAttribArray( std::to_underlying(Attrib::position) );
+	glEnableVertexAttribArray( std::to_underlying(Attrib::offset) );
+	glEnableVertexAttribArray( std::to_underlying(Attrib::color) );
 
 	pos = 0;
 	length = 2;
-	glVertexAttribPointer( attrib_position, length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
+	glVertexAttribPointer( std::to_underlying(Attrib::position), length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
 	
 	pos += length;
 	length = 2;
-	glVertexAttribPointer( attrib_offset, length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
+	glVertexAttribPointer( std::to_underlying(Attrib::offset), length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
 	
 	pos += length;
 	length = 4;
-	glVertexAttribPointer( attrib_color, length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
+	glVertexAttribPointer( std::to_underlying(Attrib::color), length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
 }
 
 void Opengl::ProgramTriangle::upload_vertex_buffer ()
@@ -174,10 +175,8 @@ void Opengl::ProgramTriangle::debug ()
 Opengl::CircleFactory::CircleFactory (const uint32_t n_triangles_)
 	: n_triangles(n_triangles_)
 {
-	double angle, delta;
-	
-	this->table_cos = new float[n_triangles];
-	this->table_sin = new float[n_triangles];
+	this->table_cos = new float[this->n_triangles];
+	this->table_sin = new float[this->n_triangles];
 
 	/*
 		cos(angle) = x / radius
@@ -189,8 +188,8 @@ Opengl::CircleFactory::CircleFactory (const uint32_t n_triangles_)
 		2*pi radians is equal to 360 degrees
 	*/
 
-	delta = (2.0 * std::numbers::pi) / static_cast<double>(this->n_triangles);
-	angle = delta;
+	const double delta = (2.0 * std::numbers::pi) / static_cast<double>(this->n_triangles);
+	double angle = delta;
 
 /*
 	dprint( std::endl )

@@ -61,12 +61,12 @@ void Game::ShapeRect::push_vertices (float *x, float *y, const uint32_t stride)
 	x[i] = half_w;
 	y[i] = half_h;
 
-	this->apply_delta(this->get_n_vertices(), x, y, stride);
+	this->apply_delta(fast_get_n_vertices(), x, y, stride);
 }
 
 Game::Player::Player ()
+	: shape( this, Config::pacman_radius, Main::get()->get_opengl_circle_factory_low_def() )
 {
-	this->shape = new ShapeCircle( this, Config::pacman_radius, Main::get()->get_opengl_circle_factory_low_def() );
 	this->x = 0.0f;
 	this->y = 0.0f;
 	this->vx = 0.0f;
@@ -77,7 +77,6 @@ Game::Player::Player ()
 
 Game::Player::~Player ()
 {
-	delete this->shape;
 }
 
 void Game::Player::render (const float dt)
@@ -86,13 +85,13 @@ void Game::Player::render (const float dt)
 	Opengl::ProgramTriangle *program;
 	uint32_t n_vertices;
 
-	n_vertices = this->shape->get_n_vertices();
+	n_vertices = this->shape.get_n_vertices();
 	dprint( "player allocating space for " << n_vertices << " vertices in vertex_buffer" << std::endl )
 
 	program = Main::get()->get_opengl_program_triangle();
 	vertices = program->alloc_vertices(n_vertices);
 
-	this->shape->push_vertices( &(vertices->x), &(vertices->y), Opengl::ProgramTriangle::get_stride() );
+	this->shape.push_vertices( &(vertices->x), &(vertices->y), Opengl::ProgramTriangle::get_stride() );
 
 	for (uint32_t i=0; i<n_vertices; i++) {
 		vertices[i].offset_x = this->x;
@@ -101,5 +100,30 @@ void Game::Player::render (const float dt)
 		vertices[i].g = 0.0f;
 		vertices[i].b = 0.0f;
 		vertices[i].a = 1.0f;
+	}
+}
+
+void Game::Player::event_keydown (const SDL_Keycode key)
+{
+	switch (key) {
+		case SDLK_LEFT:
+			this->vx = -Config::pacman_speed;
+			this->vy = 0.0f;
+		break;
+
+		case SDLK_RIGHT:
+			this->vx = Config::pacman_speed;
+			this->vy = 0.0f;
+		break;
+
+		case SDLK_UP:
+			this->vx = 0.0f;
+			this->vy = -Config::pacman_speed;
+		break;
+
+		case SDLK_DOWN:
+			this->vx = 0.0f;
+			this->vy = Config::pacman_speed;
+		break;
 	}
 }

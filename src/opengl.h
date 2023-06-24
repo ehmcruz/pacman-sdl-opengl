@@ -32,10 +32,10 @@ class Shader
 protected:
 	OO_ENCAPSULATE_READONLY(GLuint, shader_id)
 	OO_ENCAPSULATE_READONLY(GLenum, shader_type)
-	OO_ENCAPSULATE_REFERENCE(std::string, fname)
+	OO_ENCAPSULATE_REFERENCE_READONLY(std::string, fname)
 
 public:
-	Shader (const GLenum shader_type, const char *fname);
+	Shader (const GLenum shader_type_, const char *fname_);
 	void compile ();
 
 	friend class Program;
@@ -147,11 +147,11 @@ public:
 class ProgramTriangle: public Program
 {
 protected:
-	enum Attrib {
-		attrib_position,
-		attrib_offset,
-		attrib_color
-	} t_attrib_id;
+	enum class Attrib : uint32_t {
+		position,
+		offset,
+		color
+	};
 
 public:
 	struct Vertex {

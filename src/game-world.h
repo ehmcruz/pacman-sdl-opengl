@@ -114,7 +114,7 @@ protected:
 	OO_ENCAPSULATE_READONLY(float, h)
 	//OO_ENCAPSULATE(float, world_to_opengl_conversion)
 
-	OO_ENCAPSULATE_REFERENCE_READONLY(Player*, player)
+	OO_ENCAPSULATE_REFERENCE_READONLY(Player, player)
 
 protected:
 	std::vector< Object* > objects;
@@ -132,7 +132,17 @@ public:
 		this->objects.push_back(obj);
 	}
 
-	void event_keydown (const SDL_Keycode key);
+	inline void add_object (Object& obj)
+	{
+		obj.set_world(this);
+		this->objects.push_back(&obj);
+	}
+
+	inline void event_keydown (const SDL_Keycode key)
+	{
+		this->player.event_keydown(key);
+	}
+
 	void physics (const float dt, const Uint8 *keys);
 	void render_map ();
 	void render (const float dt);

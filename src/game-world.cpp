@@ -166,8 +166,6 @@ void Game::Main::run ()
 	const Uint8 *keys;
 	Clock::time_point tbegin, tend;
 	float real_dt, virtual_dt;
-	const float target_fps = 60.0f;
-	const float target_dt = 1.0f / target_fps;
 
 	this->state = State::playing;
 
@@ -179,7 +177,7 @@ void Game::Main::run ()
 	while (this->alive) {
 		tbegin = Clock::now();
 
-		virtual_dt = (real_dt > target_dt) ? target_dt : real_dt;
+		virtual_dt = (real_dt > Config::max_dt) ? Config::max_dt : real_dt;
 
 		dprint( "start new frame render real_dt=" << real_dt << " virtual_dt=" << virtual_dt << std::endl )
 
@@ -221,7 +219,7 @@ void Game::Main::run ()
 			tend = Clock::now();
 			std::chrono::duration<float> elapsed_ = std::chrono::duration_cast<std::chrono::duration<float>>(tend - tbegin);
 			real_dt = elapsed_.count();
-		} while (real_dt < target_dt);
+		} while (real_dt < Config::target_dt);
 	}
 }
 
@@ -248,41 +246,14 @@ Game::World::World ()
 
 	Main::get()->get_opengl_program_triangle()->upload_projection_matrix(this->projection_matrix);
 
-	this->player = new Player;
 	this->add_object(player);
 
-	this->player->set_x( static_cast<float>( this->map.get_pacman_start_x() ) + 0.5f );
-	this->player->set_y( static_cast<float>( this->map.get_pacman_start_y() ) + 0.5f );
+	this->player.set_x( static_cast<float>( this->map.get_pacman_start_x() ) + 0.5f );
+	this->player.set_y( static_cast<float>( this->map.get_pacman_start_y() ) + 0.5f );
 }
 
 Game::World::~World ()
 {
-	delete this->player;
-}
-
-void Game::World::event_keydown (const SDL_Keycode key)
-{
-	switch (key) {
-		case SDLK_LEFT:
-			this->player->set_vx(-Config::pacman_speed);
-			this->player->set_vy(0.0f);
-		break;
-
-		case SDLK_RIGHT:
-			this->player->set_vx(Config::pacman_speed);
-			this->player->set_vy(0.0f);
-		break;
-
-		case SDLK_UP:
-			this->player->set_vx(0.0f);
-			this->player->set_vy(-Config::pacman_speed);
-		break;
-
-		case SDLK_DOWN:
-			this->player->set_vx(0.0f);
-			this->player->set_vy(Config::pacman_speed);
-		break;
-	}
 }
 
 void Game::World::physics (const float dt, const Uint8 *keys)
