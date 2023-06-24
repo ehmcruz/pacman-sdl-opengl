@@ -40,7 +40,7 @@ public:
 	};
 
 protected:
-	Mylib::Matrix<Cell> *map;
+	Mylib::Matrix<Cell> map;
 	OO_ENCAPSULATE_READONLY(uint32_t, w)
 	OO_ENCAPSULATE_READONLY(uint32_t, h)
 	OO_ENCAPSULATE_READONLY(uint32_t, n_walls)
@@ -51,9 +51,9 @@ public:
 	Map ();
 	~Map ();
 
-	inline Cell operator() (int row, int col)
+	inline Cell operator() (const int row, const int col)
 	{
-		return this->map->get(row, col);
+		return this->map(row, col);
 	}
 };
 
@@ -75,9 +75,9 @@ protected:
 	OO_ENCAPSULATE(World*, world)
 	OO_ENCAPSULATE(bool, alive)
 	OO_ENCAPSULATE_READONLY(State, state)
-	OO_ENCAPSULATE_READONLY(Opengl::Circle_factory*, opengl_circle_factory_low_def)
-	OO_ENCAPSULATE_READONLY(Opengl::Circle_factory*, opengl_circle_factory_high_def)
-	OO_ENCAPSULATE_READONLY(Opengl::Program_triangle*, opengl_program_triangle)
+	OO_ENCAPSULATE_READONLY(Opengl::CircleFactory*, opengl_circle_factory_low_def)
+	OO_ENCAPSULATE_READONLY(Opengl::CircleFactory*, opengl_circle_factory_high_def)
+	OO_ENCAPSULATE_READONLY(Opengl::ProgramTriangle*, opengl_program_triangle)
 
 protected:
 	static Main *instance;
@@ -105,7 +105,7 @@ public:
 class World
 {
 protected:
-	Opengl::Projection_matrix projection_matrix;
+	Opengl::ProjectionMatrix projection_matrix;
 
 	// width and height of screen
 	// the screen coordinates here are in game world coords (not opengl, neither pixels)
@@ -128,14 +128,14 @@ public:
 
 	inline void add_object (Object *obj)
 	{
-		obj->set_game_world(this);
+		obj->set_world(this);
 		this->objects.push_back(obj);
 	}
 
-	void event_keydown (SDL_Keycode key);
-	void physics (float dt, const Uint8 *keys);
+	void event_keydown (const SDL_Keycode key);
+	void physics (const float dt, const Uint8 *keys);
 	void render_map ();
-	void render (float dt);
+	void render (const float dt);
 };
 
 // ---------------------------------------------------

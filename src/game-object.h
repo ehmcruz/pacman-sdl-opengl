@@ -36,48 +36,47 @@ public:
 	};
 protected:
 	OO_ENCAPSULATE_READONLY(Type, type)
-	OO_ENCAPSULATE(Object*, object)
+	OO_ENCAPSULATE(const Object*, object)
 
 	// distance from the center of the shape to the center of the object
 	OO_ENCAPSULATE(float, dx)
 	OO_ENCAPSULATE(float, dy)
 
 public:
-	inline Shape (Type type, Object *object)
+	inline Shape (const Type type_, const Object *object_)
+		: type(type_), object(object_)
 	{
-		this->type = type;
-		this->object = object;
 		this->dx = 0.0f;
 		this->dy = 0.0f;
 	}
 
-	inline Shape (Type type)
+	inline Shape (const Type type)
 		: Shape (type, nullptr)
 	{
 	}
 
-	void apply_delta (uint32_t n_vertices, float *x, float *y, uint32_t stride);
+	void apply_delta (const uint32_t n_vertices, float *x, float *y, const uint32_t stride);
 	
-	inline void apply_delta (float *x, float *y, uint32_t stride)
+	inline void apply_delta (float *x, float *y, const uint32_t stride)
 	{
 		this->apply_delta( this->get_n_vertices(), x, y, stride );
 	}
 
 	virtual uint32_t get_n_vertices () = 0;
-	virtual void push_vertices (float *x, float *y, uint32_t stride) = 0;
+	virtual void push_vertices (float *x, float *y, const uint32_t stride) = 0;
 };
 
 // ---------------------------------------------------
 
-class Shape_circle: public Shape
+class ShapeCircle: public Shape
 {
 protected:
-	Opengl::Circle_factory *factory;
+	const Opengl::CircleFactory *factory;
 
 	OO_ENCAPSULATE(float, radius)
 
 public:
-	inline Shape_circle (Object *object, float radius, Opengl::Circle_factory *factory)
+	inline ShapeCircle (const Object *object, const float radius, const Opengl::CircleFactory *factory)
 		: Shape (Type::circle, object)
 	{
 		this->factory = factory;
@@ -86,30 +85,30 @@ public:
 		dprint( "circle created r=" << this->radius << std::endl )
 	}
 
-	inline Shape_circle (float radius, Opengl::Circle_factory *factory)
-		: Shape_circle (nullptr, radius, factory)
+	inline ShapeCircle (const float radius, const Opengl::CircleFactory *factory)
+		: ShapeCircle (nullptr, radius, factory)
 	{
 	}
 
-	inline Shape_circle (Opengl::Circle_factory *factory)
-		: Shape_circle (nullptr, 0.0f, factory)
+	inline ShapeCircle (const Opengl::CircleFactory *factory)
+		: ShapeCircle (nullptr, 0.0f, factory)
 	{
 	}
 
 	uint32_t get_n_vertices () override;
-	void push_vertices (float *x, float *y, uint32_t stride) override;
+	void push_vertices (float *x, float *y, const uint32_t stride) override;
 };
 
 // ---------------------------------------------------
 
-class Shape_rect: public Shape
+class ShapeRect: public Shape
 {
 protected:
 	OO_ENCAPSULATE(float, w)
 	OO_ENCAPSULATE(float, h)
 
 public:
-	inline Shape_rect (Object *object, float w, float h)
+	inline ShapeRect (const Object *object, const float w, const float h)
 		: Shape (Type::rect, object)
 	{
 		this->w = w;
@@ -118,23 +117,22 @@ public:
 		dprint( "rect created w=" << this->w << " h=" << this->h << std::endl )
 	}
 
-	inline Shape_rect (float w, float h)
-		: Shape_rect (nullptr, w, h)
+	inline ShapeRect (const float w, const float h)
+		: ShapeRect (nullptr, w, h)
 	{
 	}
 
-	inline Shape_rect ()
-		: Shape_rect (nullptr, 0.0f, 0.0f)
+	inline ShapeRect ()
+		: ShapeRect (nullptr, 0.0f, 0.0f)
 	{
 	}
 
-	uint32_t get_n_vertices () override;
-	void push_vertices (float *x, float *y, uint32_t stride) override;
-
-	constexpr uint32_t fast_get_n_vertices ()
+	constexpr uint32_t get_n_vertices () override
 	{
-		return 6; // 2 triangles
-	}
+		return 6;
+	};
+	
+	void push_vertices (float *x, float *y, uint32_t const stride) override;
 };
 
 // ---------------------------------------------------
@@ -146,11 +144,11 @@ protected:
 	OO_ENCAPSULATE(float, y)
 	OO_ENCAPSULATE(float, vx)
 	OO_ENCAPSULATE(float, vy)
-	OO_ENCAPSULATE(World*, game_world)
+	OO_ENCAPSULATE(const World*, world)
 
 public:
-	void physics (float dt);
-	virtual void render (float dt) = 0;
+	void physics (const float dt);
+	virtual void render (const float dt) = 0;
 };
 
 // ---------------------------------------------------
@@ -158,13 +156,13 @@ public:
 class Player: public Object
 {
 protected:
-	Shape_circle *shape;
+	ShapeCircle *shape;
 
 public:
 	Player ();
 	~Player ();
 
-	void render (float dt) override;
+	void render (const float dt) override;
 };
 
 // ---------------------------------------------------

@@ -1,13 +1,13 @@
 #include "game-world.h"
 #include "game-object.h"
 
-void Game::Object::physics (float dt)
+void Game::Object::physics (const float dt)
 {
 	this->x += this->vx * dt;
 	this->y += this->vy * dt;
 }
 
-void Game::Shape::apply_delta (uint32_t n_vertices, float *x, float *y, uint32_t stride)
+void Game::Shape::apply_delta (const uint32_t n_vertices, float *x, float *y, const uint32_t stride)
 {
 	uint32_t j = 0;
 
@@ -18,12 +18,12 @@ void Game::Shape::apply_delta (uint32_t n_vertices, float *x, float *y, uint32_t
 	}
 }
 
-uint32_t Game::Shape_circle::get_n_vertices ()
+uint32_t Game::ShapeCircle::get_n_vertices ()
 {
 	return this->factory->get_n_vertices();
 }
 
-void Game::Shape_circle::push_vertices (float *x, float *y, uint32_t stride)
+void Game::ShapeCircle::push_vertices (float *x, float *y, const uint32_t stride)
 {
 	const uint32_t n = this->get_n_vertices();
 
@@ -31,12 +31,7 @@ void Game::Shape_circle::push_vertices (float *x, float *y, uint32_t stride)
 	this->apply_delta(n, x, y, stride);
 }
 
-uint32_t Game::Shape_rect::get_n_vertices ()
-{
-	return fast_get_n_vertices();
-}
-
-void Game::Shape_rect::push_vertices (float *x, float *y, uint32_t stride)
+void Game::ShapeRect::push_vertices (float *x, float *y, const uint32_t stride)
 {
 	const float half_w = this->w * 0.5f;
 	const float half_h = this->h * 0.5f;
@@ -66,12 +61,12 @@ void Game::Shape_rect::push_vertices (float *x, float *y, uint32_t stride)
 	x[i] = half_w;
 	y[i] = half_h;
 
-	this->apply_delta(fast_get_n_vertices(), x, y, stride);
+	this->apply_delta(this->get_n_vertices(), x, y, stride);
 }
 
 Game::Player::Player ()
 {
-	this->shape = new Shape_circle( this, Config::pacman_radius, Main::get()->get_opengl_circle_factory_low_def() );
+	this->shape = new ShapeCircle( this, Config::pacman_radius, Main::get()->get_opengl_circle_factory_low_def() );
 	this->x = 0.0f;
 	this->y = 0.0f;
 	this->vx = 0.0f;
@@ -85,10 +80,10 @@ Game::Player::~Player ()
 	delete this->shape;
 }
 
-void Game::Player::render (float dt)
+void Game::Player::render (const float dt)
 {
-	Opengl::Program_triangle::Vertex *vertices;
-	Opengl::Program_triangle *program;
+	Opengl::ProgramTriangle::Vertex *vertices;
+	Opengl::ProgramTriangle *program;
 	uint32_t n_vertices;
 
 	n_vertices = this->shape->get_n_vertices();
@@ -97,7 +92,7 @@ void Game::Player::render (float dt)
 	program = Main::get()->get_opengl_program_triangle();
 	vertices = program->alloc_vertices(n_vertices);
 
-	this->shape->push_vertices( &(vertices->x), &(vertices->y), program->get_stride() );
+	this->shape->push_vertices( &(vertices->x), &(vertices->y), Opengl::ProgramTriangle::get_stride() );
 
 	for (uint32_t i=0; i<n_vertices; i++) {
 		vertices[i].offset_x = this->x;

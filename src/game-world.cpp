@@ -7,12 +7,16 @@
 
 Game::Main* Game::Main::instance = nullptr;
 
+namespace Game {
+	using Clock = std::chrono::steady_clock;
+}
+
 Game::Map::Map ()
 {
 	this->w = 8;
 	this->h = 8;
-	this->map = new Mylib::Matrix<Cell>(this->h, this->w);
-	auto& m = *(this->map);
+	this->map = Mylib::Matrix<Cell>(this->h, this->w);
+	auto& m = this->map;
 	
 	std::string map_string = "00000000"
 	                         "0p     0"
@@ -60,8 +64,6 @@ Game::Map::Map ()
 
 Game::Map::~Map ()
 {
-	if (this->map != nullptr)
-		delete this->map;
 }
 
 Game::Main::Main ()
@@ -125,12 +127,12 @@ void Game::Main::load ()
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glViewport(0, 0, this->screen_width_px, this->screen_height_px);
 
-	this->opengl_circle_factory_low_def = new Opengl::Circle_factory(Config::opengl_low_def_triangles);
-	//this->opengl_circle_factory_high_def = new Opengl::Circle_factory(Config::opengl_high_def_triangles);
+	this->opengl_circle_factory_low_def = new Opengl::CircleFactory(Config::opengl_low_def_triangles);
+	//this->opengl_circle_factory_high_def = new Opengl::CircleFactory(Config::opengl_high_def_triangles);
 
 	dprint( "loaded opengl stuff" << std::endl )
 
-	dprint( "chorono resolution " << (static_cast<float>(std::chrono::high_resolution_clock::period::num) / static_cast<float>(std::chrono::high_resolution_clock::period::den)) << std::endl );
+	dprint( "chorono resolution " << (static_cast<float>(Clock::period::num) / static_cast<float>(Clock::period::den)) << std::endl );
 
 	this->load_opengl_programs();
 
@@ -144,7 +146,7 @@ void Game::Main::load ()
 
 void Game::Main::load_opengl_programs ()
 {
-	this->opengl_program_triangle = new Opengl::Program_triangle;
+	this->opengl_program_triangle = new Opengl::ProgramTriangle;
 
 	dprint( "loaded opengl triangle program" << std::endl )
 
@@ -162,7 +164,7 @@ void Game::Main::run ()
 {
 	SDL_Event event;
 	const Uint8 *keys;
-	std::chrono::steady_clock::time_point tbegin, tend;
+	Clock::time_point tbegin, tend;
 	float real_dt, virtual_dt;
 	const float target_fps = 60.0f;
 	const float target_dt = 1.0f / target_fps;
@@ -175,7 +177,7 @@ void Game::Main::run ()
 	virtual_dt = 0.0f;
 
 	while (this->alive) {
-		tbegin = std::chrono::steady_clock::now();
+		tbegin = Clock::now();
 
 		virtual_dt = (real_dt > target_dt) ? target_dt : real_dt;
 
@@ -216,7 +218,7 @@ void Game::Main::run ()
 		SDL_GL_SwapWindow(this->sdl_window);
 
 		do {
-			tend = std::chrono::steady_clock::now();
+			tend = Clock::now();
 			std::chrono::duration<float> elapsed_ = std::chrono::duration_cast<std::chrono::duration<float>>(tend - tbegin);
 			real_dt = elapsed_.count();
 		} while (real_dt < target_dt);
@@ -235,7 +237,7 @@ Game::World::World ()
 	this->w = static_cast<float>( this->map.get_w() );
 	this->h = static_cast<float>( this->map.get_h() );
 
-	this->projection_matrix.setup( Opengl::Projection_matrix::Args{
+	this->projection_matrix.setup( Opengl::ProjectionMatrix::Args{
 		.left = 0.0f,
 		.right = this->w,
 		.top = 0.0f,
@@ -258,7 +260,7 @@ Game::World::~World ()
 	delete this->player;
 }
 
-void Game::World::event_keydown (SDL_Keycode key)
+void Game::World::event_keydown (const SDL_Keycode key)
 {
 	switch (key) {
 		case SDLK_LEFT:
@@ -283,7 +285,7 @@ void Game::World::event_keydown (SDL_Keycode key)
 	}
 }
 
-void Game::World::physics (float dt, const Uint8 *keys)
+void Game::World::physics (const float dt, const Uint8 *keys)
 {
 	for (Object *obj: this->objects) {
 		obj->physics(dt);
@@ -292,17 +294,17 @@ void Game::World::physics (float dt, const Uint8 *keys)
 
 void Game::World::render_map ()
 {
-	Opengl::Program_triangle::Vertex *vertices;
-	Opengl::Program_triangle *program = Main::get()->get_opengl_program_triangle();
+	Opengl::ProgramTriangle::Vertex *vertices;
+	Opengl::ProgramTriangle *program = Main::get()->get_opengl_program_triangle();
 
-	Shape_rect rect(Config::map_tile_size, Config::map_tile_size);
+	ShapeRect rect(Config::map_tile_size, Config::map_tile_size);
 	const uint32_t n_rects = this->map.get_n_walls();
-	const uint32_t total_n_vertices = rect.fast_get_n_vertices() * n_rects;
+	const uint32_t total_n_vertices = rect.get_n_vertices() * n_rects;
 
 	dprint( "map allocating space for " << total_n_vertices << " vertices in vertex_buffer" << std::endl )
 
 	vertices = program->alloc_vertices(total_n_vertices);
-	Opengl::Program_triangle::Vertex *rect_vertices = vertices;
+	auto *rect_vertices = vertices;
 
 	for (uint32_t y=0; y<this->map.get_h(); y++) {
 		for (uint32_t x=0; x<this->map.get_w(); x++) {
@@ -311,7 +313,7 @@ void Game::World::render_map ()
 					rect.set_dx( static_cast<float>(x) + 0.5f );
 					rect.set_dy( static_cast<float>(y) + 0.5f );
 					rect.push_vertices( &(rect_vertices->x), &(rect_vertices->y), program->get_stride() );
-					rect_vertices += rect.fast_get_n_vertices();
+					rect_vertices += rect.get_n_vertices();
 				break;
 			}
 		}
@@ -333,7 +335,7 @@ void Game::World::render_map ()
 	}
 }
 
-void Game::World::render (float dt)
+void Game::World::render (const float dt)
 {
 	Main::get()->get_opengl_program_triangle()->clear();
 

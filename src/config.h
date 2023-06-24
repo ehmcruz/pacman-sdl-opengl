@@ -10,15 +10,15 @@ namespace Config
 
 // ---------------------------------------------------
 
-inline const uint32_t opengl_low_def_triangles = 64;
+inline constexpr uint32_t opengl_low_def_triangles = 64;
 
-inline const uint32_t opengl_high_def_triangles = 1024;
+inline constexpr uint32_t opengl_high_def_triangles = 1024;
 
-inline const float pacman_radius = 0.45f;
+inline constexpr float pacman_radius = 0.45f;
 
-inline const float pacman_speed = 2.0f;
+inline constexpr float pacman_speed = 2.0f;
 
-inline const float map_tile_size = 1.0f;
+inline constexpr float map_tile_size = 1.0f;
 
 // ---------------------------------------------------
 

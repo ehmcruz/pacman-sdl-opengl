@@ -35,7 +35,7 @@ protected:
 	OO_ENCAPSULATE_REFERENCE(std::string, fname)
 
 public:
-	Shader (GLenum shader_type, const char *fname);
+	Shader (const GLenum shader_type, const char *fname);
 	void compile ();
 
 	friend class Program;
@@ -43,7 +43,7 @@ public:
 
 // ---------------------------------------------------
 
-class Projection_matrix: public Mylib::StaticMatrix<float, 4, 4>
+class ProjectionMatrix: public Mylib::StaticMatrix<float, 4, 4>
 {
 public:
 	struct Args {
@@ -55,7 +55,7 @@ public:
 		float zfar;
 	};
 
-	void setup (Args&& args);
+	void setup (const Args&& args);
 };
 
 // ---------------------------------------------------
@@ -77,7 +77,7 @@ public:
 // ---------------------------------------------------
 
 template <typename T, int grow_factor=4096>
-class Vertex_buffer
+class VertexBuffer
 {
 protected:
 	uint32_t vertex_buffer_capacity;
@@ -85,7 +85,7 @@ protected:
 	OO_ENCAPSULATE_READONLY(T*, vertex_buffer)
 	OO_ENCAPSULATE_READONLY(uint32_t, vertex_buffer_used)
 
-	void realloc (uint32_t target_capacity)
+	void realloc (const uint32_t target_capacity)
 	{
 		uint32_t old_capacity = this->vertex_buffer_capacity;
 		T *old_buffer = this->vertex_buffer;
@@ -102,7 +102,7 @@ protected:
 	}
 
 public:
-	Vertex_buffer ()
+	VertexBuffer ()
 	{
 		static_assert(grow_factor > 0);
 
@@ -112,22 +112,20 @@ public:
 		this->vertex_buffer_used = 0;
 	}
 
-	~Vertex_buffer ()
+	~VertexBuffer ()
 	{
 		if (this->vertex_buffer != nullptr)
 			delete[] this->vertex_buffer;
 	}
 
-	inline T* get_vertex (uint32_t i)
+	inline T* get_vertex (const uint32_t i)
 	{
 		return (this->vertex_buffer + i);
 	}
 
-	inline T* alloc_vertices (uint32_t n)
+	inline T* alloc_vertices (const uint32_t n)
 	{
-		uint32_t free_space;
-
-		free_space = this->vertex_buffer_capacity - this->vertex_buffer_used;
+		const uint32_t free_space = this->vertex_buffer_capacity - this->vertex_buffer_used;
 
 		if (free_space < n) [[unlikely]]
 			this->realloc(this->vertex_buffer_used + n);
@@ -146,7 +144,7 @@ public:
 
 // ---------------------------------------------------
 
-class Program_triangle: public Program
+class ProgramTriangle: public Program
 {
 protected:
 	enum Attrib {
@@ -171,12 +169,12 @@ public:
 	OO_ENCAPSULATE_READONLY(GLuint, vbo) // vertex buffer id
 
 protected:
-	Vertex_buffer<Vertex, 8192> triangle_buffer;
+	VertexBuffer<Vertex, 8192> triangle_buffer;
 
 public:
-	Program_triangle ();
+	ProgramTriangle ();
 
-	inline uint32_t get_stride ()
+	consteval static uint32_t get_stride ()
 	{
 		return (sizeof(Vertex) / sizeof(GLfloat));
 	}
@@ -186,7 +184,7 @@ public:
 		this->triangle_buffer.clear();
 	}
 
-	inline Vertex* alloc_vertices (uint32_t n)
+	inline Vertex* alloc_vertices (const uint32_t n)
 	{
 		return this->triangle_buffer.alloc_vertices(n);
 	}
@@ -195,7 +193,7 @@ public:
 	void bind_vertex_buffer ();
 	void setup_vertex_array ();
 	void upload_vertex_buffer ();
-	void upload_projection_matrix (Projection_matrix& m);
+	void upload_projection_matrix (const ProjectionMatrix& m);
 	void draw ();
 
 	void debug ();
@@ -203,23 +201,23 @@ public:
 
 // ---------------------------------------------------
 
-class Circle_factory
+class CircleFactory
 {
 private:
 	float *table_sin;
 	float *table_cos;
-	uint32_t n_triangles;
+	const uint32_t n_triangles;
 
 public:
-	Circle_factory (uint32_t n_triangles);
-	~Circle_factory ();
+	CircleFactory (const uint32_t n_triangles_);
+	~CircleFactory ();
 
-	inline uint32_t get_n_vertices ()
+	inline uint32_t get_n_vertices () const
 	{
-		return (3 * this->n_triangles);
+		return (this->n_triangles * 3);
 	}
 
-	void fill_vertex_buffer (float radius, float *x, float *y, uint32_t stride);
+	void fill_vertex_buffer (const float radius, float *x, float *y, const uint32_t stride) const;
 };
 
 // ---------------------------------------------------
