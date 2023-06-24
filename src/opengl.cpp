@@ -90,9 +90,9 @@ Opengl::ProgramTriangle::ProgramTriangle ()
 
 	this->attach_shaders();
 
-	glBindAttribLocation(this->program_id, std::to_underlying(Attrib::position), "i_position");
-	glBindAttribLocation(this->program_id, std::to_underlying(Attrib::offset), "i_offset");
-	glBindAttribLocation(this->program_id, std::to_underlying(Attrib::color), "i_color");
+	glBindAttribLocation(this->program_id, std::to_underlying(Attrib::Position), "i_position");
+	glBindAttribLocation(this->program_id, std::to_underlying(Attrib::Offset), "i_offset");
+	glBindAttribLocation(this->program_id, std::to_underlying(Attrib::Color), "i_color");
 
 	this->link_program();
 
@@ -114,21 +114,21 @@ void Opengl::ProgramTriangle::setup_vertex_array ()
 {
 	uint32_t pos, length;
 
-	glEnableVertexAttribArray( std::to_underlying(Attrib::position) );
-	glEnableVertexAttribArray( std::to_underlying(Attrib::offset) );
-	glEnableVertexAttribArray( std::to_underlying(Attrib::color) );
+	glEnableVertexAttribArray( std::to_underlying(Attrib::Position) );
+	glEnableVertexAttribArray( std::to_underlying(Attrib::Offset) );
+	glEnableVertexAttribArray( std::to_underlying(Attrib::Color) );
 
 	pos = 0;
 	length = 2;
-	glVertexAttribPointer( std::to_underlying(Attrib::position), length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
+	glVertexAttribPointer( std::to_underlying(Attrib::Position), length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
 	
 	pos += length;
 	length = 2;
-	glVertexAttribPointer( std::to_underlying(Attrib::offset), length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
+	glVertexAttribPointer( std::to_underlying(Attrib::Offset), length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
 	
 	pos += length;
 	length = 4;
-	glVertexAttribPointer( std::to_underlying(Attrib::color), length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
+	glVertexAttribPointer( std::to_underlying(Attrib::Color), length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
 }
 
 void Opengl::ProgramTriangle::upload_vertex_buffer ()

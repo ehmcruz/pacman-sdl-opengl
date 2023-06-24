@@ -1,7 +1,8 @@
 #include "game-world.h"
 #include "game-object.h"
+#include "lib.h"
 
-void Game::Object::physics (const float dt)
+void Game::Object::physics (const float dt, const Uint8 *keys)
 {
 	this->x += this->vx * dt;
 	this->y += this->vy * dt;
@@ -71,12 +72,65 @@ Game::Player::Player ()
 	this->y = 0.0f;
 	this->vx = 0.0f;
 	this->vy = 0.0f;
+	this->direction = Direction::Stopped;
+	this->target_direction = Direction::Stopped;
 
 	dprint( "player created" << std::endl )
 }
 
 Game::Player::~Player ()
 {
+}
+
+void Game::Player::physics (const float dt, const Uint8 *keys)
+{
+	const float cell_center_x = get_cell_center(this->x);
+	const float cell_center_y = get_cell_center(this->y);
+	const float dist_x = std::abs(cell_center_x - this->x);
+	const float dist_y = std::abs(cell_center_y - this->y);
+	const int32_t xi = static_cast<uint32_t>( this->get_x() );
+	const int32_t yi = static_cast<uint32_t>( this->get_y() );
+	const Map& map = this->world->get_map();
+
+	switch (this->target_direction) {
+		case Direction::Left:
+			if (dist_y < Config::pacman_turn_threshold && map(yi, xi-1) != Map::Cell::wall) {
+				this->y = cell_center_y; // teleport to center of cell
+				this->vx = -Config::pacman_speed;
+				this->vy = 0.0f;
+				this->direction = Direction::Left;
+			}
+		break;
+
+		case Direction::Right:
+			if (dist_y < Config::pacman_turn_threshold && map(yi, xi+1) != Map::Cell::wall) {
+				this->y = cell_center_y; // teleport to center of cell
+				this->vx = Config::pacman_speed;
+				this->vy = 0.0f;
+				this->direction = Direction::Right;
+			}
+		break;
+
+		case Direction::Up:
+			if (dist_x < Config::pacman_turn_threshold && map(yi-1, xi) != Map::Cell::wall) {
+				this->x = cell_center_x; // teleport to center of cell
+				this->vx = 0.0f;
+				this->vy = -Config::pacman_speed;
+				this->direction = Direction::Up;
+			}
+		break;
+
+		case Direction::Down:
+			if (dist_x < Config::pacman_turn_threshold && map(yi+1, xi) != Map::Cell::wall) {
+				this->x = cell_center_x; // teleport to center of cell
+				this->vx = 0.0f;
+				this->vy = Config::pacman_speed;
+				this->direction = Direction::Down;
+			}
+		break;
+	}
+
+	this->Object::physics(dt, keys);
 }
 
 void Game::Player::render (const float dt)
@@ -107,23 +161,19 @@ void Game::Player::event_keydown (const SDL_Keycode key)
 {
 	switch (key) {
 		case SDLK_LEFT:
-			this->vx = -Config::pacman_speed;
-			this->vy = 0.0f;
+			this->target_direction = Direction::Left;
 		break;
 
 		case SDLK_RIGHT:
-			this->vx = Config::pacman_speed;
-			this->vy = 0.0f;
+			this->target_direction = Direction::Right;
 		break;
 
 		case SDLK_UP:
-			this->vx = 0.0f;
-			this->vy = -Config::pacman_speed;
+			this->target_direction = Direction::Up;
 		break;
 
 		case SDLK_DOWN:
-			this->vx = 0.0f;
-			this->vy = Config::pacman_speed;
+			this->target_direction = Direction::Down;
 		break;
 	}
 }

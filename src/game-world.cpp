@@ -4,6 +4,7 @@
 #include <limits>
 
 #include "game-world.h"
+#include "lib.h"
 
 Game::Main* Game::Main::instance = nullptr;
 
@@ -263,8 +264,8 @@ Game::World::World ()
 
 	this->add_object(player);
 
-	this->player.set_x( static_cast<float>( this->map.get_pacman_start_x() ) + 0.5f );
-	this->player.set_y( static_cast<float>( this->map.get_pacman_start_y() ) + 0.5f );
+	this->player.set_x( get_cell_center(this->map.get_pacman_start_x()) );
+	this->player.set_y( get_cell_center(this->map.get_pacman_start_y()) );
 }
 
 Game::World::~World ()
@@ -274,7 +275,37 @@ Game::World::~World ()
 void Game::World::physics (const float dt, const Uint8 *keys)
 {
 	for (Object *obj: this->objects) {
-		obj->physics(dt);
+		obj->physics(dt, keys);
+	}
+
+	this->solve_collisions();
+}
+
+void Game::World::solve_collisions ()
+{
+	for (Object *obj: this->objects) {
+		const float cell_center_x = get_cell_center( obj->get_x() );
+		const float cell_center_y = get_cell_center( obj->get_y() );
+		const int32_t xi = static_cast<uint32_t>( obj->get_x() );
+		const int32_t yi = static_cast<uint32_t>( obj->get_y() );
+
+		if (obj->get_x() < cell_center_x && this->map(yi, xi-1) == Map::Cell::wall) {
+			obj->set_x(cell_center_x);
+			obj->set_vx(0.0f);
+		}
+		else if (obj->get_x() > cell_center_x && this->map(yi, xi+1) == Map::Cell::wall) {
+			obj->set_x(cell_center_x);
+			obj->set_vx(0.0f);
+		}
+
+		if (obj->get_y() < cell_center_y && this->map(yi-1, xi) == Map::Cell::wall) {
+			obj->set_y(cell_center_y);
+			obj->set_vy(0.0f);
+		}
+		else if (obj->get_y() > cell_center_y && this->map(yi+1, xi) == Map::Cell::wall) {
+			obj->set_y(cell_center_y);
+			obj->set_vy(0.0f);
+		}
 	}
 }
 

@@ -31,8 +31,8 @@ class Shape
 {
 public:
 	enum class Type {
-		circle,
-		rect
+		Circle,
+		Rect
 	};
 protected:
 	OO_ENCAPSULATE_READONLY(Type, type)
@@ -77,7 +77,7 @@ protected:
 
 public:
 	inline ShapeCircle (const Object *object_, const float radius_, const Opengl::CircleFactory *factory_)
-		: Shape (Type::circle, object_),
+		: Shape (Type::Circle, object_),
 		  factory(factory_),
 		  radius(radius_)
 	{
@@ -108,7 +108,7 @@ protected:
 
 public:
 	inline ShapeRect (const Object *object_, const float w_, const float h_)
-		: Shape (Type::rect, object_),
+		: Shape (Type::Rect, object_),
 		  w(w_), h(h_)
 	{
 		dprint( "rect created w=" << this->w << " h=" << this->h << std::endl )
@@ -141,15 +141,25 @@ public:
 
 class Object
 {
+public:
+	enum class Direction {
+		Up,
+		Down,
+		Left,
+		Right,
+		Stopped
+	};
+
 protected:
 	OO_ENCAPSULATE(float, x)
 	OO_ENCAPSULATE(float, y)
 	OO_ENCAPSULATE(float, vx)
 	OO_ENCAPSULATE(float, vy)
-	OO_ENCAPSULATE(const World*, world)
+	OO_ENCAPSULATE(World*, world)
+	OO_ENCAPSULATE_READONLY(Direction, direction)
 
 public:
-	void physics (const float dt);
+	virtual void physics (const float dt, const Uint8 *keys);
 	virtual void render (const float dt) = 0;
 };
 
@@ -159,11 +169,13 @@ class Player: public Object
 {
 protected:
 	ShapeCircle shape;
+	Direction target_direction;
 
 public:
 	Player ();
 	~Player ();
 
+	void physics (const float dt, const Uint8 *keys) override;
 	void render (const float dt) override;
 
 	void event_keydown (const SDL_Keycode key);

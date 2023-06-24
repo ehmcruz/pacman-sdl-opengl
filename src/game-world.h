@@ -51,9 +51,14 @@ public:
 	Map ();
 	~Map ();
 
-	inline Cell operator() (const int row, const int col)
+	inline Cell get (const int row, const int col) const
 	{
 		return this->map(row, col);
+	}
+
+	inline Cell operator() (const int row, const int col) const
+	{
+		return this->get(row, col);
 	}
 };
 
@@ -115,10 +120,10 @@ protected:
 	//OO_ENCAPSULATE(float, world_to_opengl_conversion)
 
 	OO_ENCAPSULATE_REFERENCE_READONLY(Player, player)
+	OO_ENCAPSULATE_REFERENCE_READONLY(Map, map)
 
 protected:
 	std::vector< Object* > objects;
-	Map map;
 
 public:
 	World ();
@@ -144,6 +149,7 @@ public:
 	}
 
 	void physics (const float dt, const Uint8 *keys);
+	void solve_collisions ();
 	void render_map ();
 	void render (const float dt);
 };

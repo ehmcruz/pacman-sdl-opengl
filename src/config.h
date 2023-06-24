@@ -25,13 +25,15 @@ inline constexpr float target_fps = 60.0f;
 // if fps gets lower than min_fps, we slow down the simulation
 inline constexpr float min_fps = 30.0f;
 
-// here we put derived config
-
 inline constexpr float target_dt = 1.0f / target_fps;
 
 inline constexpr float max_dt = 1.0f / min_fps;
 
 inline constexpr float sleep_threshold = max_dt * 0.9f;
+
+inline constexpr float pacman_max_delta_per_cycle = pacman_speed * max_dt;
+
+inline constexpr float pacman_turn_threshold = pacman_max_delta_per_cycle * 2.0f;
 
 // ---------------------------------------------------
 

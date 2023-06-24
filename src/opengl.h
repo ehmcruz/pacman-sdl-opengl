@@ -148,9 +148,9 @@ class ProgramTriangle: public Program
 {
 protected:
 	enum class Attrib : uint32_t {
-		position,
-		offset,
-		color
+		Position,
+		Offset,
+		Color
 	};
 
 public:
