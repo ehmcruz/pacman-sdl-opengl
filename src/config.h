@@ -18,6 +18,10 @@ inline constexpr float pacman_radius = 0.45f;
 
 inline constexpr float pacman_speed = 2.0f;
 
+inline constexpr float ghost_radius = 0.3f;
+
+inline constexpr float ghost_time_between_turns = 0.5f; // in seconds
+
 inline constexpr float map_tile_size = 1.0f;
 
 inline constexpr float target_fps = 60.0f;

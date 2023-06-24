@@ -16,6 +16,7 @@
 
 #include "config.h"
 #include "opengl.h"
+#include "lib.h"
 
 namespace Game
 {
@@ -94,6 +95,11 @@ public:
 	{
 	}
 
+	inline ShapeCircle ()
+		: ShapeCircle (nullptr, 0.0f, nullptr)
+	{
+	}
+
 	uint32_t get_n_vertices () override;
 	void push_vertices (float *x, float *y, const uint32_t stride) override;
 };
@@ -143,11 +149,11 @@ class Object
 {
 public:
 	enum class Direction {
-		Up,
-		Down,
 		Left,
 		Right,
-		Stopped
+		Up,
+		Down,
+		Stopped // must be the last one
 	};
 
 protected:
@@ -159,6 +165,12 @@ protected:
 	OO_ENCAPSULATE_READONLY(Direction, direction)
 
 public:
+	inline Object (World *world_)
+		: world(world_)
+	{
+	}
+
+	virtual void collided_with_wall (Direction direction) = 0;
 	virtual void physics (const float dt, const Uint8 *keys);
 	virtual void render (const float dt) = 0;
 };
@@ -170,15 +182,36 @@ class Player: public Object
 protected:
 	ShapeCircle shape;
 	Direction target_direction;
+	Opengl::Color color;
 
 public:
-	Player ();
+	Player (World *world_);
 	~Player ();
 
+	void collided_with_wall (Direction direction) override;
 	void physics (const float dt, const Uint8 *keys) override;
 	void render (const float dt) override;
 
 	void event_keydown (const SDL_Keycode key);
+};
+
+// ---------------------------------------------------
+
+class Ghost: public Object
+{
+protected:
+	ShapeCircle shape;
+	Opengl::Color color;
+	ClockTime time_last_turn;
+	ClockDuration time_between_turns;
+
+public:
+	Ghost (World *world_);
+	~Ghost ();
+
+	void collided_with_wall (Direction direction) override;
+	void physics (const float dt, const Uint8 *keys) override;
+	void render (const float dt) override;
 };
 
 // ---------------------------------------------------

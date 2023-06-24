@@ -20,6 +20,7 @@
 
 #include "opengl.h"
 #include "game-object.h"
+#include "lib.h"
 
 namespace Game
 {
@@ -30,13 +31,58 @@ class World;
 
 // ---------------------------------------------------
 
+class Main
+{
+public:
+	enum class State {
+		initializing,
+		playing
+	};
+
+protected:
+	OO_ENCAPSULATE(SDL_Window*, sdl_window)
+	OO_ENCAPSULATE(SDL_GLContext, sdl_gl_context)
+	OO_ENCAPSULATE(uint32_t, screen_width_px)
+	OO_ENCAPSULATE(uint32_t, screen_height_px)
+	OO_ENCAPSULATE(World*, world)
+	OO_ENCAPSULATE(bool, alive)
+	OO_ENCAPSULATE_READONLY(State, state)
+	OO_ENCAPSULATE_READONLY(Opengl::CircleFactory*, opengl_circle_factory_low_def)
+	OO_ENCAPSULATE_READONLY(Opengl::CircleFactory*, opengl_circle_factory_high_def)
+	OO_ENCAPSULATE_READONLY(Opengl::ProgramTriangle*, opengl_program_triangle)
+	OO_ENCAPSULATE_REFERENCE_READONLY(Probability, probability)
+
+protected:
+	static Main *instance;
+
+	Main ();
+	~Main ();
+
+public:
+	void load ();
+	void load_opengl_programs ();
+	void run ();
+	void cleanup ();
+
+	static inline Main* get ()
+	{
+		return instance;
+	}
+
+	static void allocate ();
+	static void deallocate ();
+};
+
+// ---------------------------------------------------
+
 class Map
 {
 public:
 	enum class Cell {
-		empty,
-		wall,
-		pacman_start
+		Empty,
+		Wall,
+		Pacman_start,
+		Ghost_start
 	};
 
 protected:
@@ -64,49 +110,6 @@ public:
 
 // ---------------------------------------------------
 
-class Main
-{
-public:
-	enum class State {
-		initializing,
-		playing
-	};
-
-protected:
-	OO_ENCAPSULATE(SDL_Window*, sdl_window)
-	OO_ENCAPSULATE(SDL_GLContext, sdl_gl_context)
-	OO_ENCAPSULATE(uint32_t, screen_width_px)
-	OO_ENCAPSULATE(uint32_t, screen_height_px)
-	OO_ENCAPSULATE(World*, world)
-	OO_ENCAPSULATE(bool, alive)
-	OO_ENCAPSULATE_READONLY(State, state)
-	OO_ENCAPSULATE_READONLY(Opengl::CircleFactory*, opengl_circle_factory_low_def)
-	OO_ENCAPSULATE_READONLY(Opengl::CircleFactory*, opengl_circle_factory_high_def)
-	OO_ENCAPSULATE_READONLY(Opengl::ProgramTriangle*, opengl_program_triangle)
-
-protected:
-	static Main *instance;
-
-	Main ();
-	~Main ();
-
-public:
-	void load ();
-	void load_opengl_programs ();
-	void run ();
-	void cleanup ();
-
-	static inline Main* get ()
-	{
-		return instance;
-	}
-
-	static void allocate ();
-	static void deallocate ();
-};
-
-// ---------------------------------------------------
-
 class World
 {
 protected:
@@ -117,13 +120,14 @@ protected:
 	// every unit corresponds to a tile
 	OO_ENCAPSULATE_READONLY(float, w)
 	OO_ENCAPSULATE_READONLY(float, h)
-	//OO_ENCAPSULATE(float, world_to_opengl_conversion)
+	OO_ENCAPSULATE(ClockTime, time_create) // time instant of world creation
 
 	OO_ENCAPSULATE_REFERENCE_READONLY(Player, player)
 	OO_ENCAPSULATE_REFERENCE_READONLY(Map, map)
 
 protected:
 	std::vector< Object* > objects;
+	std::vector<Ghost> ghosts;
 
 public:
 	World ();
@@ -133,13 +137,11 @@ public:
 
 	inline void add_object (Object *obj)
 	{
-		obj->set_world(this);
 		this->objects.push_back(obj);
 	}
 
 	inline void add_object (Object& obj)
 	{
-		obj.set_world(this);
 		this->objects.push_back(&obj);
 	}
 

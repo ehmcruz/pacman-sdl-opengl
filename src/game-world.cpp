@@ -9,7 +9,6 @@
 Game::Main* Game::Main::instance = nullptr;
 
 namespace Game {
-	using Clock = std::chrono::steady_clock;
 }
 
 Game::Map::Map ()
@@ -20,12 +19,12 @@ Game::Map::Map ()
 	auto& m = this->map;
 	
 	std::string map_string = "00000000"
-	                         "0p     0"
+	                         "0p  g  0"
 	                         "0    0 0"
 	                         "0    0 0"
-	                         "0      0"
+	                         "0  g   0"
 	                         "0 0000 0"
-	                         "0      0"
+	                         "0   g  0"
 	                         "00000000";
 
 	ASSERT(map_string.length() == (this->w * this->h))
@@ -38,18 +37,22 @@ Game::Map::Map ()
 		for (uint32_t x=0; x<this->w; x++) {
 			switch (map_string[k]) {
 				case ' ':
-					m(y, x) = Cell::empty;
+					m(y, x) = Cell::Empty;
 				break;
 				
 				case '0':
-					m(y, x) = Cell::wall;
+					m(y, x) = Cell::Wall;
 					this->n_walls++;
 				break;
 				
 				case 'p':
-					m(y, x) = Cell::pacman_start;
+					m(y, x) = Cell::Pacman_start;
 					this->pacman_start_x = x;
 					this->pacman_start_y = y;
+				break;
+
+				case 'g':
+					m(y, x) = Cell::Ghost_start;
 				break;
 				
 				default:
@@ -165,7 +168,8 @@ void Game::Main::run ()
 {
 	SDL_Event event;
 	const Uint8 *keys;
-	Clock::time_point tbegin, tend;
+	ClockTime tbegin, tend;
+	ClockDuration elapsed;
 	float real_dt, virtual_dt, required_dt, sleep_dt;
 
 	this->state = State::playing;
@@ -219,8 +223,8 @@ void Game::Main::run ()
 		SDL_GL_SwapWindow(this->sdl_window);
 
 		tend = Clock::now();
-		std::chrono::duration<float> elapsed_ = std::chrono::duration_cast<std::chrono::duration<float>>(tend - tbegin);
-		required_dt = elapsed_.count();
+		elapsed = tend - tbegin;
+		required_dt = elapsed.count();
 
 		if (required_dt < Config::sleep_threshold) {
 			sleep_dt = Config::sleep_threshold - required_dt;
@@ -233,8 +237,8 @@ void Game::Main::run ()
 
 		do {
 			tend = Clock::now();
-			elapsed_ = std::chrono::duration_cast<std::chrono::duration<float>>(tend - tbegin);
-			real_dt = elapsed_.count();
+			elapsed = tend - tbegin;
+			real_dt = elapsed.count();
 		} while (real_dt < Config::target_dt);
 	}
 }
@@ -247,6 +251,8 @@ void Game::Main::cleanup ()
 }
 
 Game::World::World ()
+	: time_create( Clock::now() )
+	, player(this)
 {
 	this->w = static_cast<float>( this->map.get_w() );
 	this->h = static_cast<float>( this->map.get_h() );
@@ -262,10 +268,29 @@ Game::World::World ()
 
 	Main::get()->get_opengl_program_triangle()->upload_projection_matrix(this->projection_matrix);
 
+	// avoid vector re-allocations
+	this->objects.reserve(100);
+	this->ghosts.reserve(10);
+
 	this->add_object(player);
 
 	this->player.set_x( get_cell_center(this->map.get_pacman_start_x()) );
 	this->player.set_y( get_cell_center(this->map.get_pacman_start_y()) );
+
+	// create ghosts
+
+	for (uint32_t y=0; y<this->map.get_h(); y++) {
+		for (uint32_t x=0; x<this->map.get_w(); x++) {
+			switch (this->map(y, x)) {
+				case Map::Cell::Ghost_start:
+					Ghost& ghost = this->ghosts.emplace_back(this);
+					ghost.set_x( get_cell_center(x) );
+					ghost.set_y( get_cell_center(y) );
+					this->add_object(ghost);
+				break;
+			}
+		}
+	}
 }
 
 Game::World::~World ()
@@ -289,22 +314,26 @@ void Game::World::solve_collisions ()
 		const int32_t xi = static_cast<uint32_t>( obj->get_x() );
 		const int32_t yi = static_cast<uint32_t>( obj->get_y() );
 
-		if (obj->get_x() < cell_center_x && this->map(yi, xi-1) == Map::Cell::wall) {
+		if (obj->get_x() < cell_center_x && this->map(yi, xi-1) == Map::Cell::Wall) {
 			obj->set_x(cell_center_x);
 			obj->set_vx(0.0f);
+			obj->collided_with_wall(Object::Direction::Left);
 		}
-		else if (obj->get_x() > cell_center_x && this->map(yi, xi+1) == Map::Cell::wall) {
+		else if (obj->get_x() > cell_center_x && this->map(yi, xi+1) == Map::Cell::Wall) {
 			obj->set_x(cell_center_x);
 			obj->set_vx(0.0f);
+			obj->collided_with_wall(Object::Direction::Right);
 		}
 
-		if (obj->get_y() < cell_center_y && this->map(yi-1, xi) == Map::Cell::wall) {
+		if (obj->get_y() < cell_center_y && this->map(yi-1, xi) == Map::Cell::Wall) {
 			obj->set_y(cell_center_y);
 			obj->set_vy(0.0f);
+			obj->collided_with_wall(Object::Direction::Up);
 		}
-		else if (obj->get_y() > cell_center_y && this->map(yi+1, xi) == Map::Cell::wall) {
+		else if (obj->get_y() > cell_center_y && this->map(yi+1, xi) == Map::Cell::Wall) {
 			obj->set_y(cell_center_y);
 			obj->set_vy(0.0f);
+			obj->collided_with_wall(Object::Direction::Down);
 		}
 	}
 }
@@ -326,7 +355,7 @@ void Game::World::render_map ()
 	for (uint32_t y=0; y<this->map.get_h(); y++) {
 		for (uint32_t x=0; x<this->map.get_w(); x++) {
 			switch (this->map(y, x)) {
-				case Map::Cell::wall:
+				case Map::Cell::Wall:
 					rect.set_dx( static_cast<float>(x) + 0.5f );
 					rect.set_dy( static_cast<float>(y) + 0.5f );
 					rect.push_vertices( &(rect_vertices->x), &(rect_vertices->y), program->get_stride() );
