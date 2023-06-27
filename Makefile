@@ -1,17 +1,33 @@
 CPP = g++
-BIN = pacman.exe
+
+BIN_LINUX = pacman
+BIN_WINDOWS = pacman.exe
 
 # get my-lib:
 # https://github.com/ehmcruz/my-lib
 MYLIB = ../my-lib
 
 # Windows
-CPPFLAGS = -std=c++23 `sdl2-config --cflags` -I$(MYLIB)/include -g -mconsole #-O2
-LDFLAGS = -std=c++23 `sdl2-config --libs` -mconsole -lglew32 -lopengl32 -lm
+CPPFLAGS_WINDOWS = -std=c++23 `sdl2-config --cflags` -I$(MYLIB)/include -g -mconsole #-O2
+LDFLAGS_WINDOWS = -std=c++23 `sdl2-config --libs` -mconsole -lglew32 -lopengl32 -lm
 
 # Linux
-#CPPFLAGS = -std=c++20 `sdl2-config --cflags` -I$(MYLIB)/include -g #-O2
-#LDFLAGS = -std=c++20 `sdl2-config --libs` -lGL -lGLEW -lm
+CPPFLAGS_LINUX = -std=c++23 `sdl2-config --cflags` -I$(MYLIB)/include -g #-O2
+LDFLAGS_LINUX = -std=c++23 `sdl2-config --libs` -lGL -lGLEW -lm
+
+# ----------------------------------
+
+ifdef CONFIG_TARGET_LINUX
+	BIN=$(BIN_LINUX)
+	CPPFLAGS=$(CPPFLAGS_LINUX)
+	LDFLAGS=$(LDFLAGS_LINUX)
+endif
+
+ifdef CONFIG_TARGET_WINDOWS
+	BIN=$(BIN_WINDOWS)
+	CPPFLAGS=$(CPPFLAGS_WINDOWS)
+	LDFLAGS=$(LDFLAGS_WINDOWS)
+endif
 
 # ----------------------------------
 
