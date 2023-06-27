@@ -1,6 +1,6 @@
 # Pacman SDL Opengl
 
-Just a small game I am writing to learn the basics of Opengl and new features of the latest C++ standards.
+Just a small game I am writing to learn the basics of Opengl and new features of the latest C++ standards.  
 I plan also to use it to learn (the basics of) Vulkan.
 
 For now, it works on the following platforms:
