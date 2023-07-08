@@ -12,7 +12,7 @@ void Game::Object::physics (const float dt, const Uint8 *keys)
 
 Game::Player::Player (World *world_)
 	: Object(world_),
-	  shape( this, Config::pacman_radius, Main::get()->get_opengl_circle_factory_low_def() )
+	  shape(this, Config::pacman_radius)
 {
 	this->x = 0.0f;
 	this->y = 0.0f;
@@ -115,8 +115,8 @@ void Game::Player::event_keydown (const SDL_Keycode key)
 }
 
 Game::Ghost::Ghost (World *world_)
-	: Object(world_)
-	, shape( this, Config::ghost_radius, Main::get()->get_opengl_circle_factory_low_def() )
+	: Object(world_),
+	  shape(this, Config::ghost_radius)
 {
 	static Graphics::Color ghosts_colors[] = {
 		{ .r = 0.5f, .g = 0.1f, .b = 0.0f, .a = 1.0f },
@@ -132,7 +132,7 @@ Game::Ghost::Ghost (World *world_)
 	this->time_last_turn = this->world->get_time_create();
 	this->time_between_turns = ClockDuration(Config::ghost_time_between_turns);
 
-	if (color_i >= (sizeof(ghosts_colors) / sizeof(Opengl::Color)))
+	if (color_i >= (sizeof(ghosts_colors) / sizeof(Graphics::Color)))
 		color_i = 0;
 	this->color = ghosts_colors[color_i++];
 

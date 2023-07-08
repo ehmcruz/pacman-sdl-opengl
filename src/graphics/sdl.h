@@ -29,7 +29,14 @@ public:
 	Uint8 b;
 	Uint8 a;
 
-	inline Color& operator= (const Graphics::Color& other)
+	SDL_Color () = default;
+
+	inline SDL_Color (const Graphics::Color& other)
+	{
+		this->copy(other);
+	}
+
+	inline SDL_Color& operator= (const Graphics::Color& other)
 	{
 		this->copy(other);
 		return *this;
@@ -55,6 +62,26 @@ public:
 	virtual void draw_rect (const Game::ShapeRect& rect, const float offset_x, const float offset_y, const Graphics::Color& color) override;
 	virtual void set_projection_matrix (const ProjectionMatrix& m) override;
 	virtual void render () override;
+
+	inline int32_t transform_x (float x)
+	{
+		const ProjectionMatrix::Args& m = this->pm.args;
+
+		x /= m.width;
+		x *= static_cast<float>(this->screen_width_px);
+
+		return static_cast<int32_t>(x);
+	}
+
+	inline int32_t transform_y (float y)
+	{
+		const ProjectionMatrix::Args& m = this->pm.args;
+
+		y /= m.height;
+		y *= static_cast<float>(this->screen_height_px);
+
+		return static_cast<int32_t>(y);
+	}
 };
 
 // ---------------------------------------------------

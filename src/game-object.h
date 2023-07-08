@@ -79,8 +79,6 @@ public:
 		: ShapeCircle (nullptr, 0.0f)
 	{
 	}
-
-	uint32_t get_n_vertices () override;
 };
 
 // ---------------------------------------------------

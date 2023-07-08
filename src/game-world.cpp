@@ -177,6 +177,8 @@ void Game::Main::run ()
 				ASSERT(0)
 		}
 
+		renderer->render();
+
 		tend = Clock::now();
 		elapsed = tend - tbegin;
 		required_dt = elapsed.count();
@@ -212,13 +214,15 @@ Game::World::World ()
 	this->w = static_cast<float>( this->map.get_w() );
 	this->h = static_cast<float>( this->map.get_h() );
 
-	this->projection_matrix.setup( Graphics::ProjectionMatrix::Args{
-		.left = 0.0f,
+	this->projection_matrix.setup( Graphics::ProjectionMatrix::Args {
+	/*	.left = 0.0f,
 		.right = this->w,
 		.top = 0.0f,
 		.bottom = this->h,
 		.znear = 0.0f,
-		.zfar = 100.0f
+		.zfar = 100.0f*/
+		.width = this->w,
+		.height = this->h
 		} );
 
 	renderer->set_projection_matrix(this->projection_matrix);
@@ -317,17 +321,11 @@ void Game::World::render_map ()
 
 void Game::World::render (const float dt)
 {
-	Main::get()->get_opengl_program_triangle()->clear();
-
 	this->render_map();
 
 	for (Object *obj: this->objects) {
 		obj->render(dt);
 	}
-
-	//this->Programriangle->debug(); exit(1);
-
-	renderer->render();
 }
 
 int main (int argc, char **argv)

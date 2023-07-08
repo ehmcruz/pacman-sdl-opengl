@@ -31,9 +31,11 @@ endif
 
 # ----------------------------------
 
-OBJS := $(patsubst %.cpp,%.o,$(wildcard src/*.cpp))
+SRCS := $(wildcard src/*.cpp) src/graphics/sdl.cpp
 
-HEADERS = $(wildcard src/*.h) $(wildcard $(MYLIB)/include/my-lib/*.h)
+OBJS := $(patsubst %.cpp,%.o,$(SRCS))
+
+HEADERS = $(wildcard src/*.h) $(wildcard src/graphics/*.h) $(wildcard $(MYLIB)/include/my-lib/*.h)
 
 # ----------------------------------
 

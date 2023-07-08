@@ -100,6 +100,8 @@ void Graphics::ProjectionMatrix::setup (const Args&& args)
 {
 	ProjectionMatrix& m = *this;
 
+	this->args = args;
+
 	m(0,0) = 2.0f / (args.right - args.left);
 	m(0,1) = 0.0f;
 	m(0,2) = 0.0f;

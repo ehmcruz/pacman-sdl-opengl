@@ -15,7 +15,15 @@
 #include <my-lib/macros.h>
 #include <my-lib/matrix.h>
 
-#include "game-object.h"
+
+// ---------------------------------------------------
+
+namespace Game {
+	class ShapeCircle;
+	class ShapeRect;
+}
+
+// ---------------------------------------------------
 
 namespace Graphics
 {
@@ -48,7 +56,12 @@ public:
 		float bottom;
 		float znear;
 		float zfar;
+		
+		float width;
+		float height;
 	};
+
+	Args args;
 
 	void setup (const Args&& args);
 };
