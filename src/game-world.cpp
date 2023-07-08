@@ -5,8 +5,11 @@
 
 #include "game-world.h"
 #include "lib.h"
+#include "graphics/sdl.h"
 
-Game::Main* Game::Main::instance = nullptr;
+
+Game::Main *Game::Main::instance = nullptr;
+Graphics::Renderer *Game::renderer = nullptr;
 
 namespace Game {
 }
@@ -99,46 +102,11 @@ void Game::Main::load ()
 
 	this->state = State::initializing;
 
-	SDL_Init( SDL_INIT_EVERYTHING );
+	SDL_Init( SDL_INIT_VIDEO );
 
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-	SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
-	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
-
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 2 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
-
-	this->screen_width_px = 600;
-	this->screen_height_px = 600;
-
-	this->sdl_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, this->screen_width_px, this->screen_height_px, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-
-	this->sdl_gl_context = SDL_GL_CreateContext(this->sdl_window);
-
-	GLenum err = glewInit();
-	if (err != GLEW_OK) {
-		std::cout << "Error: " << glewGetErrorString(err) << std::endl;
-		exit(1);
-	}
-
-	std::cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
-
-	glDisable(GL_DEPTH_TEST);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
-	glViewport(0, 0, this->screen_width_px, this->screen_height_px);
-
-	this->opengl_circle_factory_low_def = new Opengl::CircleFactory(Config::opengl_low_def_triangles);
-	//this->opengl_circle_factory_high_def = new Opengl::CircleFactory(Config::opengl_high_def_triangles);
-
-	dprint( "loaded opengl stuff" << std::endl )
+	this->graphics_init();
 
 	dprint( "chorono resolution " << (static_cast<float>(Clock::period::num) / static_cast<float>(Clock::period::den)) << std::endl );
-
-	this->load_opengl_programs();
 
 	this->world = nullptr;
 	this->world = new World();
@@ -148,20 +116,9 @@ void Game::Main::load ()
 	this->alive = true;
 }
 
-void Game::Main::load_opengl_programs ()
+void Game::Main::graphics_init ()
 {
-	this->opengl_program_triangle = new Opengl::ProgramTriangle;
-
-	dprint( "loaded opengl triangle program" << std::endl )
-
-	this->opengl_program_triangle->use_program();
-	
-	this->opengl_program_triangle->bind_vertex_array();
-	this->opengl_program_triangle->bind_vertex_buffer();
-
-	this->opengl_program_triangle->setup_vertex_array();
-
-	dprint( "generated and binded opengl world vertex array/buffer" << std::endl )
+	renderer = new Graphics::SDL::Renderer(Config::screen_width_px, Config::screen_height_px);
 }
 
 void Game::Main::run ()
@@ -184,6 +141,8 @@ void Game::Main::run ()
 	while (this->alive) {
 		tbegin = Clock::now();
 
+		renderer->wait_next_frame();
+
 		virtual_dt = (real_dt > Config::max_dt) ? Config::max_dt : real_dt;
 
 		dprint( "start new frame render required_dt=" << required_dt << " real_dt=" << real_dt << " sleep_dt=" << sleep_dt << " virtual_dt=" << virtual_dt << " max_dt=" << Config::max_dt << std::endl )
@@ -203,8 +162,6 @@ void Game::Main::run ()
 			}
 		}
 
-		glClear( GL_COLOR_BUFFER_BIT );
-
 		//glBufferData( GL_ARRAY_BUFFER, sizeof(Vertex) * circle_factory.get_n_vertices(), g_vertex_buffer_data, GL_DYNAMIC_DRAW );
 
 		//glBindVertexArray( vao );
@@ -219,8 +176,6 @@ void Game::Main::run ()
 			default:
 				ASSERT(0)
 		}
-
-		SDL_GL_SwapWindow(this->sdl_window);
 
 		tend = Clock::now();
 		elapsed = tend - tbegin;
@@ -245,8 +200,8 @@ void Game::Main::run ()
 
 void Game::Main::cleanup ()
 {
-	SDL_GL_DeleteContext(this->sdl_gl_context);
-	SDL_DestroyWindow(this->sdl_window);
+	delete renderer;
+	
 	SDL_Quit();
 }
 
@@ -257,7 +212,7 @@ Game::World::World ()
 	this->w = static_cast<float>( this->map.get_w() );
 	this->h = static_cast<float>( this->map.get_h() );
 
-	this->projection_matrix.setup( Opengl::ProjectionMatrix::Args{
+	this->projection_matrix.setup( Graphics::ProjectionMatrix::Args{
 		.left = 0.0f,
 		.right = this->w,
 		.top = 0.0f,
@@ -266,7 +221,7 @@ Game::World::World ()
 		.zfar = 100.0f
 		} );
 
-	Main::get()->get_opengl_program_triangle()->upload_projection_matrix(this->projection_matrix);
+	renderer->set_projection_matrix(this->projection_matrix);
 
 	// avoid vector re-allocations
 	this->objects.reserve(100);
@@ -340,44 +295,23 @@ void Game::World::solve_collisions ()
 
 void Game::World::render_map ()
 {
-	Opengl::ProgramTriangle::Vertex *vertices;
-	Opengl::ProgramTriangle *program = Main::get()->get_opengl_program_triangle();
-
-	ShapeRect rect(Config::map_tile_size, Config::map_tile_size);
+	const ShapeRect rect(Config::map_tile_size, Config::map_tile_size);
 	const uint32_t n_rects = this->map.get_n_walls();
-	const uint32_t total_n_vertices = rect.get_n_vertices() * n_rects;
-
-	dprint( "map allocating space for " << total_n_vertices << " vertices in vertex_buffer" << std::endl )
-
-	vertices = program->alloc_vertices(total_n_vertices);
-	auto *rect_vertices = vertices;
+	const Graphics::Color color = { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f };
 
 	for (uint32_t y=0; y<this->map.get_h(); y++) {
 		for (uint32_t x=0; x<this->map.get_w(); x++) {
 			switch (this->map(y, x)) {
 				case Map::Cell::Wall:
-					rect.set_dx( static_cast<float>(x) + 0.5f );
-					rect.set_dy( static_cast<float>(y) + 0.5f );
-					rect.push_vertices( &(rect_vertices->x), &(rect_vertices->y), program->get_stride() );
-					rect_vertices += rect.get_n_vertices();
+					renderer->draw_rect(
+						rect,
+						static_cast<float>(x) + 0.5f,
+						static_cast<float>(y) + 0.5f,
+						color
+						);
 				break;
 			}
 		}
-	}
-
-	for (uint32_t i=0; i<total_n_vertices; i++) {
-		vertices[i].offset_x = 0.0f;
-		vertices[i].offset_y = 0.0f;
-		vertices[i].r = 0.0f;
-		vertices[i].g = 0.0f;
-		vertices[i].b = 1.0f;
-		vertices[i].a = 1.0f;
-
-	#if 0
-		dprint( "map vertex[" << i << "] x = " << vertices[i].x << "  y =" << vertices[i].y
-		        << " offset_x = " << vertices[i].offset_x
-				<< " offset_y = " << vertices[i].offset_y << std::endl )
-	#endif
 	}
 }
 
@@ -393,8 +327,7 @@ void Game::World::render (const float dt)
 
 	//this->Programriangle->debug(); exit(1);
 
-	Main::get()->get_opengl_program_triangle()->upload_vertex_buffer();
-	Main::get()->get_opengl_program_triangle()->draw();
+	renderer->render();
 }
 
 int main (int argc, char **argv)

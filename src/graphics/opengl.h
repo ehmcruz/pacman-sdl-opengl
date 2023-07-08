@@ -18,6 +18,8 @@
 #include <my-lib/macros.h>
 #include <my-lib/matrix.h>
 
+namespace Graphics
+{
 namespace Opengl
 {
 
@@ -39,23 +41,6 @@ public:
 	void compile ();
 
 	friend class Program;
-};
-
-// ---------------------------------------------------
-
-class ProjectionMatrix: public Mylib::StaticMatrix<float, 4, 4>
-{
-public:
-	struct Args {
-		float left;
-		float right;
-		float top;
-		float bottom;
-		float znear;
-		float zfar;
-	};
-
-	void setup (const Args&& args);
 };
 
 // ---------------------------------------------------
@@ -201,36 +186,13 @@ public:
 
 // ---------------------------------------------------
 
-class CircleFactory
+class Renderer : public Game::Renderer
 {
-private:
-	float *table_sin;
-	float *table_cos;
-	const uint32_t n_triangles;
-
-public:
-	CircleFactory (const uint32_t n_triangles_);
-	~CircleFactory ();
-
-	inline uint32_t get_n_vertices () const
-	{
-		return (this->n_triangles * 3);
-	}
-
-	void fill_vertex_buffer (const float radius, float *x, float *y, const uint32_t stride) const;
-};
-
-// ---------------------------------------------------
-
-struct Color {
-	GLfloat r;
-	GLfloat g;
-	GLfloat b;
-	GLfloat a; // alpha
 };
 
 // ---------------------------------------------------
 
 } // end namespace Opengl
+} // end namespace Graphics
 
 #endif

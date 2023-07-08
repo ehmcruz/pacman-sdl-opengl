@@ -10,66 +10,9 @@ void Game::Object::physics (const float dt, const Uint8 *keys)
 	this->y += this->vy * dt;
 }
 
-void Game::Shape::apply_delta (const uint32_t n_vertices, float *x, float *y, const uint32_t stride)
-{
-	uint32_t j = 0;
-
-	for (uint32_t i=0; i<n_vertices; i++) {
-		x[j] += this->dx;
-		y[j] += this->dy;
-		j += stride;
-	}
-}
-
-uint32_t Game::ShapeCircle::get_n_vertices ()
-{
-	return this->factory->get_n_vertices();
-}
-
-void Game::ShapeCircle::push_vertices (float *x, float *y, const uint32_t stride)
-{
-	const uint32_t n = this->get_n_vertices();
-
-	this->factory->fill_vertex_buffer(this->radius, x, y, stride);
-	this->apply_delta(n, x, y, stride);
-}
-
-void Game::ShapeRect::push_vertices (float *x, float *y, const uint32_t stride)
-{
-	const float half_w = this->w * 0.5f;
-	const float half_h = this->h * 0.5f;
-	uint32_t i = 0;
-
-	// let's draw clockwise
-
-	// first triangle
-	x[i] = -half_w;
-	y[i] = -half_h;
-	i += stride;
-	x[i] = half_w;
-	y[i] = half_h;
-	i += stride;
-	x[i] = -half_w;
-	y[i] = half_h;
-
-	i += stride;
-
-	// second triangle
-	x[i] = -half_w;
-	y[i] = -half_h;
-	i += stride;
-	x[i] = half_w;
-	y[i] = -half_h;
-	i += stride;
-	x[i] = half_w;
-	y[i] = half_h;
-
-	this->apply_delta(fast_get_n_vertices(), x, y, stride);
-}
-
 Game::Player::Player (World *world_)
-	: Object(world_)
-	, shape( this, Config::pacman_radius, Main::get()->get_opengl_circle_factory_low_def() )
+	: Object(world_),
+	  shape( this, Config::pacman_radius, Main::get()->get_opengl_circle_factory_low_def() )
 {
 	this->x = 0.0f;
 	this->y = 0.0f;
@@ -78,7 +21,7 @@ Game::Player::Player (World *world_)
 	this->direction = Direction::Stopped;
 	this->target_direction = Direction::Stopped;
 
-	this->color = Opengl::Color { .r = 0.0f, .g = 1.0f, .b = 1.0f, .a = 1.0f };
+	this->color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 1.0f, .a = 1.0f };
 
 	dprint( "player created" << std::endl )
 }
@@ -147,26 +90,7 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 
 void Game::Player::render (const float dt)
 {
-	Opengl::ProgramTriangle::Vertex *vertices;
-	Opengl::ProgramTriangle *program;
-	uint32_t n_vertices;
-
-	n_vertices = this->shape.get_n_vertices();
-	dprint( "player allocating space for " << n_vertices << " vertices in vertex_buffer" << std::endl )
-
-	program = Main::get()->get_opengl_program_triangle();
-	vertices = program->alloc_vertices(n_vertices);
-
-	this->shape.push_vertices( &(vertices->x), &(vertices->y), Opengl::ProgramTriangle::get_stride() );
-
-	for (uint32_t i=0; i<n_vertices; i++) {
-		vertices[i].offset_x = this->x;
-		vertices[i].offset_y = this->y;
-		vertices[i].r = this->color.r;
-		vertices[i].g = this->color.g;
-		vertices[i].b = this->color.b;
-		vertices[i].a = this->color.a;
-	}
+	renderer->draw_circle(this->shape, this->x, this->y, this->color);
 }
 
 void Game::Player::event_keydown (const SDL_Keycode key)
@@ -194,7 +118,7 @@ Game::Ghost::Ghost (World *world_)
 	: Object(world_)
 	, shape( this, Config::ghost_radius, Main::get()->get_opengl_circle_factory_low_def() )
 {
-	static Opengl::Color ghosts_colors[] = {
+	static Graphics::Color ghosts_colors[] = {
 		{ .r = 0.5f, .g = 0.1f, .b = 0.0f, .a = 1.0f },
 		{ .r = 0.0f, .g = 0.5f, .b = 0.0f, .a = 1.0f },
 	};
@@ -289,24 +213,5 @@ void Game::Ghost::physics (const float dt, const Uint8 *keys)
 
 void Game::Ghost::render (const float dt)
 {
-	Opengl::ProgramTriangle::Vertex *vertices;
-	Opengl::ProgramTriangle *program;
-	uint32_t n_vertices;
-
-	n_vertices = this->shape.get_n_vertices();
-	dprint( "ghost allocating space for " << n_vertices << " vertices in vertex_buffer" << std::endl )
-
-	program = Main::get()->get_opengl_program_triangle();
-	vertices = program->alloc_vertices(n_vertices);
-
-	this->shape.push_vertices( &(vertices->x), &(vertices->y), Opengl::ProgramTriangle::get_stride() );
-
-	for (uint32_t i=0; i<n_vertices; i++) {
-		vertices[i].offset_x = this->x;
-		vertices[i].offset_y = this->y;
-		vertices[i].r = this->color.r;
-		vertices[i].g = this->color.g;
-		vertices[i].b = this->color.b;
-		vertices[i].a = this->color.a;
-	}
+	renderer->draw_circle(this->shape, this->x, this->y, this->color);
 }

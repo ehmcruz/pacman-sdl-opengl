@@ -5,10 +5,7 @@
 	#define SDL_MAIN_HANDLED
 #endif
 
-#include <GL/glew.h>
-
 #include <SDL.h>
-#include <SDL_opengl.h>
 
 #include <vector>
 #include <string>
@@ -18,12 +15,16 @@
 #include <my-lib/macros.h>
 #include <my-lib/matrix.h>
 
-#include "opengl.h"
+#include "graphics.h"
 #include "game-object.h"
 #include "lib.h"
 
 namespace Game
 {
+
+// ---------------------------------------------------
+
+extern Graphics::Renderer *renderer;
 
 // ---------------------------------------------------
 
@@ -40,16 +41,9 @@ public:
 	};
 
 protected:
-	OO_ENCAPSULATE(SDL_Window*, sdl_window)
-	OO_ENCAPSULATE(SDL_GLContext, sdl_gl_context)
-	OO_ENCAPSULATE(uint32_t, screen_width_px)
-	OO_ENCAPSULATE(uint32_t, screen_height_px)
 	OO_ENCAPSULATE(World*, world)
 	OO_ENCAPSULATE(bool, alive)
 	OO_ENCAPSULATE_READONLY(State, state)
-	OO_ENCAPSULATE_READONLY(Opengl::CircleFactory*, opengl_circle_factory_low_def)
-	OO_ENCAPSULATE_READONLY(Opengl::CircleFactory*, opengl_circle_factory_high_def)
-	OO_ENCAPSULATE_READONLY(Opengl::ProgramTriangle*, opengl_program_triangle)
 	OO_ENCAPSULATE_REFERENCE_READONLY(Probability, probability)
 
 protected:
@@ -60,7 +54,7 @@ protected:
 
 public:
 	void load ();
-	void load_opengl_programs ();
+	void graphics_init ();
 	void run ();
 	void cleanup ();
 
@@ -113,7 +107,7 @@ public:
 class World
 {
 protected:
-	Opengl::ProjectionMatrix projection_matrix;
+	Graphics::ProjectionMatrix projection_matrix;
 
 	// width and height of screen
 	// the screen coordinates here are in game world coords (not opengl, neither pixels)
@@ -132,8 +126,6 @@ protected:
 public:
 	World ();
 	~World ();
-
-	void bind_vertex_buffer ();
 
 	inline void add_object (Object *obj)
 	{

@@ -9,6 +9,71 @@
 
 #include "opengl.h"
 
+void opengl_init ()
+{
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+	SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
+	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
+
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 2 );
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+
+	this->sdl_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, this->screen_width_px, this->screen_height_px, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+
+	this->sdl_gl_context = SDL_GL_CreateContext(this->sdl_window);
+
+	GLenum err = glewInit();
+	if (err != GLEW_OK) {
+		std::cout << "Error: " << glewGetErrorString(err) << std::endl;
+		exit(1);
+	}
+
+	std::cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
+
+	glDisable(GL_DEPTH_TEST);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glViewport(0, 0, this->screen_width_px, this->screen_height_px);
+
+	this->opengl_circle_factory_low_def = new Opengl::CircleFactory(Config::opengl_low_def_triangles);
+	//this->opengl_circle_factory_high_def = new Opengl::CircleFactory(Config::opengl_high_def_triangles);
+
+	this->load_opengl_programs();
+
+	dprint( "loaded opengl stuff" << std::endl )
+}
+
+void wait_new_frame ()
+{
+	glClear( GL_COLOR_BUFFER_BIT );
+	SDL_GL_SwapWindow(this->sdl_window);
+}
+
+void opengl_clean ()
+{
+	SDL_GL_DeleteContext(this->sdl_gl_context);
+	SDL_DestroyWindow(this->sdl_window);
+}
+
+void Game::Main::graphics_init ()
+{
+	this->opengl_program_triangle = new Opengl::ProgramTriangle;
+
+	dprint( "loaded opengl triangle program" << std::endl )
+
+	this->opengl_program_triangle->use_program();
+	
+	this->opengl_program_triangle->bind_vertex_array();
+	this->opengl_program_triangle->bind_vertex_buffer();
+
+	this->opengl_program_triangle->setup_vertex_array();
+
+	dprint( "generated and binded opengl world vertex array/buffer" << std::endl )
+}
+
 Opengl::Shader::Shader (const GLenum shader_type_, const char *fname_)
 : shader_type(shader_type_),
   fname(fname_)

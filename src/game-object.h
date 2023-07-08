@@ -5,18 +5,16 @@
 	#define SDL_MAIN_HANDLED
 #endif
 
-#include <GL/glew.h>
-
 #include <SDL.h>
-#include <SDL_opengl.h>
 
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
 #include <my-lib/matrix.h>
 
 #include "config.h"
-#include "opengl.h"
 #include "lib.h"
+#include "graphics.h"
+
 
 namespace Game
 {
@@ -55,16 +53,6 @@ public:
 		: Shape (type_, nullptr)
 	{
 	}
-
-	void apply_delta (const uint32_t n_vertices, float *x, float *y, const uint32_t stride);
-	
-	inline void apply_delta (float *x, float *y, const uint32_t stride)
-	{
-		this->apply_delta( this->get_n_vertices(), x, y, stride );
-	}
-
-	virtual uint32_t get_n_vertices () = 0;
-	virtual void push_vertices (float *x, float *y, const uint32_t stride) = 0;
 };
 
 // ---------------------------------------------------
@@ -72,36 +60,27 @@ public:
 class ShapeCircle: public Shape
 {
 protected:
-	const Opengl::CircleFactory *factory;
-
 	OO_ENCAPSULATE(float, radius)
 
 public:
-	inline ShapeCircle (const Object *object_, const float radius_, const Opengl::CircleFactory *factory_)
+	inline ShapeCircle (const Object *object_, const float radius_)
 		: Shape (Type::Circle, object_),
-		  factory(factory_),
 		  radius(radius_)
 	{
 		dprint( "circle created r=" << this->radius << std::endl )
 	}
 
-	inline ShapeCircle (const float radius_, const Opengl::CircleFactory *factory_)
-		: ShapeCircle (nullptr, radius_, factory_)
-	{
-	}
-
-	inline ShapeCircle (const Opengl::CircleFactory *factory_)
-		: ShapeCircle (nullptr, 0.0f, factory_)
+	inline ShapeCircle (const float radius_)
+		: ShapeCircle (nullptr, radius_)
 	{
 	}
 
 	inline ShapeCircle ()
-		: ShapeCircle (nullptr, 0.0f, nullptr)
+		: ShapeCircle (nullptr, 0.0f)
 	{
 	}
 
 	uint32_t get_n_vertices () override;
-	void push_vertices (float *x, float *y, const uint32_t stride) override;
 };
 
 // ---------------------------------------------------
@@ -129,18 +108,6 @@ public:
 		: ShapeRect (nullptr, 0.0f, 0.0f)
 	{
 	}
-
-	consteval static uint32_t fast_get_n_vertices ()
-	{
-		return 6; // 2 triangles
-	}
-
-	constexpr uint32_t get_n_vertices () override
-	{
-		return fast_get_n_vertices();
-	};
-	
-	void push_vertices (float *x, float *y, uint32_t const stride) override;
 };
 
 // ---------------------------------------------------
@@ -182,7 +149,7 @@ class Player: public Object
 protected:
 	ShapeCircle shape;
 	Direction target_direction;
-	Opengl::Color color;
+	Graphics::Color color;
 
 public:
 	Player (World *world_);
@@ -201,7 +168,7 @@ class Ghost: public Object
 {
 protected:
 	ShapeCircle shape;
-	Opengl::Color color;
+	Graphics::Color color;
 	ClockTime time_last_turn;
 	ClockDuration time_between_turns;
 
