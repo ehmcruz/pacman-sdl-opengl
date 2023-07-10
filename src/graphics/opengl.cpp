@@ -9,6 +9,29 @@
 
 #include "opengl.h"
 
+void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArgs&& args)
+{
+/*	m(0,0) = 2.0f / (args.right - args.left);
+	m(0,1) = 0.0f;
+	m(0,2) = 0.0f;
+	m(0,3) = 0.0f;
+
+	m(1,0) = 0.0f;
+	m(1,1) = 2.0f / (args.top - args.bottom);
+	m(1,2) = 0.0f;
+	m(1,3) = 0.0f;
+
+	m(2,0) = 0.0f;
+	m(2,1) = 0.0f;
+	m(2,2) = -2.0f / (args.zfar - args.znear);
+	m(2,3) = 0.0f;
+
+	m(3,0) = -(args.right + args.left) / (args.right - args.left);
+	m(3,1) = -(args.top + args.bottom) / (args.top - args.bottom);
+	m(3,2) = -(args.zfar + args.znear) / (args.zfar - args.znear);
+	m(3,3) = 1.0f;*/
+}
+
 void opengl_init ()
 {
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );

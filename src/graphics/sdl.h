@@ -51,7 +51,8 @@ protected:
 	SDL_Window *sdl_window;
 	SDL_Renderer *renderer;
 	SDL_Color background_color;
-	ProjectionMatrix m;
+	Matrix4d projection_matrix;
+	float scale_factor;
 
 public:
 	Renderer (const uint32_t screen_width_px_, const uint32_t screen_height_px_);

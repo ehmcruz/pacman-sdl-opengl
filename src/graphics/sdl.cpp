@@ -48,11 +48,20 @@ void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vect
 {
 	SDL_Rect sdl_rect;
 	const SDL_Color sdl_color = color;
+	const Vector world_pos = offset + rect.get_delta();
+	//const Vector world_pos = Vector(4.0f, 4.0f);
+	const Vector4d clip_pos = this->projection_matrix * Vector4d(world_pos);
 
-/*	sdl_rect.x = this->transform_x(offset.x - rect.get_w()*0.5f + rect.get_dx());
-	sdl_rect.y = this->transform_y(offset.y - rect.get_h()*0.5f + rect.get_dy());
-	sdl_rect.w = this->transform_x(rect.get_w());
-	sdl_rect.h = this->transform_y(rect.get_h());*/
+	dprintln( "world_pos:" )
+	world_pos.println();
+
+	dprintln( "clip_pos:" )
+	clip_pos.println();
+exit(1);
+	sdl_rect.x = clip_pos.x - (rect.get_w() * 0.5f * this->scale_factor);
+	sdl_rect.y = clip_pos.y - (rect.get_h() * 0.5f * this->scale_factor);
+	sdl_rect.w = rect.get_w() * this->scale_factor;
+	sdl_rect.h = rect.get_h() * this->scale_factor;
 
 	SDL_SetRenderDrawColor(this->renderer, sdl_color.r, sdl_color.g, sdl_color.b, sdl_color.a);
 	SDL_RenderFillRect(this->renderer, &sdl_rect);
@@ -60,31 +69,50 @@ void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vect
 
 void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArgs&& args)
 {
-/*	m(0,0) = 2.0f / (args.right - args.left);
-	m(0,1) = 0.0f;
-	m(0,2) = 0.0f;
-	m(0,3) = 0.0f;
+	const Vector clip_init = args.clip_init_per_cent * Vector(static_cast<float>(this->screen_width_px), static_cast<float>(this->screen_height_px));
+	const Vector clip_end = args.clip_end_per_cent * Vector(static_cast<float>(this->screen_width_px), static_cast<float>(this->screen_height_px));
+	const Vector clip_size = clip_end - clip_init;
 
-	m(1,0) = 0.0f;
-	m(1,1) = 2.0f / (args.top - args.bottom);
-	m(1,2) = 0.0f;
-	m(1,3) = 0.0f;
+	const float aspect_ratio = clip_size.x / clip_size.y;
+	const Vector world_screen_size = Vector(args.world_screen_width, args.world_screen_width * aspect_ratio);
+	this->scale_factor = clip_size.x / world_screen_size.x;
 
-	m(2,0) = 0.0f;
-	m(2,1) = 0.0f;
-	m(2,2) = -2.0f / (args.zfar - args.znear);
-	m(2,3) = 0.0f;
+	Vector world_camera = args.world_camera_focus - Vector(world_screen_size.x*0.5f, world_screen_size.y*0.5f);
 
-	m(3,0) = -(args.right + args.left) / (args.right - args.left);
-	m(3,1) = -(args.top + args.bottom) / (args.top - args.bottom);
-	m(3,2) = -(args.zfar + args.znear) / (args.zfar - args.znear);
-	m(3,3) = 1.0f;*/
+	dprint( "clip_init: " )
+	clip_init.println();
+
+	dprint( "clip_end: " )
+	clip_end.println();
+
+	dprint( "clip_size: " )
+	clip_size.println();
+
+	dprintln( "aspect_ratio: " << aspect_ratio )
+	dprintln( "scale_factor: " << this->scale_factor )
+
+	dprint( "world_screen_size: " )
+	world_screen_size.println();
+
+	dprint( "world_camera_focus: " )
+	args.world_camera_focus.println();
+
+	dprint( "world_camera: " )
+	world_camera.println();
+
 	Matrix4d translate_camera;
-	translate_camera.set_translate(args.world_camera_focus);
+	translate_camera.set_translate(world_camera);
+	dprintln( "translation matrix:" )
+	translate_camera.println();
 
-	dprint( std::endl )
-	translate_camera.print();
-	exit(1);
+	Matrix4d scale;
+	scale.set_scale(this->scale_factor);
+	dprintln( "scale matrix:" )
+	scale.println();
+
+	this->projection_matrix = scale * translate_camera;
+	dprintln( "final matrix:" )
+	this->projection_matrix.println();
 }
 
 void Graphics::SDL::Renderer::render ()

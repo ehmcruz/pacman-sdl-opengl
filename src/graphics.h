@@ -14,6 +14,7 @@
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
 #include <my-lib/math-matrix.h>
+#include <my-lib/math-vector.h>
 
 #include "lib.h"
 
@@ -29,8 +30,9 @@ namespace Game {
 namespace Graphics
 {
 
-using Vector = Game::Vector;
-using Matrix4d = Mylib::Math::Matrix4d;
+using Game::Vector;
+using Mylib::Math::Matrix4d;
+using Mylib::Math::Vector4d;
 
 // ---------------------------------------------------
 
@@ -51,15 +53,14 @@ inline constexpr Color config_background_color = {
 // ---------------------------------------------------
 
 struct ProjectionMatrixArgs {
-	Vector screen_offset_per_cent;
-	float screen_width_per_cent;
-	float screen_height_per_cent;
-	float world_width;
-	float world_height;
+	Vector clip_init_per_cent;
+	Vector clip_end_per_cent;
+	Vector world_init;
+	Vector world_end;
+	float world_screen_width;
+	// world_screen_height will be calculated automatically from the aspect ratio
 	Vector world_camera_focus;
 };
-
-using ProjectionMatrix = Matrix4d;
 
 // ---------------------------------------------------
 

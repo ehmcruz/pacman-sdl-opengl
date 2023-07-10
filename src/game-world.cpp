@@ -306,11 +306,11 @@ void Game::World::render_map ()
 void Game::World::render (const float dt)
 {
 	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
-		.screen_offset_per_cent = Vector(0.0f, 0.0f),
-		.screen_width_per_cent = 1.0f,
-		.screen_height_per_cent = 1.0f,
-		.world_width = this->w,
-		.world_height = this->h,
+		.clip_init_per_cent = Vector(0.0f, 0.0f),
+		.clip_end_per_cent = Vector(1.0f, 1.0f),
+		.world_init = Vector(0.0f, 0.0f),
+		.world_end = Vector(this->w, this->h),
+		.world_screen_width = this->w,
 		.world_camera_focus = player.get_pos()
 		} );
 

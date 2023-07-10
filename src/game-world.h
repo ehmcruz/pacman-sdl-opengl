@@ -107,8 +107,6 @@ public:
 class World
 {
 protected:
-	Graphics::ProjectionMatrix projection_matrix;
-
 	// width and height of screen
 	// the screen coordinates here are in game world coords (not opengl, neither pixels)
 	// every unit corresponds to a tile
