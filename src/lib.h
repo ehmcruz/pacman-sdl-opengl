@@ -8,6 +8,7 @@
 
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
+#include <my-lib/math-vector.h>
 
 namespace Game
 {
@@ -18,6 +19,10 @@ using Clock = std::chrono::steady_clock;
 using ClockTime = Clock::time_point;
 using ClockDuration = std::chrono::duration<float>;
 
+using Vector = Mylib::Math::Vector<2>;
+
+// ---------------------------------------------------
+
 class Probability
 {
 private:
@@ -26,6 +31,18 @@ private:
 public:
 	Probability ();
 };
+
+// ---------------------------------------------------
+
+inline Vector get_cell_center (Vector& pos)
+{
+	return Vector(std::floor(pos.x) + 0.5f, std::floor(pos.y) + 0.5f);
+}
+
+inline Vector get_cell_center (Vector&& pos)
+{
+	return Vector(std::floor(pos.x) + 0.5f, std::floor(pos.y) + 0.5f);
+}
 
 inline float get_cell_center (float pos)
 {

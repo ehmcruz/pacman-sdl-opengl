@@ -38,20 +38,38 @@ protected:
 	OO_ENCAPSULATE(const Object*, object)
 
 	// distance from the center of the shape to the center of the object
-	OO_ENCAPSULATE(float, dx)
-	OO_ENCAPSULATE(float, dy)
+	OO_ENCAPSULATE_REFERENCE(Vector, delta)
 
 public:
 	inline Shape (const Type type_, const Object *object_)
 		: type(type_), object(object_)
 	{
-		this->dx = 0.0f;
-		this->dy = 0.0f;
+		this->delta = {0.0f, 0.0f};
 	}
 
 	inline Shape (const Type type_)
 		: Shape (type_, nullptr)
 	{
+	}
+
+	inline float get_dx () const
+	{
+		return this->delta.x;
+	}
+
+	inline float get_dy () const
+	{
+		return this->delta.y;
+	}
+
+	inline void set_dx (const float dx)
+	{
+		this->delta.x = dx;
+	}
+
+	inline void set_dy (const float dy)
+	{
+		this->delta.y = dy;
 	}
 };
 
@@ -122,10 +140,8 @@ public:
 	};
 
 protected:
-	OO_ENCAPSULATE(float, x)
-	OO_ENCAPSULATE(float, y)
-	OO_ENCAPSULATE(float, vx)
-	OO_ENCAPSULATE(float, vy)
+	OO_ENCAPSULATE_REFERENCE(Vector, pos)
+	OO_ENCAPSULATE_REFERENCE(Vector, vel)
 	OO_ENCAPSULATE(World*, world)
 	OO_ENCAPSULATE_READONLY(Direction, direction)
 
@@ -133,6 +149,46 @@ public:
 	inline Object (World *world_)
 		: world(world_)
 	{
+	}
+
+	inline float get_x () const
+	{
+		return this->pos.x;
+	}
+
+	inline float get_y () const
+	{
+		return this->pos.y;
+	}
+
+	inline void set_x (const float x)
+	{
+		this->pos.x = x;
+	}
+
+	inline void set_y (const float y)
+	{
+		this->pos.y = y;
+	}
+
+	inline float get_vx () const
+	{
+		return this->vel.x;
+	}
+
+	inline float get_vy () const
+	{
+		return this->vel.y;
+	}
+
+	inline void set_vx (const float vx)
+	{
+		this->vel.x = vx;
+	}
+
+	inline void set_vy (const float vy)
+	{
+		this->vel.y = vy;
 	}
 
 	virtual void collided_with_wall (Direction direction) = 0;

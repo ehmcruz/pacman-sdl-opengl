@@ -35,23 +35,22 @@ void Graphics::SDL::Renderer::wait_next_frame ()
 	SDL_RenderClear(this->renderer);
 }
 
-void Graphics::SDL::Renderer::draw_circle (const Game::ShapeCircle& circle, const float offset_x, const float offset_y, const Graphics::Color& color)
+void Graphics::SDL::Renderer::draw_circle (const Game::ShapeCircle& circle, const Vector& offset, const Graphics::Color& color)
 {
 	Game::ShapeRect rect(circle.get_radius(), circle.get_radius());
 
-	rect.set_dx(circle.get_dx());
-	rect.set_dy(circle.get_dy());
+	rect.set_delta(circle.get_delta());
 
-	this->draw_rect(rect, offset_x, offset_y, color);
+	this->draw_rect(rect, offset, color);
 }
 
-void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const float offset_x, const float offset_y, const Graphics::Color& color)
+void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vector& offset, const Graphics::Color& color)
 {
 	SDL_Rect sdl_rect;
 	const SDL_Color sdl_color = color;
 
-	sdl_rect.x = this->transform_x(offset_x - rect.get_w()*0.5f + rect.get_dx());
-	sdl_rect.y = this->transform_y(offset_y - rect.get_h()*0.5f + rect.get_dy());
+	sdl_rect.x = this->transform_x(offset.x - rect.get_w()*0.5f + rect.get_dx());
+	sdl_rect.y = this->transform_y(offset.y - rect.get_h()*0.5f + rect.get_dy());
 	sdl_rect.w = this->transform_x(rect.get_w());
 	sdl_rect.h = this->transform_y(rect.get_h());
 

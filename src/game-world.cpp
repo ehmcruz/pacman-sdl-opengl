@@ -233,8 +233,10 @@ Game::World::World ()
 
 	this->add_object(player);
 
-	this->player.set_x( get_cell_center(this->map.get_pacman_start_x()) );
-	this->player.set_y( get_cell_center(this->map.get_pacman_start_y()) );
+	this->player.set_pos( Vector(
+		get_cell_center(this->map.get_pacman_start_x()),
+		get_cell_center(this->map.get_pacman_start_y())
+		));
 
 	// create ghosts
 
@@ -243,8 +245,7 @@ Game::World::World ()
 			switch (this->map(y, x)) {
 				case Map::Cell::Ghost_start:
 					Ghost& ghost = this->ghosts.emplace_back(this);
-					ghost.set_x( get_cell_center(x) );
-					ghost.set_y( get_cell_center(y) );
+					ghost.set_pos(Vector( get_cell_center(x), get_cell_center(y) ));
 					this->add_object(ghost);
 				break;
 			}
@@ -268,29 +269,28 @@ void Game::World::physics (const float dt, const Uint8 *keys)
 void Game::World::solve_collisions ()
 {
 	for (Object *obj: this->objects) {
-		const float cell_center_x = get_cell_center( obj->get_x() );
-		const float cell_center_y = get_cell_center( obj->get_y() );
+		const Vector cell_center = get_cell_center(obj->get_pos());
 		const int32_t xi = static_cast<uint32_t>( obj->get_x() );
 		const int32_t yi = static_cast<uint32_t>( obj->get_y() );
 
-		if (obj->get_x() < cell_center_x && this->map(yi, xi-1) == Map::Cell::Wall) {
-			obj->set_x(cell_center_x);
+		if (obj->get_x() < cell_center.x && this->map(yi, xi-1) == Map::Cell::Wall) {
+			obj->set_x(cell_center.x);
 			obj->set_vx(0.0f);
 			obj->collided_with_wall(Object::Direction::Left);
 		}
-		else if (obj->get_x() > cell_center_x && this->map(yi, xi+1) == Map::Cell::Wall) {
-			obj->set_x(cell_center_x);
+		else if (obj->get_x() > cell_center.x && this->map(yi, xi+1) == Map::Cell::Wall) {
+			obj->set_x(cell_center.x);
 			obj->set_vx(0.0f);
 			obj->collided_with_wall(Object::Direction::Right);
 		}
 
-		if (obj->get_y() < cell_center_y && this->map(yi-1, xi) == Map::Cell::Wall) {
-			obj->set_y(cell_center_y);
+		if (obj->get_y() < cell_center.y && this->map(yi-1, xi) == Map::Cell::Wall) {
+			obj->set_y(cell_center.y);
 			obj->set_vy(0.0f);
 			obj->collided_with_wall(Object::Direction::Up);
 		}
-		else if (obj->get_y() > cell_center_y && this->map(yi+1, xi) == Map::Cell::Wall) {
-			obj->set_y(cell_center_y);
+		else if (obj->get_y() > cell_center.y && this->map(yi+1, xi) == Map::Cell::Wall) {
+			obj->set_y(cell_center.y);
 			obj->set_vy(0.0f);
 			obj->collided_with_wall(Object::Direction::Down);
 		}
@@ -302,17 +302,14 @@ void Game::World::render_map ()
 	const ShapeRect rect(Config::map_tile_size, Config::map_tile_size);
 	const uint32_t n_rects = this->map.get_n_walls();
 	const Graphics::Color color = { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f };
+	Vector offset;
 
 	for (uint32_t y=0; y<this->map.get_h(); y++) {
 		for (uint32_t x=0; x<this->map.get_w(); x++) {
 			switch (this->map(y, x)) {
 				case Map::Cell::Wall:
-					renderer->draw_rect(
-						rect,
-						static_cast<float>(x) + 0.5f,
-						static_cast<float>(y) + 0.5f,
-						color
-						);
+					offset.set(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f);
+					renderer->draw_rect(rect, offset, color);
 				break;
 			}
 		}

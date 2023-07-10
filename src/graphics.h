@@ -15,6 +15,7 @@
 #include <my-lib/macros.h>
 #include <my-lib/matrix.h>
 
+#include "lib.h"
 
 // ---------------------------------------------------
 
@@ -27,6 +28,8 @@ namespace Game {
 
 namespace Graphics
 {
+
+using Vector = Game::Vector;
 
 // ---------------------------------------------------
 
@@ -82,8 +85,8 @@ public:
 	}
 
 	virtual void wait_next_frame () = 0;
-	virtual void draw_circle (const Game::ShapeCircle& circle, const float offset_x, const float offset_y, const Color& color) = 0;
-	virtual void draw_rect (const Game::ShapeRect& rect, const float offset_x, const float offset_y, const Color& color) = 0;
+	virtual void draw_circle (const Game::ShapeCircle& circle, const Vector& offset, const Color& color) = 0;
+	virtual void draw_rect (const Game::ShapeRect& rect, const Vector& offset, const Color& color) = 0;
 	virtual void set_projection_matrix (const ProjectionMatrix& m) = 0;
 	virtual void render () = 0;
 };

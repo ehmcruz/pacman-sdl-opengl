@@ -6,18 +6,16 @@
 
 void Game::Object::physics (const float dt, const Uint8 *keys)
 {
-	this->x += this->vx * dt;
-	this->y += this->vy * dt;
+	this->pos.x += this->vel.x * dt;
+	this->pos.y += this->vel.y * dt;
 }
 
 Game::Player::Player (World *world_)
 	: Object(world_),
 	  shape(this, Config::pacman_radius)
 {
-	this->x = 0.0f;
-	this->y = 0.0f;
-	this->vx = 0.0f;
-	this->vy = 0.0f;
+	this->pos = Vector(0.0f, 0.0f);
+	this->vel = Vector(0.0f, 0.0f);
 	this->direction = Direction::Stopped;
 	this->target_direction = Direction::Stopped;
 
@@ -37,10 +35,9 @@ void Game::Player::collided_with_wall (Direction direction)
 
 void Game::Player::physics (const float dt, const Uint8 *keys)
 {
-	const float cell_center_x = get_cell_center(this->x);
-	const float cell_center_y = get_cell_center(this->y);
-	const float dist_x = std::abs(cell_center_x - this->x);
-	const float dist_y = std::abs(cell_center_y - this->y);
+	const Vector cell_center = get_cell_center(this->pos);
+	const float dist_x = std::abs(cell_center.x - this->get_x() );
+	const float dist_y = std::abs(cell_center.y - this->get_y() );
 	const int32_t xi = static_cast<uint32_t>( this->get_x() );
 	const int32_t yi = static_cast<uint32_t>( this->get_y() );
 	const Map& map = this->world->get_map();
@@ -50,36 +47,36 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 
 		case Left:
 			if (dist_y < Config::pacman_turn_threshold && map(yi, xi-1) != Map::Cell::Wall) {
-				this->y = cell_center_y; // teleport to center of cell
-				this->vx = -Config::pacman_speed;
-				this->vy = 0.0f;
+				this->pos.y = cell_center.y; // teleport to center of cell
+				this->vel.x = -Config::pacman_speed;
+				this->vel.y = 0.0f;
 				this->direction = Left;
 			}
 		break;
 
 		case Right:
 			if (dist_y < Config::pacman_turn_threshold && map(yi, xi+1) != Map::Cell::Wall) {
-				this->y = cell_center_y; // teleport to center of cell
-				this->vx = Config::pacman_speed;
-				this->vy = 0.0f;
+				this->pos.y = cell_center.y; // teleport to center of cell
+				this->vel.x = Config::pacman_speed;
+				this->vel.y = 0.0f;
 				this->direction = Right;
 			}
 		break;
 
 		case Up:
 			if (dist_x < Config::pacman_turn_threshold && map(yi-1, xi) != Map::Cell::Wall) {
-				this->x = cell_center_x; // teleport to center of cell
-				this->vx = 0.0f;
-				this->vy = -Config::pacman_speed;
+				this->pos.x = cell_center.x; // teleport to center of cell
+				this->vel.x = 0.0f;
+				this->vel.y = -Config::pacman_speed;
 				this->direction = Up;
 			}
 		break;
 
 		case Down:
 			if (dist_x < Config::pacman_turn_threshold && map(yi+1, xi) != Map::Cell::Wall) {
-				this->x = cell_center_x; // teleport to center of cell
-				this->vx = 0.0f;
-				this->vy = Config::pacman_speed;
+				this->pos.x = cell_center.x; // teleport to center of cell
+				this->vel.x = 0.0f;
+				this->vel.y = Config::pacman_speed;
 				this->direction = Down;
 			}
 		break;
@@ -90,7 +87,7 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 
 void Game::Player::render (const float dt)
 {
-	renderer->draw_circle(this->shape, this->x, this->y, this->color);
+	renderer->draw_circle(this->shape, this->pos, this->color);
 }
 
 void Game::Player::event_keydown (const SDL_Keycode key)
@@ -124,10 +121,8 @@ Game::Ghost::Ghost (World *world_)
 	};
 	static uint32_t color_i = 0;
 
-	this->x = 0.0f;
-	this->y = 0.0f;
-	this->vx = 0.0f;
-	this->vy = 0.0f;
+	this->pos = Vector(0.0f, 0.0f);
+	this->vel = Vector(0.0f, 0.0f);
 	this->direction = Direction::Stopped;
 	this->time_last_turn = this->world->get_time_create();
 	this->time_between_turns = ClockDuration(Config::ghost_time_between_turns);
@@ -150,10 +145,9 @@ void Game::Ghost::collided_with_wall (Direction direction)
 
 void Game::Ghost::physics (const float dt, const Uint8 *keys)
 {
-	const float cell_center_x = get_cell_center(this->x);
-	const float cell_center_y = get_cell_center(this->y);
-	const float dist_x = std::abs(cell_center_x - this->x);
-	const float dist_y = std::abs(cell_center_y - this->y);
+	const Vector cell_center = get_cell_center(this->pos);
+	const float dist_x = std::abs(cell_center.x - this->get_x() );
+	const float dist_y = std::abs(cell_center.y - this->get_y() );
 	const int32_t xi = static_cast<uint32_t>( this->get_x() );
 	const int32_t yi = static_cast<uint32_t>( this->get_y() );
 	const Map& map = this->world->get_map();
@@ -174,34 +168,30 @@ void Game::Ghost::physics (const float dt, const Uint8 *keys)
 				using enum Direction;
 
 				case Left:
-					this->x = cell_center_x; // teleport to center of cell
-					this->y = cell_center_y; // teleport to center of cell
-					this->vx = -Config::pacman_speed;
-					this->vy = 0.0f;
+					this->pos = cell_center; // teleport to center of cell
+					this->vel.x = -Config::pacman_speed;
+					this->vel.y = 0.0f;
 					this->direction = Left;
 				break;
 
 				case Right:
-					this->x = cell_center_x; // teleport to center of cell
-					this->y = cell_center_y; // teleport to center of cell
-					this->vx = Config::pacman_speed;
-					this->vy = 0.0f;
+					this->pos = cell_center; // teleport to center of cell
+					this->vel.x = Config::pacman_speed;
+					this->vel.y = 0.0f;
 					this->direction = Right;
 				break;
 
 				case Up:
-					this->x = cell_center_x; // teleport to center of cell
-					this->y = cell_center_y; // teleport to center of cell
-					this->vx = 0.0f;
-					this->vy = -Config::pacman_speed;
+					this->pos = cell_center; // teleport to center of cell
+					this->vel.x = 0.0f;
+					this->vel.y = -Config::pacman_speed;
 					this->direction = Up;
 				break;
 
 				case Down:
-					this->x = cell_center_x; // teleport to center of cell
-					this->y = cell_center_y; // teleport to center of cell
-					this->vx = 0.0f;
-					this->vy = Config::pacman_speed;
+					this->pos = cell_center; // teleport to center of cell
+					this->vel.x = 0.0f;
+					this->vel.y = Config::pacman_speed;
 					this->direction = Down;
 				break;
 			}
@@ -213,5 +203,5 @@ void Game::Ghost::physics (const float dt, const Uint8 *keys)
 
 void Game::Ghost::render (const float dt)
 {
-	renderer->draw_circle(this->shape, this->x, this->y, this->color);
+	renderer->draw_circle(this->shape, this->pos, this->color);
 }
