@@ -31,7 +31,18 @@ endif
 
 # ----------------------------------
 
-SRCS := $(wildcard src/*.cpp) src/graphics/sdl.cpp
+MYLIB_SRCS = ext/math-matrix.cpp
+
+ext/math-matrix.cpp: $(MYLIB)/math-matrix.cpp
+	cp $(MYLIB)/math-matrix.cpp ext/math-matrix.cpp
+
+copy_my_lib_srcs:
+	mkdir -p ext
+	cp $(MYLIB)/math-matrix.cpp ext/math-matrix.cpp
+
+# ----------------------------------
+
+SRCS := $(wildcard src/*.cpp) $(MYLIB_SRCS) src/graphics/sdl.cpp
 
 OBJS := $(patsubst %.cpp,%.o,$(SRCS))
 

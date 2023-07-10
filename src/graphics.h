@@ -13,7 +13,7 @@
 
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
-#include <my-lib/matrix.h>
+#include <my-lib/math-matrix.h>
 
 #include "lib.h"
 
@@ -30,6 +30,7 @@ namespace Graphics
 {
 
 using Vector = Game::Vector;
+using Matrix4d = Mylib::Math::Matrix4d;
 
 // ---------------------------------------------------
 
@@ -49,25 +50,16 @@ inline constexpr Color config_background_color = {
 
 // ---------------------------------------------------
 
-class ProjectionMatrix: public Mylib::StaticMatrix<float, 4, 4>
-{
-public:
-	struct Args {
-		float left;
-		float right;
-		float top;
-		float bottom;
-		float znear;
-		float zfar;
-		
-		float width;
-		float height;
-	};
-
-	Args args;
-
-	void setup (const Args&& args);
+struct ProjectionMatrixArgs {
+	Vector screen_offset_per_cent;
+	float screen_width_per_cent;
+	float screen_height_per_cent;
+	float world_width;
+	float world_height;
+	Vector world_camera_focus;
 };
+
+using ProjectionMatrix = Matrix4d;
 
 // ---------------------------------------------------
 
@@ -87,7 +79,7 @@ public:
 	virtual void wait_next_frame () = 0;
 	virtual void draw_circle (const Game::ShapeCircle& circle, const Vector& offset, const Color& color) = 0;
 	virtual void draw_rect (const Game::ShapeRect& rect, const Vector& offset, const Color& color) = 0;
-	virtual void set_projection_matrix (const ProjectionMatrix& m) = 0;
+	virtual void setup_projection_matrix (const ProjectionMatrixArgs&& args) = 0;
 	virtual void render () = 0;
 };
 

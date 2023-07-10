@@ -49,18 +49,41 @@ void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vect
 	SDL_Rect sdl_rect;
 	const SDL_Color sdl_color = color;
 
-	sdl_rect.x = this->transform_x(offset.x - rect.get_w()*0.5f + rect.get_dx());
+/*	sdl_rect.x = this->transform_x(offset.x - rect.get_w()*0.5f + rect.get_dx());
 	sdl_rect.y = this->transform_y(offset.y - rect.get_h()*0.5f + rect.get_dy());
 	sdl_rect.w = this->transform_x(rect.get_w());
-	sdl_rect.h = this->transform_y(rect.get_h());
+	sdl_rect.h = this->transform_y(rect.get_h());*/
 
 	SDL_SetRenderDrawColor(this->renderer, sdl_color.r, sdl_color.g, sdl_color.b, sdl_color.a);
 	SDL_RenderFillRect(this->renderer, &sdl_rect);
 }
 
-void Graphics::SDL::Renderer::set_projection_matrix (const ProjectionMatrix& m)
+void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArgs&& args)
 {
-	this->pm = m;
+/*	m(0,0) = 2.0f / (args.right - args.left);
+	m(0,1) = 0.0f;
+	m(0,2) = 0.0f;
+	m(0,3) = 0.0f;
+
+	m(1,0) = 0.0f;
+	m(1,1) = 2.0f / (args.top - args.bottom);
+	m(1,2) = 0.0f;
+	m(1,3) = 0.0f;
+
+	m(2,0) = 0.0f;
+	m(2,1) = 0.0f;
+	m(2,2) = -2.0f / (args.zfar - args.znear);
+	m(2,3) = 0.0f;
+
+	m(3,0) = -(args.right + args.left) / (args.right - args.left);
+	m(3,1) = -(args.top + args.bottom) / (args.top - args.bottom);
+	m(3,2) = -(args.zfar + args.znear) / (args.zfar - args.znear);
+	m(3,3) = 1.0f;*/
+	Matrix4d translate_camera;	
+	translate_camera.set_translate(args.world_camera_focus);
+
+	translate_camera.print();
+	exit(1);
 }
 
 void Graphics::SDL::Renderer::render ()

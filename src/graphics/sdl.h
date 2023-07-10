@@ -51,7 +51,7 @@ protected:
 	SDL_Window *sdl_window;
 	SDL_Renderer *renderer;
 	SDL_Color background_color;
-	ProjectionMatrix pm;
+	ProjectionMatrix m;
 
 public:
 	Renderer (const uint32_t screen_width_px_, const uint32_t screen_height_px_);
@@ -60,10 +60,10 @@ public:
 	void wait_next_frame () override;
 	virtual void draw_circle (const Game::ShapeCircle& circle, const Vector& offset, const Graphics::Color& color) override;
 	virtual void draw_rect (const Game::ShapeRect& rect, const Vector& offset, const Graphics::Color& color) override;
-	virtual void set_projection_matrix (const ProjectionMatrix& m) override;
+	virtual void setup_projection_matrix (const ProjectionMatrixArgs&& args) override;
 	virtual void render () override;
 
-	inline int32_t transform_x (float x)
+	/*inline int32_t transform_x (float x)
 	{
 		const ProjectionMatrix::Args& m = this->pm.args;
 
@@ -81,7 +81,7 @@ public:
 		y *= static_cast<float>(this->screen_height_px);
 
 		return static_cast<int32_t>(y);
-	}
+	}*/
 };
 
 // ---------------------------------------------------

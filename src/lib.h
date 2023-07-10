@@ -19,7 +19,7 @@ using Clock = std::chrono::steady_clock;
 using ClockTime = Clock::time_point;
 using ClockDuration = std::chrono::duration<float>;
 
-using Vector = Mylib::Math::Vector<2>;
+using Vector = Mylib::Math::Vector2d;
 
 // ---------------------------------------------------
 

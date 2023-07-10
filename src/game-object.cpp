@@ -6,8 +6,7 @@
 
 void Game::Object::physics (const float dt, const Uint8 *keys)
 {
-	this->pos.x += this->vel.x * dt;
-	this->pos.y += this->vel.y * dt;
+	this->pos += this->vel * dt;
 }
 
 Game::Player::Player (World *world_)
@@ -36,8 +35,9 @@ void Game::Player::collided_with_wall (Direction direction)
 void Game::Player::physics (const float dt, const Uint8 *keys)
 {
 	const Vector cell_center = get_cell_center(this->pos);
-	const float dist_x = std::abs(cell_center.x - this->get_x() );
-	const float dist_y = std::abs(cell_center.y - this->get_y() );
+	const Vector dist = cell_center - this->pos;
+	const float dist_x = std::abs(dist.x);
+	const float dist_y = std::abs(dist.y);
 	const int32_t xi = static_cast<uint32_t>( this->get_x() );
 	const int32_t yi = static_cast<uint32_t>( this->get_y() );
 	const Map& map = this->world->get_map();
@@ -146,8 +146,9 @@ void Game::Ghost::collided_with_wall (Direction direction)
 void Game::Ghost::physics (const float dt, const Uint8 *keys)
 {
 	const Vector cell_center = get_cell_center(this->pos);
-	const float dist_x = std::abs(cell_center.x - this->get_x() );
-	const float dist_y = std::abs(cell_center.y - this->get_y() );
+	const Vector dist = cell_center - this->pos;
+	const float dist_x = std::abs(dist.x);
+	const float dist_y = std::abs(dist.y);
 	const int32_t xi = static_cast<uint32_t>( this->get_x() );
 	const int32_t yi = static_cast<uint32_t>( this->get_y() );
 	const Map& map = this->world->get_map();

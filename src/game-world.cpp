@@ -214,18 +214,13 @@ Game::World::World ()
 	this->w = static_cast<float>( this->map.get_w() );
 	this->h = static_cast<float>( this->map.get_h() );
 
-	this->projection_matrix.setup( Graphics::ProjectionMatrix::Args {
-	/*	.left = 0.0f,
-		.right = this->w,
-		.top = 0.0f,
-		.bottom = this->h,
-		.znear = 0.0f,
-		.zfar = 100.0f*/
-		.width = this->w,
-		.height = this->h
+	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
+		.screen_offset_per_cent = Vector(0.0f, 0.0f),
+		.screen_width_per_cent = 1.0f,
+		.screen_height_per_cent = 1.0f,
+		.world_width = this->w,
+		.world_height = this->h
 		} );
-
-	renderer->set_projection_matrix(this->projection_matrix);
 
 	// avoid vector re-allocations
 	this->objects.reserve(100);
