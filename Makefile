@@ -31,16 +31,8 @@ endif
 
 # ----------------------------------
 
+# need to add a rule for each .cpp at the bottom
 MYLIB_SRCS = ext/math-matrix.cpp
-
-ext/math-matrix.cpp: $(MYLIB)/math-matrix.cpp
-	cp $(MYLIB)/math-matrix.cpp ext/math-matrix.cpp
-
-copy_my_lib_srcs:
-	mkdir -p ext
-	cp $(MYLIB)/math-matrix.cpp ext/math-matrix.cpp
-
-# ----------------------------------
 
 SRCS := $(wildcard src/*.cpp) $(MYLIB_SRCS) src/graphics/sdl.cpp
 
@@ -58,6 +50,14 @@ $(BIN): $(OBJS)
 
 all: $(BIN)
 	@echo "Everything compiled! yes!"
+
+# ----------------------------------
+
+ext/math-matrix.cpp: $(MYLIB)/lib/math-matrix.cpp
+	mkdir -p ext
+	cp $(MYLIB)/lib/math-matrix.cpp ext/math-matrix.cpp
+
+# ----------------------------------
 
 clean:
 	- rm -rf $(BIN) $(OBJS)

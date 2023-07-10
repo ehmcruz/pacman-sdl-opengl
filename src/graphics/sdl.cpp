@@ -79,9 +79,10 @@ void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArg
 	m(3,1) = -(args.top + args.bottom) / (args.top - args.bottom);
 	m(3,2) = -(args.zfar + args.znear) / (args.zfar - args.znear);
 	m(3,3) = 1.0f;*/
-	Matrix4d translate_camera;	
+	Matrix4d translate_camera;
 	translate_camera.set_translate(args.world_camera_focus);
 
+	dprint( std::endl )
 	translate_camera.print();
 	exit(1);
 }
