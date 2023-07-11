@@ -340,6 +340,8 @@ void Game::World::render (const float dt)
 	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
 		.clip_init_per_cent = Vector(this->border_thickness, this->border_thickness),
 		.clip_end_per_cent = Vector(1.0f - this->border_thickness, 1.0f - this->border_thickness),
+		.clip_init_per_cent = Vector(0.0f, 0.0f),
+		.clip_end_per_cent = Vector(1.0f, 1.0f),
 		.world_init = Vector(0.0f, 0.0f),
 		.world_end = Vector(this->w, this->h),
 		.world_screen_width = this->w,
