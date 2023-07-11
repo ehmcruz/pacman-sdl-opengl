@@ -9,6 +9,7 @@
 
 #include "../graphics.h"
 #include "../game-object.h"
+#include "../lib.h"
 #include "sdl.h"
 
 // ---------------------------------------------------
@@ -41,14 +42,12 @@ void Graphics::SDL::Renderer::wait_next_frame ()
 
 void Graphics::SDL::Renderer::draw_circle (const Game::ShapeCircle& circle, const Vector& offset, const Graphics::Color& color)
 {
-	Game::ShapeRect rect(circle.get_radius(), circle.get_radius());
+	Game::ShapeRect rect(circle.get_radius()*2.0f, circle.get_radius()*2.0f);
 
 	rect.set_delta(circle.get_delta());
 
 	this->draw_rect(rect, offset, color);
 }
-
-//static Graphics::Matrix4d translate_to_clip_init;
 
 void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vector& offset, const Graphics::Color& color)
 {
@@ -68,10 +67,10 @@ void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vect
 //exit(1);
 #endif
 
-	sdl_rect.x = clip_pos.x - (rect.get_w() * 0.5f * this->scale_factor);
-	sdl_rect.y = clip_pos.y - (rect.get_h() * 0.5f * this->scale_factor);
-	sdl_rect.w = rect.get_w() * this->scale_factor;
-	sdl_rect.h = rect.get_h() * this->scale_factor;
+	sdl_rect.x = Game::round_to_nearest(clip_pos.x - (rect.get_w() * 0.5f * this->scale_factor));
+	sdl_rect.y = Game::round_to_nearest(clip_pos.y - (rect.get_h() * 0.5f * this->scale_factor));
+	sdl_rect.w = Game::round_to_nearest(rect.get_w() * this->scale_factor);
+	sdl_rect.h = Game::round_to_nearest(rect.get_h() * this->scale_factor);
 
 	SDL_SetRenderDrawColor(this->renderer, sdl_color.r, sdl_color.g, sdl_color.b, sdl_color.a);
 	SDL_RenderFillRect(this->renderer, &sdl_rect);
