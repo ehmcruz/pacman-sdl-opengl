@@ -57,7 +57,7 @@ void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vect
 
 	dprintln( "clip_pos:" )
 	clip_pos.println();
-exit(1);
+//exit(1);
 	sdl_rect.x = clip_pos.x - (rect.get_w() * 0.5f * this->scale_factor);
 	sdl_rect.y = clip_pos.y - (rect.get_h() * 0.5f * this->scale_factor);
 	sdl_rect.w = rect.get_w() * this->scale_factor;
@@ -77,7 +77,7 @@ void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArg
 	const Vector world_screen_size = Vector(args.world_screen_width, args.world_screen_width * aspect_ratio);
 	this->scale_factor = clip_size.x / world_screen_size.x;
 
-	Vector world_camera = args.world_camera_focus - Vector(world_screen_size.x*0.5f, world_screen_size.y*0.5f);
+	Vector world_camera = Vector(world_screen_size.x*0.5f, world_screen_size.y*0.5f) - args.world_camera_focus;
 
 	dprint( "clip_init: " )
 	clip_init.println();

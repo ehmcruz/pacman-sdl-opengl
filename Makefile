@@ -31,12 +31,12 @@ endif
 
 # ----------------------------------
 
-# need to add a rule for each .cpp at the bottom
-MYLIB_SRCS = ext/math-matrix.cpp
+# need to add a rule for each .o/.cpp at the bottom
+MYLIB_OBJS = ext/math.o
 
-SRCS := $(wildcard src/*.cpp) $(MYLIB_SRCS) src/graphics/sdl.cpp
+SRCS := $(wildcard src/*.cpp) src/graphics/sdl.cpp
 
-OBJS := $(patsubst %.cpp,%.o,$(SRCS))
+OBJS := $(patsubst %.cpp,%.o,$(SRCS)) $(MYLIB_OBJS)
 
 HEADERS = $(wildcard src/*.h) $(wildcard src/graphics/*.h) $(wildcard $(MYLIB)/include/my-lib/*.h)
 
@@ -53,9 +53,9 @@ all: $(BIN)
 
 # ----------------------------------
 
-ext/math-matrix.cpp: $(MYLIB)/lib/math-matrix.cpp
+ext/math.o: $(MYLIB)/src/math.cpp $(HEADERS)
 	mkdir -p ext
-	cp $(MYLIB)/lib/math-matrix.cpp ext/math-matrix.cpp
+	$(CPP) $(CPPFLAGS) -c -o ext/math.o $(MYLIB)/src/math.cpp
 
 # ----------------------------------
 
