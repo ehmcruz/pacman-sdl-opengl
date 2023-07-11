@@ -214,6 +214,8 @@ Game::World::World ()
 	this->w = static_cast<float>( this->map.get_w() );
 	this->h = static_cast<float>( this->map.get_h() );
 
+	this->border_thickness = Config::border_thickness_screen_fraction;
+
 	// avoid vector re-allocations
 	this->objects.reserve(100);
 	this->ghosts.reserve(10);
@@ -246,6 +248,8 @@ Game::World::~World ()
 
 void Game::World::physics (const float dt, const Uint8 *keys)
 {
+//	dprintln( "distance between player and ghost[0]: " << Mylib::Math::distance(this->player.get_pos(), this->ghosts[0].get_pos()) )
+
 	for (Object *obj: this->objects) {
 		obj->physics(dt, keys);
 	}
@@ -303,11 +307,39 @@ void Game::World::render_map ()
 	}
 }
 
+void Game::World::render_box()
+{
+	ShapeRect rect;
+	Vector offset;
+	float w, h;
+	const Graphics::Color color = { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
+	const float window_w = 1.0f;
+	const float window_h = 1.0f / renderer->get_window_aspect_ratio();
+	
+	w = this->border_thickness;
+	h = window_h;
+	offset.set(w*0.5f, window_h*0.5f);
+	rect = ShapeRect(w, h);
+	renderer->draw_rect(rect, offset, color);
+
+	offset.set(window_w - w*0.5f, window_h*0.5f);
+	renderer->draw_rect(rect, offset, color);
+
+	w = window_w;
+	h = this->border_thickness;
+	offset.set(window_w*0.5f, h*0.5f);
+	rect = ShapeRect(w, h);
+	renderer->draw_rect(rect, offset, color);
+
+	offset.set(window_w*0.5f, window_h - h*0.5f);
+	renderer->draw_rect(rect, offset, color);
+}
+
 void Game::World::render (const float dt)
 {
 	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
-		.clip_init_per_cent = Vector(0.0f, 0.0f),
-		.clip_end_per_cent = Vector(1.0f, 1.0f),
+		.clip_init_per_cent = Vector(this->border_thickness, this->border_thickness),
+		.clip_end_per_cent = Vector(1.0f - this->border_thickness, 1.0f - this->border_thickness),
 		.world_init = Vector(0.0f, 0.0f),
 		.world_end = Vector(this->w, this->h),
 		.world_screen_width = this->w,
@@ -319,6 +351,17 @@ void Game::World::render (const float dt)
 	for (Object *obj: this->objects) {
 		obj->render(dt);
 	}
+
+	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
+		.clip_init_per_cent = Vector(0.0f, 0.0f),
+		.clip_end_per_cent = Vector(1.0f, 1.0f),
+		.world_init = Vector(0.0f, 0.0f),
+		.world_end = Vector(1.0f, 1.0f / renderer->get_window_aspect_ratio()),
+		.world_screen_width = 1.0f,
+		.world_camera_focus = Vector(0.5f, (1.0f / renderer->get_window_aspect_ratio()) * 0.5f)
+		} );
+	
+	this->render_box();
 }
 
 int main (int argc, char **argv)

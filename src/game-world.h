@@ -113,6 +113,7 @@ protected:
 	OO_ENCAPSULATE_READONLY(float, w)
 	OO_ENCAPSULATE_READONLY(float, h)
 	OO_ENCAPSULATE(ClockTime, time_create) // time instant of world creation
+	OO_ENCAPSULATE_READONLY(float, border_thickness)
 
 	OO_ENCAPSULATE_REFERENCE_READONLY(Player, player)
 	OO_ENCAPSULATE_REFERENCE_READONLY(Map, map)
@@ -143,6 +144,7 @@ public:
 	void physics (const float dt, const Uint8 *keys);
 	void solve_collisions ();
 	void render_map ();
+	void render_box();
 	void render (const float dt);
 };
 

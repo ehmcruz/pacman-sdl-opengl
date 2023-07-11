@@ -55,7 +55,7 @@ protected:
 	float scale_factor;
 
 public:
-	Renderer (const uint32_t screen_width_px_, const uint32_t screen_height_px_);
+	Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_);
 	~Renderer ();
 
 	void wait_next_frame () override;
@@ -63,26 +63,6 @@ public:
 	virtual void draw_rect (const Game::ShapeRect& rect, const Vector& offset, const Graphics::Color& color) override;
 	virtual void setup_projection_matrix (const ProjectionMatrixArgs&& args) override;
 	virtual void render () override;
-
-	/*inline int32_t transform_x (float x)
-	{
-		const ProjectionMatrix::Args& m = this->pm.args;
-
-		x /= m.width;
-		x *= static_cast<float>(this->screen_width_px);
-
-		return static_cast<int32_t>(x);
-	}
-
-	inline int32_t transform_y (float y)
-	{
-		const ProjectionMatrix::Args& m = this->pm.args;
-
-		y /= m.height;
-		y *= static_cast<float>(this->screen_height_px);
-
-		return static_cast<int32_t>(y);
-	}*/
 };
 
 // ---------------------------------------------------

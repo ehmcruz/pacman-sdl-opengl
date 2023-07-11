@@ -67,14 +67,15 @@ struct ProjectionMatrixArgs {
 class Renderer
 {
 protected:
-	OO_ENCAPSULATE_READONLY(uint32_t, screen_width_px)
-	OO_ENCAPSULATE_READONLY(uint32_t, screen_height_px)
+	OO_ENCAPSULATE_READONLY(uint32_t, window_width_px)
+	OO_ENCAPSULATE_READONLY(uint32_t, window_height_px)
+	OO_ENCAPSULATE_READONLY(float, window_aspect_ratio)
 
 public:
-	inline Renderer (const uint32_t screen_width_px_, const uint32_t screen_height_px_)
-		: screen_width_px(screen_width_px_), screen_height_px(screen_height_px_)
+	inline Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_)
+		: window_width_px(window_width_px_), window_height_px(window_height_px_)
 	{
-
+		this->window_aspect_ratio = static_cast<float>(this->window_width_px) / static_cast<float>(this->window_height_px);
 	}
 
 	virtual void wait_next_frame () = 0;
