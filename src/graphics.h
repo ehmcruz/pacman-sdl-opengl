@@ -10,6 +10,7 @@
 #include <cstring>
 
 #include <string>
+#include <algorithm>
 
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
@@ -53,13 +54,27 @@ inline constexpr Color config_background_color = {
 // ---------------------------------------------------
 
 struct ProjectionMatrixArgs {
-	Vector clip_init_per_cent;
-	Vector clip_end_per_cent;
+	/* Normalized clip area.
+	   Values must be between 0.0f and 1.0f,
+	   where 1.0f represents max(clip_width, clip_height).
+	*/
+	Vector clip_init_norm;
+	Vector clip_end_norm;
+
+	/* The minimum and maximum possible coordinates of the world.
+	*/
 	Vector world_init;
 	Vector world_end;
+
+	Vector world_camera_focus;
+
+	/* This is the width in world coords that will fit in the clip_spice.
+	   The lower the value, the highest the zoom.
+	   This should NEVER be higher then (world_end.x - world_init.x).
+	   In case it is, it will be automatically set to (world_end.x - world_init.x).
+	*/
 	float world_screen_width;
 	// world_screen_height will be calculated automatically from the aspect ratio
-	Vector world_camera_focus;
 };
 
 // ---------------------------------------------------
@@ -76,6 +91,17 @@ public:
 		: window_width_px(window_width_px_), window_height_px(window_height_px_)
 	{
 		this->window_aspect_ratio = static_cast<float>(this->window_width_px) / static_cast<float>(this->window_height_px);
+	}
+
+	inline float get_inverted_window_aspect_ratio () const
+	{
+		return 1.0f / this->window_aspect_ratio;
+	}
+
+	inline Vector get_normalized_window_size () const
+	{
+		const float max_value = static_cast<float>( std::max(this->window_width_px, this->window_height_px) );
+		return Vector(static_cast<float>(this->window_width_px) / max_value, static_cast<float>(this->window_height_px) / max_value);
 	}
 
 	virtual void wait_next_frame () = 0;

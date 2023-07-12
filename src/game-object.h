@@ -85,7 +85,7 @@ public:
 		: Shape (Type::Circle, object_),
 		  radius(radius_)
 	{
-		dprint( "circle created r=" << this->radius << std::endl )
+		//dprint( "circle created r=" << this->radius << std::endl )
 	}
 
 	inline ShapeCircle (const float radius_)
@@ -112,7 +112,7 @@ public:
 		: Shape (Type::Rect, object_),
 		  w(w_), h(h_)
 	{
-		dprint( "rect created w=" << this->w << " h=" << this->h << std::endl )
+		//dprint( "rect created w=" << this->w << " h=" << this->h << std::endl )
 	}
 
 	inline ShapeRect (const float w_, const float h_)

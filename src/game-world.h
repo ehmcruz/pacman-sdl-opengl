@@ -142,7 +142,7 @@ public:
 	}
 
 	void physics (const float dt, const Uint8 *keys);
-	void solve_collisions ();
+	void solve_wall_collisions ();
 	void render_map ();
 	void render_box();
 	void render (const float dt);

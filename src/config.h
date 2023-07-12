@@ -43,7 +43,7 @@ inline constexpr float sleep_threshold = max_dt * 0.9f;
 
 inline constexpr float pacman_max_delta_per_cycle = pacman_speed * max_dt;
 
-inline constexpr float pacman_turn_threshold = pacman_max_delta_per_cycle * 2.0f;
+inline constexpr float pacman_turn_threshold = pacman_max_delta_per_cycle * 1.0f;
 
 // ---------------------------------------------------
 

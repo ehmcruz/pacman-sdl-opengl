@@ -254,10 +254,10 @@ void Game::World::physics (const float dt, const Uint8 *keys)
 		obj->physics(dt, keys);
 	}
 
-	this->solve_collisions();
+	this->solve_wall_collisions();
 }
 
-void Game::World::solve_collisions ()
+void Game::World::solve_wall_collisions ()
 {
 	for (Object *obj: this->objects) {
 		const Vector cell_center = get_cell_center(obj->get_pos());
@@ -313,43 +313,38 @@ void Game::World::render_box()
 	Vector offset;
 	float w, h;
 	const Graphics::Color color = { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
-	const float window_w = 1.0f;
-	const float window_h = 1.0f / renderer->get_window_aspect_ratio();
+	const Vector ws = renderer->get_normalized_window_size();
 	
 	w = this->border_thickness;
-	h = window_h;
-	offset.set(w*0.5f, window_h*0.5f);
+	h = ws.y;
+	offset.set(w*0.5f, ws.y*0.5f);
 	rect = ShapeRect(w, h);
 	renderer->draw_rect(rect, offset, color);
 
-	offset.set(window_w - w*0.5f, window_h*0.5f);
+	offset.set(ws.x - w*0.5f, ws.y*0.5f);
 	renderer->draw_rect(rect, offset, color);
 
-	w = window_w;
+	w = ws.x;
 	h = this->border_thickness;
-	offset.set(window_w*0.5f, h*0.5f);
+	offset.set(ws.x*0.5f, h*0.5f);
 	rect = ShapeRect(w, h);
 	renderer->draw_rect(rect, offset, color);
 
-	offset.set(window_w*0.5f, window_h - h*0.5f);
+	offset.set(ws.x*0.5f, ws.y - h*0.5f);
 	renderer->draw_rect(rect, offset, color);
 }
 
 void Game::World::render (const float dt)
 {
-	#warning There is a problem with the clip space definition when screen_w is different from screen_h
-	#warning To solve this, instead of using clip per cent, lets use pixels directly
-	#warning Will do that later
+	const Vector ws = renderer->get_normalized_window_size();
 
 	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
-		//.clip_init_per_cent = Vector(this->border_thickness, this->border_thickness),
-		//.clip_end_per_cent = Vector(1.0f - this->border_thickness, 1.0f - this->border_thickness),
-		.clip_init_per_cent = Vector(0.0f, 0.0f),
-		.clip_end_per_cent = Vector(1.0f, 1.0f),
+		.clip_init_norm = Vector(this->border_thickness, this->border_thickness),
+		.clip_end_norm = Vector(ws.x - this->border_thickness, ws.y - this->border_thickness),
 		.world_init = Vector(0.0f, 0.0f),
 		.world_end = Vector(this->w, this->h),
-		.world_screen_width = this->w * 0.8f,
-		.world_camera_focus = player.get_pos()
+		.world_camera_focus = player.get_pos(),
+		.world_screen_width = this->w * 0.8f
 		} );
 
 	this->render_map();
@@ -358,16 +353,18 @@ void Game::World::render (const float dt)
 		obj->render(dt);
 	}
 
+#if 1
 	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
-		.clip_init_per_cent = Vector(0.0f, 0.0f),
-		.clip_end_per_cent = Vector(1.0f, 1.0f),
+		.clip_init_norm = Vector(0.0f, 0.0f),
+		.clip_end_norm = Vector(ws.x, ws.y),
 		.world_init = Vector(0.0f, 0.0f),
-		.world_end = Vector(1.0f, 1.0f / renderer->get_window_aspect_ratio()),
-		.world_screen_width = 1.0f,
-		.world_camera_focus = Vector(0.5f, (1.0f / renderer->get_window_aspect_ratio()) * 0.5f)
+		.world_end = Vector(ws.x, ws.y),
+		.world_camera_focus = Vector(ws.x*0.5f, ws.y*0.5f),
+		.world_screen_width = ws.x
 		} );
 	
 	this->render_box();
+#endif
 }
 
 int main (int argc, char **argv)

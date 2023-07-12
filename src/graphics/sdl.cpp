@@ -3,6 +3,7 @@
 #include <sstream>
 #include <numbers>
 #include <utility>
+#include <algorithm>
 
 #include <cstdlib>
 #include <cmath>
@@ -58,7 +59,7 @@ void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vect
 	const Vector4d clip_pos = this->projection_matrix * Vector4d(world_pos);
 	//const Vector4d clip_pos = translate_to_clip_init * clip_pos_;
 
-#if 1
+#if 0
 	dprint( "world_pos:" )
 	world_pos.println();
 
@@ -78,14 +79,19 @@ void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vect
 
 void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArgs&& args)
 {
-	const Vector clip_init = args.clip_init_per_cent * Vector(static_cast<float>(this->window_width_px), static_cast<float>(this->window_height_px));
-	const Vector clip_end = args.clip_end_per_cent * Vector(static_cast<float>(this->window_width_px), static_cast<float>(this->window_height_px));
+	const float max_value = static_cast<float>( std::max(this->window_width_px, this->window_height_px) );
+	const Vector clip_init = args.clip_init_norm * Vector(max_value, max_value);
+	const Vector clip_end = args.clip_end_norm * Vector(max_value, max_value);
 	const Vector clip_size = clip_end - clip_init;
+	const float clip_aspect_ratio = clip_size.x / clip_size.y;
 
 	const Vector world_size = args.world_end - args.world_init;
+	
+	const float world_screen_width = std::min(args.world_screen_width, world_size.x);
+	const float world_screen_height = std::min(world_screen_width / clip_aspect_ratio, world_size.y);
 
-	const float aspect_ratio = clip_size.x / clip_size.y;
-	const Vector world_screen_size = Vector(args.world_screen_width, args.world_screen_width / aspect_ratio);
+	const Vector world_screen_size = Vector(world_screen_width, world_screen_height);
+
 	this->scale_factor = clip_size.x / world_screen_size.x;
 
 	Vector world_camera = args.world_camera_focus - Vector(world_screen_size.x*0.5f, world_screen_size.y*0.5f);
@@ -114,7 +120,7 @@ void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArg
 	dprint( "clip_size: " )
 	clip_size.println();
 
-	dprintln( "aspect_ratio: " << aspect_ratio )
+	dprintln( "clip_aspect_ratio: " << clip_aspect_ratio )
 	dprintln( "scale_factor: " << this->scale_factor )
 
 	dprint( "world_size: " )
