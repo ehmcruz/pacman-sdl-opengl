@@ -116,11 +116,11 @@ protected:
 	OO_ENCAPSULATE_READONLY(float, border_thickness)
 
 	OO_ENCAPSULATE_REFERENCE_READONLY(Player, player)
+	OO_ENCAPSULATE_REFERENCE_READONLY(std::vector<Ghost>, ghosts)
 	OO_ENCAPSULATE_REFERENCE_READONLY(Map, map)
 
 protected:
 	std::vector< Object* > objects;
-	std::vector<Ghost> ghosts;
 
 public:
 	World ();

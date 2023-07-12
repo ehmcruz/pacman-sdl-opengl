@@ -1,5 +1,9 @@
 #include <utility>
 #include <array>
+#include <limits>
+#include <algorithm>
+
+#include <cmath>
 
 #include "game-world.h"
 #include "game-object.h"
@@ -36,7 +40,9 @@ Game::Player::Player (World *world_)
 	this->direction = Direction::Stopped;
 	this->target_direction = Direction::Stopped;
 
-	this->color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 1.0f, .a = 1.0f };
+	//this->base_color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
+	//this->color = this->base_color;
+	this->color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
 
 	dprint( "player created" << std::endl )
 }
@@ -105,6 +111,7 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 
 void Game::Player::render (const float dt)
 {
+	this->update_color();
 	renderer->draw_circle(this->shape, this->pos, this->color);
 }
 
@@ -127,6 +134,37 @@ void Game::Player::event_keydown (const SDL_Keycode key)
 			this->target_direction = Direction::Down;
 		break;
 	}
+}
+
+void Game::Player::update_color ()
+{
+	float min_distance = std::numeric_limits<float>::max();
+	const float w = this->world->get_w();
+	const float h = this->world->get_h();
+	const float max_world_distance = std::sqrt(w*w + h*h);
+
+	//dprintln("min_distance: " << min_distance)
+
+	for (Ghost& ghost : this->world->get_ghosts()) {
+		const float distance = Mylib::Math::distance(this->get_pos(), ghost.get_pos());
+
+		if (distance < min_distance)
+			min_distance = distance;
+	}
+
+	const float dist_ratio = min_distance / max_world_distance;
+
+	//this->color = this->base_color;
+	this->color.r = 1.0f - dist_ratio;
+	//this->color.r *= 2.0f;
+	this->color.g = dist_ratio;
+	this->color.b = dist_ratio;
+
+	this->color.r = std::clamp(this->color.r, 0.0f, 1.0f);
+	this->color.g = std::clamp(this->color.g, 0.0f, 1.0f);
+	this->color.b = std::clamp(this->color.b, 0.0f, 1.0f);
+
+//	dprintln("min_distance: " << min_distance << "  max_world_distance: " << max_world_distance << "  color.r: " << this->color.r)
 }
 
 Game::Ghost::Ghost (World *world_)

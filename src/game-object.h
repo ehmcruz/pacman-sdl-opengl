@@ -206,6 +206,7 @@ protected:
 	ShapeCircle shape;
 	Direction target_direction;
 	Graphics::Color color;
+	//Graphics::Color base_color;
 
 public:
 	Player (World *world_);
@@ -216,6 +217,8 @@ public:
 	void render (const float dt) override;
 
 	void event_keydown (const SDL_Keycode key);
+
+	void update_color ();
 };
 
 // ---------------------------------------------------
