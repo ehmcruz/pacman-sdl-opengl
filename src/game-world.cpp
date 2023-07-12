@@ -10,9 +10,8 @@
 
 Game::Main *Game::Main::instance = nullptr;
 Graphics::Renderer *Game::renderer = nullptr;
+Game::Probability Game::probability;
 
-namespace Game {
-}
 
 Game::Map::Map ()
 {
@@ -145,7 +144,7 @@ void Game::Main::run ()
 
 		virtual_dt = (real_dt > Config::max_dt) ? Config::max_dt : real_dt;
 
-		dprint( "start new frame render required_dt=" << required_dt << " real_dt=" << real_dt << " sleep_dt=" << sleep_dt << " virtual_dt=" << virtual_dt << " max_dt=" << Config::max_dt << std::endl )
+		//dprintln( "start new frame render required_dt=" << required_dt << " real_dt=" << real_dt << " sleep_dt=" << sleep_dt << " virtual_dt=" << virtual_dt << " max_dt=" << Config::max_dt )
 
 		while ( SDL_PollEvent( &event ) ) {
 			switch (event.type) {
@@ -186,7 +185,7 @@ void Game::Main::run ()
 		if (required_dt < Config::sleep_threshold) {
 			sleep_dt = Config::sleep_threshold - required_dt;
 			uint32_t delay = static_cast<uint32_t>(sleep_dt * 1000.0f);
-			dprint( "sleeping for " << delay << "ms..." << std::endl )
+			//dprintln( "sleeping for " << delay << "ms..." )
 			SDL_Delay(delay);
 		}
 		else
@@ -268,22 +267,26 @@ void Game::World::solve_wall_collisions ()
 			obj->set_x(cell_center.x);
 			obj->set_vx(0.0f);
 			obj->collided_with_wall(Object::Direction::Left);
+			obj->set_direction(Object::Direction::Stopped);
 		}
 		else if (obj->get_x() > cell_center.x && this->map(yi, xi+1) == Map::Cell::Wall) {
 			obj->set_x(cell_center.x);
 			obj->set_vx(0.0f);
 			obj->collided_with_wall(Object::Direction::Right);
+			obj->set_direction(Object::Direction::Stopped);
 		}
 
 		if (obj->get_y() < cell_center.y && this->map(yi-1, xi) == Map::Cell::Wall) {
 			obj->set_y(cell_center.y);
 			obj->set_vy(0.0f);
 			obj->collided_with_wall(Object::Direction::Up);
+			obj->set_direction(Object::Direction::Stopped);
 		}
 		else if (obj->get_y() > cell_center.y && this->map(yi+1, xi) == Map::Cell::Wall) {
 			obj->set_y(cell_center.y);
 			obj->set_vy(0.0f);
 			obj->collided_with_wall(Object::Direction::Down);
+			obj->set_direction(Object::Direction::Stopped);
 		}
 	}
 }
@@ -344,7 +347,7 @@ void Game::World::render (const float dt)
 		.world_init = Vector(0.0f, 0.0f),
 		.world_end = Vector(this->w, this->h),
 		.world_camera_focus = player.get_pos(),
-		.world_screen_width = this->w * 0.8f
+		.world_screen_width = this->w
 		} );
 
 	this->render_map();

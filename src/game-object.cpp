@@ -1,8 +1,26 @@
 #include <utility>
+#include <array>
 
 #include "game-world.h"
 #include "game-object.h"
 #include "lib.h"
+
+const char* Game::Object::get_direction_str (Direction d)
+{
+	static const char *strs[] = {
+		"Left",
+		"Right",
+		"Up",
+		"Down",
+		"Stopped"
+	};
+
+	const auto i = std::to_underlying(d);
+
+	ASSERT(i <= std::to_underlying(Direction::Stopped))
+
+	return strs[i];
+}
 
 void Game::Object::physics (const float dt, const Uint8 *keys)
 {
@@ -141,6 +159,8 @@ Game::Ghost::~Ghost ()
 void Game::Ghost::collided_with_wall (Direction direction)
 {
 	this->time_last_turn = this->world->get_time_create();
+
+	//dprintln("------- Ghost collided with wall")
 }
 
 void Game::Ghost::physics (const float dt, const Uint8 *keys)
@@ -158,12 +178,48 @@ void Game::Ghost::physics (const float dt, const Uint8 *keys)
 		if (Clock::now() > (this->time_last_turn + this->time_between_turns)) {
 			this->time_last_turn = Clock::now();
 
-			// let's randomize a direction
-			std::uniform_int_distribution<uint32_t> distribution (0, 5);
-			const uint32_t direction_ = distribution(Main::get()->get_probability().get_rgenerator());
-			const Direction target_direction = (direction_ < std::to_underlying(Direction::Stopped))
-			                                 ? static_cast<Direction>(direction_)
+			// let's check in which adjacent tiles we have walls
+
+			std::array<Direction, 4> possibilities; // max of 4 possible directions
+			uint32_t n_possibilities = 0;
+
+			if (map(xi-1, yi) == Map::Cell::Empty)
+				possibilities[n_possibilities++] = Direction::Left;
+			if (map(xi+1, yi) == Map::Cell::Empty)
+				possibilities[n_possibilities++] = Direction::Right;
+			if (map(xi, yi-1) == Map::Cell::Empty)
+				possibilities[n_possibilities++] = Direction::Up;
+			if (map(xi, yi+1) == Map::Cell::Empty)
+				possibilities[n_possibilities++] = Direction::Down;
+
+			//dprint("Ghost n_possibilities = " << n_possibilities << " (")
+
+			//for (uint32_t i=0; i<n_possibilities; i++)
+			//	dprint( get_direction_str(possibilities[i]) << ", " )
+			
+			//dprint( ")" << std::endl)
+
+			if (n_possibilities == 0) // ghost is locked in a jail
+				return;
+
+			// let's randomize a direction among the possible directions
+
+			uint32_t dice_range = n_possibilities - 1;
+			
+			// used to reduce the probability of constantly changing direction when moving
+			if (this->direction != Direction::Stopped)
+				dice_range += 3;
+			
+			//dprintln("Ghost dice_range = " << dice_range)
+
+			std::uniform_int_distribution<uint32_t> distribution (0, dice_range);
+			const uint32_t dice = distribution(probability.get_rgenerator());
+			//dprintln("Ghost dice = " << dice)
+			const Direction target_direction = (dice < n_possibilities)
+			                                 ? static_cast<Direction>( possibilities[dice] )
 											 : Direction::Stopped;
+
+			//dprintln("Ghost target_direction = " << get_direction_str(target_direction))
 
 			switch (target_direction) {
 				using enum Direction;

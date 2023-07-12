@@ -25,6 +25,7 @@ namespace Game
 // ---------------------------------------------------
 
 extern Graphics::Renderer *renderer;
+extern Probability probability;
 
 // ---------------------------------------------------
 
@@ -44,7 +45,6 @@ protected:
 	OO_ENCAPSULATE(World*, world)
 	OO_ENCAPSULATE(bool, alive)
 	OO_ENCAPSULATE_READONLY(State, state)
-	OO_ENCAPSULATE_REFERENCE_READONLY(Probability, probability)
 
 protected:
 	static Main *instance;

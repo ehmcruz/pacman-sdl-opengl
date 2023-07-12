@@ -131,7 +131,7 @@ public:
 class Object
 {
 public:
-	enum class Direction {
+	enum class Direction {  // any change here will need a change in get_direction_str
 		Left,
 		Right,
 		Up,
@@ -139,11 +139,13 @@ public:
 		Stopped // must be the last one
 	};
 
+	static const char* get_direction_str (Direction d);
+
 protected:
 	OO_ENCAPSULATE_REFERENCE(Vector, pos)
 	OO_ENCAPSULATE_REFERENCE(Vector, vel)
 	OO_ENCAPSULATE(World*, world)
-	OO_ENCAPSULATE_READONLY(Direction, direction)
+	OO_ENCAPSULATE(Direction, direction)
 
 public:
 	inline Object (World *world_)
