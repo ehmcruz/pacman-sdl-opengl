@@ -19,6 +19,55 @@
 
 // ---------------------------------------------------
 
+static void my_SDL_DrawCircle (SDL_Renderer *renderer, const int32_t centreX, const int32_t centreY, const int32_t radius)
+{
+	const int32_t diameter = (radius * 2);
+
+	int32_t x = (radius - 1);
+	int32_t y = 0;
+	int32_t tx = 1;
+	int32_t ty = 1;
+	int32_t error = (tx - diameter);
+
+	while (x >= y) {
+		//  Each of the following renders an octant of the circle
+		SDL_RenderDrawPoint(renderer, centreX + x, centreY - y);
+		SDL_RenderDrawPoint(renderer, centreX + x, centreY + y);
+		SDL_RenderDrawPoint(renderer, centreX - x, centreY - y);
+		SDL_RenderDrawPoint(renderer, centreX - x, centreY + y);
+		SDL_RenderDrawPoint(renderer, centreX + y, centreY - x);
+		SDL_RenderDrawPoint(renderer, centreX + y, centreY + x);
+		SDL_RenderDrawPoint(renderer, centreX - y, centreY - x);
+		SDL_RenderDrawPoint(renderer, centreX - y, centreY + x);
+
+		if (error <= 0) {
+			++y;
+			error += ty;
+			ty += 2;
+		}
+
+		if (error > 0) {
+			--x;
+			tx += 2;
+			error += (tx - diameter);
+		}
+	}
+}
+
+static void my_SDL_DrawFilledCircle (SDL_Renderer *renderer, const int32_t centreX, const int32_t centreY, const int32_t radius)
+{
+	for (int32_t w = 0; w < radius * 2; w++) {
+		for (int32_t h = 0; h < radius * 2; h++) {
+			int32_t dx = radius - w; // horizontal offset
+			int32_t dy = radius - h; // vertical offset
+			if ((dx*dx + dy*dy) <= (radius * radius))
+				SDL_RenderDrawPoint(renderer, centreX + dx, centreY + dy);
+		}
+	}
+}
+
+// ---------------------------------------------------
+
 Graphics::SDL::Renderer::Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_)
 	: Graphics::Renderer (window_width_px_, window_height_px_)
 {
@@ -43,11 +92,22 @@ void Graphics::SDL::Renderer::wait_next_frame ()
 
 void Graphics::SDL::Renderer::draw_circle (const Game::ShapeCircle& circle, const Vector& offset, const Graphics::Color& color)
 {
-	Game::ShapeRect rect(circle.get_radius()*2.0f, circle.get_radius()*2.0f);
+	const SDL_Color sdl_color = color;
+	const Vector world_pos = offset + circle.get_delta();
+	const Vector4d clip_pos = this->projection_matrix * Vector4d(world_pos);
 
+/*	Game::ShapeRect rect(circle.get_radius()*2.0f, circle.get_radius()*2.0f);
 	rect.set_delta(circle.get_delta());
+	this->draw_rect(rect, offset, color);*/
 
-	this->draw_rect(rect, offset, color);
+	SDL_SetRenderDrawColor(this->renderer, sdl_color.r, sdl_color.g, sdl_color.b, sdl_color.a);
+
+	my_SDL_DrawFilledCircle(
+		renderer,
+		static_cast<int32_t>( clip_pos.x ),
+		static_cast<int32_t>( clip_pos.y ),
+		static_cast<int32_t>( circle.get_radius() * this->scale_factor )
+		);
 }
 
 void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vector& offset, const Graphics::Color& color)
@@ -80,8 +140,8 @@ void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vect
 void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArgs&& args)
 {
 	const float max_value = static_cast<float>( std::max(this->window_width_px, this->window_height_px) );
-	const Vector clip_init = args.clip_init_norm * Vector(max_value, max_value);
-	const Vector clip_end = args.clip_end_norm * Vector(max_value, max_value);
+	const Vector clip_init = args.clip_init_norm * max_value;
+	const Vector clip_end = args.clip_end_norm * max_value;
 	const Vector clip_size = clip_end - clip_init;
 	const float clip_aspect_ratio = clip_size.x / clip_size.y;
 
