@@ -9,6 +9,24 @@
 
 #include "graphics.h"
 
+const char* Graphics::Renderer::get_type_str (Type t)
+{
+	static const char *strs[] = {
+		"SDL",
+	#ifdef PACMAN_SUPPORT_OPENGL
+		"Opengl",
+	#endif
+	#ifdef PACMAN_SUPPORT_VULKAN
+		"Vulkan",
+	#endif
+	};
+
+	const auto i = std::to_underlying(t);
+
+	ASSERT(i < std::to_underlying(Type::Unsupported))
+
+	return strs[i];
+}
 
 Graphics::CircleFactory::CircleFactory (const uint32_t n_triangles_)
 	: n_triangles(n_triangles_)

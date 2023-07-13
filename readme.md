@@ -29,6 +29,7 @@ First, you need to download the following packages (considering you are using Ub
 
 - libglew-dev
 - libsdl2-dev
+- libboost-program-options-dev
 
 Then, to compile:
 

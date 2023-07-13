@@ -81,6 +81,20 @@ struct ProjectionMatrixArgs {
 
 class Renderer
 {
+public:
+	enum class Type { // any change here will need a change in get_type_str
+		SDL,
+	#ifdef PACMAN_SUPPORT_OPENGL
+		Opengl,
+	#endif
+	#ifdef PACMAN_SUPPORT_VULKAN
+		Vulkan,
+	#endif
+		Unsupported // must be the last one
+	};
+
+	static const char* get_type_str (Type t);
+
 protected:
 	OO_ENCAPSULATE_READONLY(uint32_t, window_width_px)
 	OO_ENCAPSULATE_READONLY(uint32_t, window_height_px)

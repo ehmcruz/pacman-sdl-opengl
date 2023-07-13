@@ -369,16 +369,3 @@ void Game::World::render (const float dt)
 	this->render_box();
 #endif
 }
-
-int main (int argc, char **argv)
-{
-	Game::Main::allocate();
-	
-	Game::Main::get()->load();
-	Game::Main::get()->run();
-	Game::Main::get()->cleanup();
-
-	Game::Main::deallocate();
-
-	return 0;
-}

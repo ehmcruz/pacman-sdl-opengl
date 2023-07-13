@@ -145,7 +145,7 @@ void Game::Player::update_color ()
 
 	//dprintln("min_distance: " << min_distance)
 
-	for (Ghost& ghost : this->world->get_ghosts()) {
+	for (const Ghost& ghost : this->world->get_ghosts()) {
 		const float distance = Mylib::Math::distance(this->get_pos(), ghost.get_pos());
 
 		if (distance < min_distance)
