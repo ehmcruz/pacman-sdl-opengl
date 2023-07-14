@@ -7,6 +7,8 @@
 
 #include <SDL.h>
 
+#include <string>
+
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
 #include <my-lib/matrix.h>
@@ -145,6 +147,7 @@ public:
 protected:
 	OO_ENCAPSULATE_REFERENCE(Vector, pos)
 	OO_ENCAPSULATE_REFERENCE(Vector, vel)
+	OO_ENCAPSULATE_REFERENCE(std::string, name)
 	OO_ENCAPSULATE(World*, world)
 	OO_ENCAPSULATE(Direction, direction)
 
@@ -194,10 +197,20 @@ public:
 		this->vel.y = vy;
 	}
 
-	virtual void collided_with_wall (Direction direction) = 0;
 	virtual void physics (const float dt, const Uint8 *keys);
 	virtual void render (const float dt) = 0;
 };
+
+namespace Events {
+	struct WallCollisionData {
+		Object& coll_obj;
+		Object::Direction direction;
+	};
+
+	using WallCollision = Mylib::Trigger::EventHandler<WallCollisionData>;
+	
+	extern WallCollision wall_collision;
+}
 
 // ---------------------------------------------------
 
@@ -214,11 +227,10 @@ public:
 	Player (World *world_);
 	~Player ();
 
-	void collided_with_wall (Direction direction) override;
 	void physics (const float dt, const Uint8 *keys) override;
 	void render (const float dt) override;
 
-	void event_keydown (const SDL_Keycode key);
+	void event_keydown (const Events::Keyboard::Type& key);
 
 	void update_color ();
 };
@@ -232,12 +244,24 @@ protected:
 	Graphics::Color color;
 	ClockTime time_last_turn;
 	ClockDuration time_between_turns;
+	Events::WallCollision::Descriptor event_wall_collision_d;
+
+	struct WallCollisionFilter
+	{
+		Object& myself;
+
+		inline bool operator() (const Events::WallCollision::Type& event)
+		{
+			//dprintln("test-coll " << event.coll_obj->get_name() << "   myself is " << this->myself->get_name())
+			return (&this->myself == &event.coll_obj);
+		}
+	};
 
 public:
 	Ghost (World *world_);
 	~Ghost ();
 
-	void collided_with_wall (Direction direction) override;
+	void collided_with_wall (const Events::WallCollision::Type& event, const WallCollisionFilter& filter);
 	void physics (const float dt, const Uint8 *keys) override;
 	void render (const float dt) override;
 };

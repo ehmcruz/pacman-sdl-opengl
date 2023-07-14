@@ -35,6 +35,7 @@ Game::Player::Player (World *world_)
 	: Object(world_),
 	  shape(this, Config::pacman_radius)
 {
+	this->name = "Player";
 	this->pos = Vector(0.0f, 0.0f);
 	this->vel = Vector(0.0f, 0.0f);
 	this->direction = Direction::Stopped;
@@ -52,11 +53,6 @@ Game::Player::Player (World *world_)
 Game::Player::~Player ()
 {
 	Events::key_down.unsubscribe(this->event_keydown_d);
-}
-
-void Game::Player::collided_with_wall (Direction direction)
-{
-
 }
 
 void Game::Player::physics (const float dt, const Uint8 *keys)
@@ -118,7 +114,7 @@ void Game::Player::render (const float dt)
 	renderer->draw_circle(this->shape, this->pos, this->color);
 }
 
-void Game::Player::event_keydown (const SDL_Keycode key)
+void Game::Player::event_keydown (const Events::Keyboard::Type& key)
 {
 	switch (key) {
 		case SDLK_LEFT:
@@ -178,30 +174,35 @@ Game::Ghost::Ghost (World *world_)
 		{ .r = 0.5f, .g = 0.1f, .b = 0.0f, .a = 1.0f },
 		{ .r = 0.0f, .g = 0.5f, .b = 0.0f, .a = 1.0f },
 	};
-	static uint32_t color_i = 0;
+	static uint32_t ghost_i = 0;
 
+	this->name = "Ghost_" + std::to_string(ghost_i);
 	this->pos = Vector(0.0f, 0.0f);
 	this->vel = Vector(0.0f, 0.0f);
 	this->direction = Direction::Stopped;
 	this->time_last_turn = this->world->get_time_create();
 	this->time_between_turns = ClockDuration(Config::ghost_time_between_turns);
 
-	if (color_i >= (sizeof(ghosts_colors) / sizeof(Graphics::Color)))
-		color_i = 0;
-	this->color = ghosts_colors[color_i++];
+	this->color = ghosts_colors[ ghost_i % (sizeof(ghosts_colors) / sizeof(Graphics::Color)) ];
+	ghost_i++;
+
+	WallCollisionFilter wall_collision_filter = WallCollisionFilter { .myself = *this };
+
+	this->event_wall_collision_d = Events::wall_collision.subscribe( Mylib::Trigger::make_filter_callback_object<Events::WallCollision::Type>(wall_collision_filter, *this, &Ghost::collided_with_wall) );
 
 	dprint( "ghost created" << std::endl )
 }
 
 Game::Ghost::~Ghost ()
 {
+	Events::wall_collision.unsubscribe(this->event_wall_collision_d);
 }
 
-void Game::Ghost::collided_with_wall (Direction direction)
+void Game::Ghost::collided_with_wall (const Events::WallCollision::Type& event, const WallCollisionFilter& filter)
 {
 	this->time_last_turn = this->world->get_time_create();
 
-	//dprintln("------- Ghost collided with wall")
+//	dprintln("------- Ghost " << this->name << " collided with wall")
 }
 
 void Game::Ghost::physics (const float dt, const Uint8 *keys)

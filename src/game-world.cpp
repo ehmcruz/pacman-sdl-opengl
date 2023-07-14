@@ -4,6 +4,7 @@
 #include <limits>
 
 #include "game-world.h"
+#include "game-object.h"
 #include "lib.h"
 #include "graphics/sdl.h"
 
@@ -13,6 +14,7 @@ Graphics::Renderer *Game::renderer = nullptr;
 Game::Probability Game::probability;
 
 Game::Events::Keyboard Game::Events::key_down;
+Game::Events::WallCollision Game::Events::wall_collision;
 
 Game::Map::Map ()
 {
@@ -264,26 +266,26 @@ void Game::World::solve_wall_collisions ()
 		if (obj->get_x() < cell_center.x && this->map(yi, xi-1) == Map::Cell::Wall) {
 			obj->set_x(cell_center.x);
 			obj->set_vx(0.0f);
-			obj->collided_with_wall(Object::Direction::Left);
+			Events::wall_collision.publish( Events::WallCollisionData { .coll_obj = *obj, .direction = Object::Direction::Left } );
 			obj->set_direction(Object::Direction::Stopped);
 		}
 		else if (obj->get_x() > cell_center.x && this->map(yi, xi+1) == Map::Cell::Wall) {
 			obj->set_x(cell_center.x);
 			obj->set_vx(0.0f);
-			obj->collided_with_wall(Object::Direction::Right);
+			Events::wall_collision.publish( Events::WallCollisionData { .coll_obj = *obj, .direction = Object::Direction::Right } );
 			obj->set_direction(Object::Direction::Stopped);
 		}
 
 		if (obj->get_y() < cell_center.y && this->map(yi-1, xi) == Map::Cell::Wall) {
 			obj->set_y(cell_center.y);
 			obj->set_vy(0.0f);
-			obj->collided_with_wall(Object::Direction::Up);
+			Events::wall_collision.publish( Events::WallCollisionData { .coll_obj = *obj, .direction = Object::Direction::Up } );
 			obj->set_direction(Object::Direction::Stopped);
 		}
 		else if (obj->get_y() > cell_center.y && this->map(yi+1, xi) == Map::Cell::Wall) {
 			obj->set_y(cell_center.y);
 			obj->set_vy(0.0f);
-			obj->collided_with_wall(Object::Direction::Down);
+			Events::wall_collision.publish( Events::WallCollisionData { .coll_obj = *obj, .direction = Object::Direction::Down } );
 			obj->set_direction(Object::Direction::Stopped);
 		}
 	}
