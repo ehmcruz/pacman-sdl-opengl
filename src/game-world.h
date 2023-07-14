@@ -14,10 +14,12 @@
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
 #include <my-lib/matrix.h>
+#include <my-lib/trigger.h>
 
 #include "graphics.h"
 #include "game-object.h"
 #include "lib.h"
+#include "events.h"
 
 namespace Game
 {
@@ -134,11 +136,6 @@ public:
 	inline void add_object (Object& obj)
 	{
 		this->objects.push_back(&obj);
-	}
-
-	inline void event_keydown (const SDL_Keycode key)
-	{
-		this->player.event_keydown(key);
 	}
 
 	void physics (const float dt, const Uint8 *keys);

@@ -14,6 +14,7 @@
 #include "config.h"
 #include "lib.h"
 #include "graphics.h"
+#include "events.h"
 
 
 namespace Game
@@ -207,6 +208,7 @@ protected:
 	Direction target_direction;
 	Graphics::Color color;
 	//Graphics::Color base_color;
+	Events::Keyboard::Descriptor event_keydown_d;
 
 public:
 	Player (World *world_);

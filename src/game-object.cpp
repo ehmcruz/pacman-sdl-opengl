@@ -44,11 +44,14 @@ Game::Player::Player (World *world_)
 	//this->color = this->base_color;
 	this->color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
 
+	this->event_keydown_d = Events::key_down.subscribe( Mylib::Trigger::make_callback_object<Events::Keyboard::Type>(*this, &Player::event_keydown) );
+
 	dprint( "player created" << std::endl )
 }
 
 Game::Player::~Player ()
 {
+	Events::key_down.unsubscribe(this->event_keydown_d);
 }
 
 void Game::Player::collided_with_wall (Direction direction)

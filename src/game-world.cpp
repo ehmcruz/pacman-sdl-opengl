@@ -12,6 +12,7 @@ Game::Main *Game::Main::instance = nullptr;
 Graphics::Renderer *Game::renderer = nullptr;
 Game::Probability Game::probability;
 
+Game::Events::Keyboard Game::Events::key_down;
 
 Game::Map::Map ()
 {
@@ -153,11 +154,8 @@ void Game::Main::run ()
 				break;
 				
 				case SDL_KEYDOWN:
-					switch (this->state) {
-						case State::playing:
-							this->world->event_keydown(event.key.keysym.sym);
-						break;
-					}
+					Events::key_down.publish(event.key.keysym.sym);
+				break;
 			}
 		}
 
