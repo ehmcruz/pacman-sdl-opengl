@@ -16,8 +16,9 @@ namespace Game
 // ---------------------------------------------------
 
 using Clock = std::chrono::steady_clock;
-using ClockTime = Clock::time_point;
 using ClockDuration = std::chrono::duration<float>;
+//using ClockTime = Clock::time_point;
+using ClockTime = std::chrono::time_point<Clock, ClockDuration>;
 
 using Vector = Mylib::Math::Vector2d;
 

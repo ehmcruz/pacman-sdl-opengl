@@ -121,6 +121,9 @@ protected:
 	OO_ENCAPSULATE_REFERENCE_READONLY(std::vector<Ghost>, ghosts)
 	OO_ENCAPSULATE_REFERENCE_READONLY(Map, map)
 
+	Graphics::Color wall_color;
+	Events::Timer::Descriptor event_timer_wall_color_d;
+
 protected:
 	std::vector< Object* > objects;
 
@@ -140,6 +143,7 @@ public:
 
 	void physics (const float dt, const Uint8 *keys);
 	void solve_wall_collisions ();
+	void change_wall_color (Events::Timer::Event& event);
 	void render_map ();
 	void render_box();
 	void render (const float dt);

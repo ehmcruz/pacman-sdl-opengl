@@ -9,6 +9,9 @@
 
 #include <my-lib/std.h>
 #include <my-lib/trigger.h>
+#include <my-lib/timer.h>
+
+#include "lib.h"
 
 namespace Game
 {
@@ -18,8 +21,10 @@ namespace Game
 namespace Events
 {
 	using Keyboard = Mylib::Trigger::EventHandler<SDL_Keycode>;
+	using Timer = Mylib::Trigger::Timer<Game::ClockTime>;
 
 	extern Keyboard key_down;
+	extern Timer timer;
 };
 
 // ---------------------------------------------------

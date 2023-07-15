@@ -13,6 +13,7 @@ Game::Main *Game::Main::instance = nullptr;
 Graphics::Renderer *Game::renderer = nullptr;
 Game::Probability Game::probability;
 
+Game::Events::Timer Game::Events::timer( Clock::now() );
 Game::Events::Keyboard Game::Events::key_down;
 Game::Events::WallCollision Game::Events::wall_collision;
 
@@ -145,6 +146,8 @@ void Game::Main::run ()
 
 		renderer->wait_next_frame();
 
+		Events::timer.trigger_events(tbegin);
+
 		virtual_dt = (real_dt > Config::max_dt) ? Config::max_dt : real_dt;
 
 		//dprintln( "start new frame render required_dt=" << required_dt << " real_dt=" << real_dt << " sleep_dt=" << sleep_dt << " virtual_dt=" << virtual_dt << " max_dt=" << Config::max_dt )
@@ -239,10 +242,15 @@ Game::World::World ()
 			}
 		}
 	}
+
+	this->wall_color = Graphics::Color { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f };
+	
+	this->event_timer_wall_color_d = Events::timer.schedule_event(Clock::now() + ClockDuration(Config::map_tile_color_change_time), Mylib::Trigger::make_callback_object<Events::Timer::Event>(*this, &World::change_wall_color));
 }
 
 Game::World::~World ()
 {
+	//Events::timer.unschedule_event(this->event_timer_wall_color_d);
 }
 
 void Game::World::physics (const float dt, const Uint8 *keys)
@@ -291,11 +299,28 @@ void Game::World::solve_wall_collisions ()
 	}
 }
 
+void Game::World::change_wall_color (Events::Timer::Event& event)
+{
+	//dprintln("Changing wall color")
+
+	std::uniform_real_distribution<float> d (0.0f, 1.0f);
+	auto& r = probability.get_rgenerator();
+
+	this->wall_color = Graphics::Color {
+		.r = d(r),
+		.g = d(r),
+		.b = d(r),
+		.a = 1.0f
+		};
+
+	event.re_schedule = true;
+	event.time = Clock::now() + ClockDuration(Config::map_tile_color_change_time);
+}
+
 void Game::World::render_map ()
 {
 	const ShapeRect rect(Config::map_tile_size, Config::map_tile_size);
 	const uint32_t n_rects = this->map.get_n_walls();
-	const Graphics::Color color = { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f };
 	Vector offset;
 
 	for (uint32_t y=0; y<this->map.get_h(); y++) {
@@ -303,7 +328,7 @@ void Game::World::render_map ()
 			switch (this->map(y, x)) {
 				case Map::Cell::Wall:
 					offset.set(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f);
-					renderer->draw_rect(rect, offset, color);
+					renderer->draw_rect(rect, offset, this->wall_color);
 				break;
 			}
 		}
