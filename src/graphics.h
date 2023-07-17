@@ -56,7 +56,7 @@ protected:
 
 public:
 	inline Shape (const Type type_)
-		: type(type_)
+		: type(type_),
 	{
 		this->delta = Vector(0.0f, 0.0f);
 	}
