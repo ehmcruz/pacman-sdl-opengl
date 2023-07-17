@@ -250,7 +250,7 @@ Game::World::World ()
 
 Game::World::~World ()
 {
-	//Events::timer.unschedule_event(this->event_timer_wall_color_d);
+	Events::timer.unschedule_event(this->event_timer_wall_color_d);
 }
 
 void Game::World::physics (const float dt, const Uint8 *keys)

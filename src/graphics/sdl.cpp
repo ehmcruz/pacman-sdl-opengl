@@ -163,7 +163,7 @@ void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArg
 	else if ((world_camera.x + world_screen_size.x) > args.world_end.x)
 		world_camera.x = args.world_end.x - world_screen_size.x;
 
-	//dprint( "world_camera POS: " ) world_camera.println();
+	//dprint( "world_camera POS: " ) Mylib::Math::println(world_camera);
 
 	if (world_camera.y < args.world_init.y)
 		world_camera.y = args.world_init.y;
@@ -207,7 +207,7 @@ void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArg
 
 	Matrix4d scale;
 	scale.set_scale(Vector(this->scale_factor, this->scale_factor));
-//	dprintln( "scale matrix:" ) scale.println();
+//	dprintln( "scale matrix:" ) Mylib::Math::println(scale);
 //exit(1);
 
 	this->projection_matrix = (translate_to_clip_init * scale) * translate_camera;
