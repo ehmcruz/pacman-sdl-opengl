@@ -58,7 +58,7 @@ public:
 	inline Shape (const Type type_)
 		: type(type_)
 	{
-		this->delta = {0.0f, 0.0f};
+		this->delta = Vector(0.0f, 0.0f);
 	}
 
 	inline float get_dx () const
