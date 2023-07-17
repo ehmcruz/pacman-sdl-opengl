@@ -1,5 +1,5 @@
-#ifndef __PACMAN_SDL_OPENGL_OPENGL_HEADER_H__
-#define __PACMAN_SDL_OPENGL_OPENGL_HEADER_H__
+#ifndef __PACMAN_SDL_GRAPHICS_OPENGL_HEADER_H__
+#define __PACMAN_SDL_GRAPHICS_OPENGL_HEADER_H__
 
 #ifdef __MINGW32__
 	#define SDL_MAIN_HANDLED
@@ -17,6 +17,8 @@
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
 #include <my-lib/matrix.h>
+
+#include "../graphics.h"
 
 namespace Graphics
 {
@@ -178,7 +180,7 @@ public:
 	void bind_vertex_buffer ();
 	void setup_vertex_array ();
 	void upload_vertex_buffer ();
-	void upload_projection_matrix (const ProjectionMatrix& m);
+	void upload_projection_matrix (const Matrix4d& m);
 	void draw ();
 
 	void debug ();
@@ -186,8 +188,29 @@ public:
 
 // ---------------------------------------------------
 
-class Renderer : public Game::Renderer
+class Renderer : public Graphics::Renderer
 {
+protected:
+	SDL_Window *sdl_window;
+	SDL_GLContext sdl_gl_context;
+	Color background_color;
+	Matrix4d projection_matrix;
+	float scale_factor;
+
+	ProgramTriangle *program_triangle;
+	CircleFactory *circle_factory_low_def;
+
+public:
+	Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_);
+	~Renderer ();
+
+	void wait_next_frame () override;
+	virtual void draw_circle (const ShapeCircle& circle, const Vector& offset, const Graphics::Color& color) override;
+	virtual void draw_rect (const ShapeRect& rect, const Vector& offset, const Graphics::Color& color) override;
+	virtual void setup_projection_matrix (const ProjectionMatrixArgs& args) override;
+	virtual void render () override;
+
+	void load_opengl_programs ();
 };
 
 // ---------------------------------------------------

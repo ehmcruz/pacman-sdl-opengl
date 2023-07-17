@@ -10,9 +10,9 @@ namespace Config
 
 // ---------------------------------------------------
 
-inline constexpr uint32_t screen_width_px = 1200;
+inline constexpr uint32_t screen_width_px = 700;
 
-inline constexpr uint32_t screen_height_px = 800;
+inline constexpr uint32_t screen_height_px = 700;
 
 inline constexpr uint32_t opengl_low_def_triangles = 64;
 

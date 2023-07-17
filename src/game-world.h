@@ -47,6 +47,7 @@ protected:
 	OO_ENCAPSULATE(World*, world)
 	OO_ENCAPSULATE(bool, alive)
 	OO_ENCAPSULATE_READONLY(State, state)
+	OO_ENCAPSULATE_READONLY(Graphics::Renderer::Type, renderer_type)
 
 protected:
 	static Main *instance;
@@ -55,8 +56,7 @@ protected:
 	~Main ();
 
 public:
-	void load ();
-	void graphics_init ();
+	void load (Graphics::Renderer::Type renderer_type);
 	void run ();
 	void cleanup ();
 

@@ -8,6 +8,13 @@
 #include <cmath>
 
 #include "graphics.h"
+#include "graphics/sdl.h"
+#ifdef PACMAN_SUPPORT_OPENGL
+	#include "graphics/opengl.h"
+#endif
+#ifdef PACMAN_SUPPORT_VULKAN
+	#include "graphics/vulkan.h"
+#endif
 
 const char* Graphics::Renderer::get_type_str (Type t)
 {
@@ -26,6 +33,39 @@ const char* Graphics::Renderer::get_type_str (Type t)
 	ASSERT(i < std::to_underlying(Type::Unsupported))
 
 	return strs[i];
+}
+
+Graphics::Renderer* Graphics::init (Renderer::Type renderer_type, uint32_t screen_width_px, uint32_t screen_height_px)
+{
+	Renderer *r;
+
+	switch (renderer_type) {
+		case Renderer::Type::SDL:
+			r = new Graphics::SDL::Renderer(screen_width_px, screen_height_px);
+		break;
+
+	#ifdef PACMAN_SUPPORT_OPENGL
+		case Renderer::Type::Opengl:
+			r = new Graphics::Opengl::Renderer(screen_width_px, screen_height_px);
+		break;
+	#endif
+
+	#ifdef PACMAN_SUPPORT_VULKAN
+		case Renderer::Type::Vulkan:
+			r = new Graphics::Vulkan::Renderer(screen_width_px, screen_height_px);
+		break;
+	#endif
+
+		default:
+			throw std::runtime_error("Bad Video Driver!");
+	}
+
+	return r;
+}
+
+void Graphics::quit (Renderer *renderer, Renderer::Type renderer_type)
+{
+
 }
 
 Graphics::CircleFactory::CircleFactory (const uint32_t n_triangles_)

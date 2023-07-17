@@ -9,6 +9,10 @@ For now, it works on the following platforms:
 
 I intend to extend it to Android latter.
 
+IMPORTANT!  
+Opengl support still not working!  
+Only SDL renderer for now!
+
 # Overall dependencies
 
 To compile, you need a C++23 capable compiler and the following libraries:
@@ -33,7 +37,8 @@ First, you need to download the following packages (considering you are using Ub
 
 Then, to compile:
 
-**make CONFIG_TARGET_LINUX=1**
+- For SDL Renderer only: **make CONFIG_TARGET_LINUX=1**
+- To also support Opengl: **make CONFIG_TARGET_LINUX=1 PACMAN_SUPPORT_OPENGL=1**
 
 ## Running in Linux
 

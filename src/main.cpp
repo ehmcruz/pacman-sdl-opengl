@@ -2,6 +2,9 @@
 #include <string>
 #include <utility>
 #include <string_view>
+#include <algorithm>
+#include <ctype.h>
+#include <boost/algorithm/string.hpp>
 
 #include <boost/program_options.hpp>
 
@@ -10,6 +13,15 @@
 #include "lib.h"
 
 static Graphics::Renderer::Type renderer_type = Graphics::Renderer::Type::SDL; // default
+
+static bool str_i_equals (const std::string_view& a, const std::string_view& b)
+{
+	/*return std::equal(a.begin(), a.end(), b.begin(), b.end(),
+		[](char a, char b) {
+		return tolower(a) == tolower(b);
+	});*/
+	return boost::iequals(a, b);
+}
 
 static void process_args (int argc, char **argv)
 {
@@ -48,7 +60,7 @@ static void process_args (int argc, char **argv)
 				const auto type = static_cast<Graphics::Renderer::Type>(i);
 				const char *s = Graphics::Renderer::get_type_str(type);
 	
-				if (vm["video"].as<std::string>() == std::string_view(s)) {
+				if ( str_i_equals(vm["video"].as<std::string>(), std::string_view(s)) ) {
 					valid_type = true;
 					renderer_type = type;
 					break;
@@ -73,8 +85,8 @@ int main (int argc, char **argv)
 		std::cout << "Setting video renderer to " << Graphics::Renderer::get_type_str(renderer_type) << std::endl;
 
 		Game::Main::allocate();
-		
-		Game::Main::get()->load();
+
+		Game::Main::get()->load(renderer_type);
 		Game::Main::get()->run();
 		Game::Main::get()->cleanup();
 

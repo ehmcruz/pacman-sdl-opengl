@@ -8,12 +8,12 @@ BIN_WINDOWS = pacman.exe
 MYLIB = ../my-lib
 
 # Windows
-CPPFLAGS_WINDOWS = -std=c++23 `sdl2-config --cflags` -I$(MYLIB)/include -g -mconsole #-O2
-LDFLAGS_WINDOWS = -std=c++23 `sdl2-config --libs` -mconsole -lglew32 -lopengl32 -lm -lboost_program_options
+CPPFLAGS_WINDOWS = -DCONFIG_TARGET_WINDOWS=1 -std=c++23 `sdl2-config --cflags` -I$(MYLIB)/include -g -mconsole #-O2
+LDFLAGS_WINDOWS = -std=c++23 `sdl2-config --libs` -mconsole -lm -lboost_program_options
 
 # Linux
-CPPFLAGS_LINUX = -std=c++23 `sdl2-config --cflags` -I$(MYLIB)/include -g #-O2
-LDFLAGS_LINUX = -std=c++23 `sdl2-config --libs` -lGL -lGLEW -lm -lboost_program_options
+CPPFLAGS_LINUX = -DCONFIG_TARGET_LINUX=1 -std=c++23 `sdl2-config --cflags` -I$(MYLIB)/include -g #-O2
+LDFLAGS_LINUX = -std=c++23 `sdl2-config --libs` -lm -lboost_program_options
 
 # ----------------------------------
 
@@ -21,12 +21,22 @@ ifdef CONFIG_TARGET_LINUX
 	BIN=$(BIN_LINUX)
 	CPPFLAGS=$(CPPFLAGS_LINUX)
 	LDFLAGS=$(LDFLAGS_LINUX)
+
+	ifdef PACMAN_SUPPORT_OPENGL
+		CPPFLAGS += -DPACMAN_SUPPORT_OPENGL=1
+		LDFLAGS += -lGL -lGLEW
+	endif
 endif
 
 ifdef CONFIG_TARGET_WINDOWS
 	BIN=$(BIN_WINDOWS)
 	CPPFLAGS=$(CPPFLAGS_WINDOWS)
 	LDFLAGS=$(LDFLAGS_WINDOWS)
+
+	ifdef PACMAN_SUPPORT_OPENGL
+		CPPFLAGS += -DPACMAN_SUPPORT_OPENGL=1
+		LDFLAGS += -lglew32 -lopengl32
+	endif
 endif
 
 # ----------------------------------
@@ -35,6 +45,10 @@ endif
 MYLIB_OBJS = ext/math.o
 
 SRCS := $(wildcard src/*.cpp) src/graphics/sdl.cpp
+
+ifdef PACMAN_SUPPORT_OPENGL
+	SRCS += src/graphics/opengl.cpp
+endif
 
 OBJS := $(patsubst %.cpp,%.o,$(SRCS)) $(MYLIB_OBJS)
 

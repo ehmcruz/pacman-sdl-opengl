@@ -6,7 +6,6 @@
 #include "game-world.h"
 #include "game-object.h"
 #include "lib.h"
-#include "graphics/sdl.h"
 
 
 Game::Main *Game::Main::instance = nullptr;
@@ -98,16 +97,17 @@ void Game::Main::deallocate ()
 	delete instance;
 }
 
-void Game::Main::load ()
+void Game::Main::load (Graphics::Renderer::Type renderer_type)
 {
 	std::cout << std::setprecision(4);
 	std::cout << std::fixed;
 
 	this->state = State::initializing;
+	this->renderer_type = renderer_type;
 
 	SDL_Init( SDL_INIT_VIDEO );
 
-	this->graphics_init();
+	renderer = Graphics::init(this->renderer_type, Config::screen_width_px, Config::screen_height_px);
 
 	dprint( "chorono resolution " << (static_cast<float>(Clock::period::num) / static_cast<float>(Clock::period::den)) << std::endl );
 
@@ -119,9 +119,10 @@ void Game::Main::load ()
 	this->alive = true;
 }
 
-void Game::Main::graphics_init ()
+void Game::Main::cleanup ()
 {
-	renderer = new Graphics::SDL::Renderer(Config::screen_width_px, Config::screen_height_px);
+	Graphics::quit(renderer, this->renderer_type);
+	SDL_Quit();
 }
 
 void Game::Main::run ()
@@ -200,13 +201,6 @@ void Game::Main::run ()
 			real_dt = elapsed.count();
 		} while (real_dt < Config::target_dt);
 	}
-}
-
-void Game::Main::cleanup ()
-{
-	delete renderer;
-	
-	SDL_Quit();
 }
 
 Game::World::World ()
@@ -367,8 +361,10 @@ void Game::World::render (const float dt)
 	const Vector ws = renderer->get_normalized_window_size();
 
 	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
-		.clip_init_norm = Vector(this->border_thickness, this->border_thickness),
-		.clip_end_norm = Vector(ws.x - this->border_thickness, ws.y - this->border_thickness),
+		//.clip_init_norm = Vector(this->border_thickness, this->border_thickness),
+		//.clip_end_norm = Vector(ws.x - this->border_thickness, ws.y - this->border_thickness),
+		.clip_init_norm = Vector(0.0f, 0.0f),
+		.clip_end_norm = Vector(ws.x, ws.y),
 		.world_init = Vector(0.0f, 0.0f),
 		.world_end = Vector(this->w, this->h),
 		.world_camera_focus = player.get_pos(),
@@ -381,7 +377,7 @@ void Game::World::render (const float dt)
 		obj->render(dt);
 	}
 
-#if 1
+#if 0
 	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
 		.clip_init_norm = Vector(0.0f, 0.0f),
 		.clip_end_norm = Vector(ws.x, ws.y),

@@ -9,102 +9,20 @@
 
 #include "opengl.h"
 
-void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArgs&& args)
-{
-/*	m(0,0) = 2.0f / (args.right - args.left);
-	m(0,1) = 0.0f;
-	m(0,2) = 0.0f;
-	m(0,3) = 0.0f;
+// ---------------------------------------------------
 
-	m(1,0) = 0.0f;
-	m(1,1) = 2.0f / (args.top - args.bottom);
-	m(1,2) = 0.0f;
-	m(1,3) = 0.0f;
+#define DEBUG_SHOW_CENTER_LINE
 
-	m(2,0) = 0.0f;
-	m(2,1) = 0.0f;
-	m(2,2) = -2.0f / (args.zfar - args.znear);
-	m(2,3) = 0.0f;
+// ---------------------------------------------------
 
-	m(3,0) = -(args.right + args.left) / (args.right - args.left);
-	m(3,1) = -(args.top + args.bottom) / (args.top - args.bottom);
-	m(3,2) = -(args.zfar + args.znear) / (args.zfar - args.znear);
-	m(3,3) = 1.0f;*/
-}
-
-void opengl_init ()
-{
-	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-	SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
-	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
-
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 2 );
-	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
-
-	this->sdl_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, this->screen_width_px, this->screen_height_px, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-
-	this->sdl_gl_context = SDL_GL_CreateContext(this->sdl_window);
-
-	GLenum err = glewInit();
-	if (err != GLEW_OK) {
-		std::cout << "Error: " << glewGetErrorString(err) << std::endl;
-		exit(1);
-	}
-
-	std::cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
-
-	glDisable(GL_DEPTH_TEST);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
-	glViewport(0, 0, this->screen_width_px, this->screen_height_px);
-
-	this->opengl_circle_factory_low_def = new Opengl::CircleFactory(Config::opengl_low_def_triangles);
-	//this->opengl_circle_factory_high_def = new Opengl::CircleFactory(Config::opengl_high_def_triangles);
-
-	this->load_opengl_programs();
-
-	dprint( "loaded opengl stuff" << std::endl )
-}
-
-void wait_new_frame ()
-{
-	glClear( GL_COLOR_BUFFER_BIT );
-	SDL_GL_SwapWindow(this->sdl_window);
-}
-
-void opengl_clean ()
-{
-	SDL_GL_DeleteContext(this->sdl_gl_context);
-	SDL_DestroyWindow(this->sdl_window);
-}
-
-void Game::Main::graphics_init ()
-{
-	this->opengl_program_triangle = new Opengl::ProgramTriangle;
-
-	dprint( "loaded opengl triangle program" << std::endl )
-
-	this->opengl_program_triangle->use_program();
-	
-	this->opengl_program_triangle->bind_vertex_array();
-	this->opengl_program_triangle->bind_vertex_buffer();
-
-	this->opengl_program_triangle->setup_vertex_array();
-
-	dprint( "generated and binded opengl world vertex array/buffer" << std::endl )
-}
-
-Opengl::Shader::Shader (const GLenum shader_type_, const char *fname_)
+Graphics::Opengl::Shader::Shader (const GLenum shader_type_, const char *fname_)
 : shader_type(shader_type_),
   fname(fname_)
 {
 	this->shader_id = glCreateShader(this->shader_type);
 }
 
-void Opengl::Shader::compile ()
+void Graphics::Opengl::Shader::compile ()
 {
 	// First, read the whole shader file to memory.
 	// I usually do this in C, but wanted to do in C++ for a change, but Jesus...
@@ -141,30 +59,30 @@ void Opengl::Shader::compile ()
 	}
 }
 
-Opengl::Program::Program ()
+Graphics::Opengl::Program::Program ()
 {
 	this->vs = nullptr;
 	this->fs = nullptr;
 	this->program_id = glCreateProgram();
 }
 
-void Opengl::Program::attach_shaders ()
+void Graphics::Opengl::Program::attach_shaders ()
 {
 	glAttachShader(this->program_id, this->vs->shader_id);
 	glAttachShader(this->program_id, this->fs->shader_id);
 }
 
-void Opengl::Program::link_program ()
+void Graphics::Opengl::Program::link_program ()
 {
 	glLinkProgram(this->program_id);
 }
 
-void Opengl::Program::use_program ()
+void Graphics::Opengl::Program::use_program ()
 {
 	glUseProgram(this->program_id);
 }
 
-Opengl::ProgramTriangle::ProgramTriangle ()
+Graphics::Opengl::ProgramTriangle::ProgramTriangle ()
 	: Program ()
 {
 	static_assert(sizeof(Vertex) == 32);
@@ -188,17 +106,17 @@ Opengl::ProgramTriangle::ProgramTriangle ()
 	glGenBuffers(1, &(this->vbo));
 }
 
-void Opengl::ProgramTriangle::bind_vertex_array ()
+void Graphics::Opengl::ProgramTriangle::bind_vertex_array ()
 {
 	glBindVertexArray(this->vao);
 }
 
-void Opengl::ProgramTriangle::bind_vertex_buffer ()
+void Graphics::Opengl::ProgramTriangle::bind_vertex_buffer ()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
 }
 
-void Opengl::ProgramTriangle::setup_vertex_array ()
+void Graphics::Opengl::ProgramTriangle::setup_vertex_array ()
 {
 	uint32_t pos, length;
 
@@ -219,25 +137,25 @@ void Opengl::ProgramTriangle::setup_vertex_array ()
 	glVertexAttribPointer( std::to_underlying(Attrib::Color), length, GL_FLOAT, GL_FALSE, sizeof(Vertex), ( void * )(pos * sizeof(float)) );
 }
 
-void Opengl::ProgramTriangle::upload_vertex_buffer ()
+void Graphics::Opengl::ProgramTriangle::upload_vertex_buffer ()
 {
 	uint32_t n = this->triangle_buffer.get_vertex_buffer_used();
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * n, this->triangle_buffer.get_vertex_buffer(), GL_DYNAMIC_DRAW);
 }
 
-void Opengl::ProgramTriangle::upload_projection_matrix (const ProjectionMatrix& m)
+void Graphics::Opengl::ProgramTriangle::upload_projection_matrix (const Matrix4d& m)
 {
-	glUniformMatrix4fv( glGetUniformLocation(this->program_id, "u_projection_matrix"), 1, GL_FALSE, m.get_raw_const() );
-	dprint( "projection matrix sent to GPU" << std::endl )
+	glUniformMatrix4fv( glGetUniformLocation(this->program_id, "u_projection_matrix"), 1, GL_TRUE, m.get_raw() );
+	//dprintln( "projection matrix sent to GPU" )
 }
 
-void Opengl::ProgramTriangle::draw ()
+void Graphics::Opengl::ProgramTriangle::draw ()
 {
 	uint32_t n = this->triangle_buffer.get_vertex_buffer_used();
 	glDrawArrays(GL_TRIANGLES, 0, n);
 }
 
-void Opengl::ProgramTriangle::debug ()
+void Graphics::Opengl::ProgramTriangle::debug ()
 {
 	uint32_t n = this->triangle_buffer.get_vertex_buffer_used();
 
@@ -260,113 +178,223 @@ void Opengl::ProgramTriangle::debug ()
 	}
 }
 
-Opengl::CircleFactory::CircleFactory (const uint32_t n_triangles_)
-	: n_triangles(n_triangles_)
+Graphics::Opengl::Renderer::Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_)
+	: Graphics::Renderer (window_width_px_, window_height_px_)
 {
-	this->table_cos = new float[this->n_triangles];
-	this->table_sin = new float[this->n_triangles];
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+	SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
+	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
 
-	/*
-		cos(angle) = x / radius
-		sin(angle) = y / radius
-		
-		x = cos(angle) * radius
-		y = sin(angle) * radius
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 2 );
+	SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
 
-		2*pi radians is equal to 360 degrees
-	*/
+	this->sdl_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, this->window_width_px, this->window_height_px, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
-	const double delta = (2.0 * std::numbers::pi) / static_cast<double>(this->n_triangles);
-	double angle = delta;
+	this->sdl_gl_context = SDL_GL_CreateContext(this->sdl_window);
 
-/*
-	dprint( std::endl )
-	dprint( "delta = " << delta << std::endl )
-	dprint( std::endl )
-*/
+	GLenum err = glewInit();
+	if (err != GLEW_OK) {
+		std::cout << "Error: " << glewGetErrorString(err) << std::endl;
+		exit(1);
+	}
 
-	for (uint32_t i=0; i<this->n_triangles; i++) {
-		this->table_cos[i] = static_cast<float>( cos(angle) );
-		this->table_sin[i] = static_cast<float>( sin(angle) );
+	std::cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
 
-	/*
-		dprint( "cos(" << angle << ") = " << this->table_cos[i] << std::endl )
-		dprint( "sin(" << angle << ") = " << this->table_sin[i] << std::endl )
-		dprint( std::endl )
-	*/
+	glDisable(GL_DEPTH_TEST);
 
-		angle += delta;
+	this->background_color = Graphics::config_background_color;
+
+	glClearColor(this->background_color.r, this->background_color.g, this->background_color.b, 1.0);
+	glViewport(0, 0, this->window_width_px, this->window_height_px);
+
+	this->circle_factory_low_def = new CircleFactory(64);
+	//this->opengl_circle_factory_high_def = new Opengl::CircleFactory(Config::opengl_high_def_triangles);
+
+	this->load_opengl_programs();
+
+	dprintln( "loaded opengl stuff" )
+
+	this->wait_next_frame();
+}
+
+void Graphics::Opengl::Renderer::load_opengl_programs ()
+{
+	this->program_triangle = new ProgramTriangle;
+
+	dprintln( "loaded opengl triangle program" )
+
+	this->program_triangle->use_program();
+	
+	this->program_triangle->bind_vertex_array();
+	this->program_triangle->bind_vertex_buffer();
+
+	this->program_triangle->setup_vertex_array();
+
+	dprintln( "generated and binded opengl world vertex array/buffer" )
+}
+
+Graphics::Opengl::Renderer::~Renderer ()
+{
+	delete this->program_triangle;
+	delete this->circle_factory_low_def;
+
+	SDL_GL_DeleteContext(this->sdl_gl_context);
+	SDL_DestroyWindow(this->sdl_window);
+}
+
+void Graphics::Opengl::Renderer::wait_next_frame ()
+{
+	glClear( GL_COLOR_BUFFER_BIT );
+
+	this->program_triangle->clear();
+}
+
+void Graphics::Opengl::Renderer::draw_circle (const ShapeCircle& circle, const Vector& offset, const Graphics::Color& color)
+{
+	Graphics::ShapeRect rect(circle.get_radius()*2.0f, circle.get_radius()*2.0f);
+	rect.set_delta(circle.get_delta());
+	this->draw_rect(rect, circle.get_delta(), color);
+}
+
+void Graphics::Opengl::Renderer::draw_rect (const ShapeRect& rect, const Vector& offset, const Graphics::Color& color)
+{
+	const uint32_t n_vertices = 6;
+	const Vector local_pos = rect.get_delta();
+	//const Vector world_pos = Vector(4.0f, 4.0f);
+	
+#if 0
+	dprint( "local_pos:" )
+	Mylib::Math::println(world_pos);
+
+	dprint( "clip_pos:" )
+	Mylib::Math::println(clip_pos);
+//exit(1);
+#endif
+
+	ProgramTriangle::Vertex *vertices = this->program_triangle->alloc_vertices(n_vertices);
+
+	// draw first triangle
+
+	// upper left vertex
+	vertices[0].x = local_pos.x - rect.get_w()*0.5f;
+	vertices[0].y = local_pos.y - rect.get_h()*0.5f;
+
+	// down right vertex
+	vertices[1].x = local_pos.x + rect.get_w()*0.5f;
+	vertices[1].y = local_pos.y + rect.get_h()*0.5f;
+
+	// down left vertex
+	vertices[2].x = local_pos.x - rect.get_w()*0.5f;
+	vertices[2].y = local_pos.y + rect.get_h()*0.5f;
+
+	// draw second triangle
+
+	// upper left vertex
+	vertices[3].x = local_pos.x - rect.get_w()*0.5f;
+	vertices[3].y = local_pos.y - rect.get_h()*0.5f;
+
+	// upper right vertex
+	vertices[4].x = local_pos.x + rect.get_w()*0.5f;
+	vertices[4].y = local_pos.y - rect.get_h()*0.5f;
+
+	// down right vertex
+	vertices[5].x = local_pos.x + rect.get_w()*0.5f;
+	vertices[5].y = local_pos.y + rect.get_h()*0.5f;
+
+	for (uint32_t i=0; i<n_vertices; i++) {
+		vertices[i].offset_x = offset.x;
+		vertices[i].offset_y = offset.y;
+		vertices[i].r = color.r;
+		vertices[i].g = color.g;
+		vertices[i].b = color.b;
+		vertices[i].a = color.a;
 	}
 }
 
-Opengl::CircleFactory::~CircleFactory ()
+void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrixArgs& args)
 {
-	delete[] this->table_cos;
-	delete[] this->table_sin;
+	//const float max_value = static_cast<float>( std::max(this->window_width_px, this->window_height_px) );
+	const float max_value = 2.0f;
+	const Vector clip_init = args.clip_init_norm * max_value;
+	const Vector clip_end = args.clip_end_norm * max_value;
+	const Vector clip_size = clip_end - clip_init;
+	const float clip_aspect_ratio = clip_size.x / clip_size.y;
+
+	const Vector world_size = args.world_end - args.world_init;
+	
+	const float world_screen_width = std::min(args.world_screen_width, world_size.x);
+	const float world_screen_height = std::min(world_screen_width / clip_aspect_ratio, world_size.y);
+
+	const Vector world_screen_size = Vector(world_screen_width, world_screen_height);
+
+	this->scale_factor = clip_size.x / world_screen_size.x;
+
+	Vector world_camera = args.world_camera_focus - Vector(world_screen_size.x*0.5f, world_screen_size.y*0.5f);
+
+	dprint( "world_camera PRE: " ) Mylib::Math::println(world_camera);
+
+#if 0
+	if (world_camera.x < args.world_init.x)
+		world_camera.x = args.world_init.x;
+	else if ((world_camera.x + world_screen_size.x) > args.world_end.x)
+		world_camera.x = args.world_end.x - world_screen_size.x;
+
+	//dprint( "world_camera POS: " ) Mylib::Math::println(world_camera);
+
+	if (world_camera.y < args.world_init.y)
+		world_camera.y = args.world_init.y;
+	else if ((world_camera.y + world_screen_size.y) > args.world_end.y)
+		world_camera.y = args.world_end.y - world_screen_size.y;
+#endif
+
+#if 1
+	dprint( "clip_init: " ) Mylib::Math::println(clip_init);
+	dprint( "clip_end: " ) Mylib::Math::println(clip_end);
+	dprint( "clip_size: " ) Mylib::Math::println(clip_size);
+	dprintln( "clip_aspect_ratio: " << clip_aspect_ratio )
+	dprintln( "scale_factor: " << this->scale_factor )
+	dprint( "world_size: " ) Mylib::Math::println(world_size);
+	dprint( "world_screen_size: " ) Mylib::Math::println(world_screen_size);
+	dprint( "args.world_camera_focus: " ) Mylib::Math::println(args.world_camera_focus);
+	dprint( "world_camera: " ) Mylib::Math::println(world_camera);
+exit(1);
+#endif
+
+	Matrix4d translate_subtract_one;
+	translate_subtract_one.set_translate( Vector(-1.0f, -1.0f) );
+//	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
+
+	Matrix4d translate_to_clip_init;
+	translate_to_clip_init.set_translate(clip_init);
+//	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
+
+	Matrix4d translate_camera;
+	translate_camera.set_translate(-world_camera);
+//	dprintln( "translation matrix:" ) translate_camera.println();
+
+	Matrix4d scale;
+	scale.set_scale(Vector(this->scale_factor, -this->scale_factor));
+//	dprintln( "scale matrix:" ) Mylib::Math::println(scale);
+//exit(1);
+
+	this->projection_matrix = ((translate_subtract_one * translate_to_clip_init) * scale) * translate_camera;
+	//this->projection_matrix = scale * translate_camera;
+	//dprintln( "final matrix:" ) this->projection_matrix.println();
 }
 
-void Opengl::CircleFactory::fill_vertex_buffer (const float radius, float *x, float *y, const uint32_t stride) const
+void Graphics::Opengl::Renderer::render ()
 {
-	uint32_t j;
-	float previous_x, previous_y;
+#ifdef DEBUG_SHOW_CENTER_LINE
+{
 
-	/*
-		For each triangle:
-			- first vertex is the center (0.0f, 0.0f)
-			- second vertex is the previous calculated vertex (from previous triangle)
-			- third vertex is the new vertex
-	*/
-
-	// for the first triangle
-	previous_x = radius;
-	previous_y = 0.0f;
-
-	j = 0;
-	for (uint32_t i=0; i<this->n_triangles; i++) {
-		// first vertex
-		x[j] = 0.0f;
-		y[j] = 0.0f;
-
-		j += stride;
-
-		// second vertex
-		x[j] = previous_x;
-		y[j] = previous_y;
-
-		j += stride;
-
-		// third vertex
-		x[j] = this->table_cos[i] * radius;
-		y[j] = this->table_sin[i] * radius;
-
-		previous_x = x[j];
-		previous_y = y[j];
-
-		j += stride;
-	}
 }
-
-void Opengl::ProjectionMatrix::setup (const Args&& args)
-{
-	ProjectionMatrix& m = *this;
-
-	m(0,0) = 2.0f / (args.right - args.left);
-	m(0,1) = 0.0f;
-	m(0,2) = 0.0f;
-	m(0,3) = 0.0f;
-
-	m(1,0) = 0.0f;
-	m(1,1) = 2.0f / (args.top - args.bottom);
-	m(1,2) = 0.0f;
-	m(1,3) = 0.0f;
-
-	m(2,0) = 0.0f;
-	m(2,1) = 0.0f;
-	m(2,2) = -2.0f / (args.zfar - args.znear);
-	m(2,3) = 0.0f;
-
-	m(3,0) = -(args.right + args.left) / (args.right - args.left);
-	m(3,1) = -(args.top + args.bottom) / (args.top - args.bottom);
-	m(3,2) = -(args.zfar + args.znear) / (args.zfar - args.znear);
-	m(3,3) = 1.0f;
+#endif
+	this->program_triangle->upload_projection_matrix(this->projection_matrix);
+	this->program_triangle->upload_vertex_buffer();
+	this->program_triangle->draw();
+	SDL_GL_SwapWindow(this->sdl_window);
 }

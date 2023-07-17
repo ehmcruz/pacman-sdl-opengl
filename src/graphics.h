@@ -18,6 +18,7 @@
 #include <my-lib/math-matrix.h>
 #include <my-lib/math-vector.h>
 
+#include "config.h"
 #include "lib.h"
 
 // ---------------------------------------------------
@@ -214,6 +215,11 @@ public:
 	virtual void setup_projection_matrix (const ProjectionMatrixArgs& args) = 0;
 	virtual void render () = 0;
 };
+
+// ---------------------------------------------------
+
+Renderer* init (Renderer::Type renderer_type, uint32_t screen_width_px, uint32_t screen_height_px);
+void quit (Renderer *renderer, Renderer::Type renderer_type);
 
 // ---------------------------------------------------
 
