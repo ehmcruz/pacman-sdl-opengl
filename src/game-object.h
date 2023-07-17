@@ -29,108 +29,6 @@ class Object;
 
 // ---------------------------------------------------
 
-class Shape
-{
-public:
-	enum class Type {
-		Circle,
-		Rect
-	};
-protected:
-	OO_ENCAPSULATE_READONLY(Type, type)
-	OO_ENCAPSULATE(const Object*, object)
-
-	// distance from the center of the shape to the center of the object
-	OO_ENCAPSULATE_REFERENCE(Vector, delta)
-
-public:
-	inline Shape (const Type type_, const Object *object_)
-		: type(type_), object(object_)
-	{
-		this->delta = {0.0f, 0.0f};
-	}
-
-	inline Shape (const Type type_)
-		: Shape (type_, nullptr)
-	{
-	}
-
-	inline float get_dx () const
-	{
-		return this->delta.x;
-	}
-
-	inline float get_dy () const
-	{
-		return this->delta.y;
-	}
-
-	inline void set_dx (const float dx)
-	{
-		this->delta.x = dx;
-	}
-
-	inline void set_dy (const float dy)
-	{
-		this->delta.y = dy;
-	}
-};
-
-// ---------------------------------------------------
-
-class ShapeCircle: public Shape
-{
-protected:
-	OO_ENCAPSULATE(float, radius)
-
-public:
-	inline ShapeCircle (const Object *object_, const float radius_)
-		: Shape (Type::Circle, object_),
-		  radius(radius_)
-	{
-		//dprint( "circle created r=" << this->radius << std::endl )
-	}
-
-	inline ShapeCircle (const float radius_)
-		: ShapeCircle (nullptr, radius_)
-	{
-	}
-
-	inline ShapeCircle ()
-		: ShapeCircle (nullptr, 0.0f)
-	{
-	}
-};
-
-// ---------------------------------------------------
-
-class ShapeRect: public Shape
-{
-protected:
-	OO_ENCAPSULATE(float, w)
-	OO_ENCAPSULATE(float, h)
-
-public:
-	inline ShapeRect (const Object *object_, const float w_, const float h_)
-		: Shape (Type::Rect, object_),
-		  w(w_), h(h_)
-	{
-		//dprint( "rect created w=" << this->w << " h=" << this->h << std::endl )
-	}
-
-	inline ShapeRect (const float w_, const float h_)
-		: ShapeRect (nullptr, w_, h_)
-	{
-	}
-
-	inline ShapeRect ()
-		: ShapeRect (nullptr, 0.0f, 0.0f)
-	{
-	}
-};
-
-// ---------------------------------------------------
-
 class Object
 {
 public:
@@ -217,7 +115,7 @@ namespace Events {
 class Player: public Object
 {
 protected:
-	ShapeCircle shape;
+	Graphics::ShapeCircle shape;
 	Direction target_direction;
 	Graphics::Color color;
 	//Graphics::Color base_color;
@@ -240,7 +138,7 @@ public:
 class Ghost: public Object
 {
 protected:
-	ShapeCircle shape;
+	Graphics::ShapeCircle shape;
 	Graphics::Color color;
 	ClockTime time_last_turn;
 	ClockDuration time_between_turns;

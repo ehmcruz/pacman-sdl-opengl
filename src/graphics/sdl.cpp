@@ -90,7 +90,7 @@ void Graphics::SDL::Renderer::wait_next_frame ()
 	SDL_RenderClear(this->renderer);
 }
 
-void Graphics::SDL::Renderer::draw_circle (const Game::ShapeCircle& circle, const Vector& offset, const Graphics::Color& color)
+void Graphics::SDL::Renderer::draw_circle (const ShapeCircle& circle, const Vector& offset, const Graphics::Color& color)
 {
 	const SDL_Color sdl_color = color;
 	const Vector world_pos = offset + circle.get_delta();
@@ -110,7 +110,7 @@ void Graphics::SDL::Renderer::draw_circle (const Game::ShapeCircle& circle, cons
 		);
 }
 
-void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vector& offset, const Graphics::Color& color)
+void Graphics::SDL::Renderer::draw_rect (const ShapeRect& rect, const Vector& offset, const Graphics::Color& color)
 {
 	SDL_Rect sdl_rect;
 	const SDL_Color sdl_color = color;
@@ -137,7 +137,7 @@ void Graphics::SDL::Renderer::draw_rect (const Game::ShapeRect& rect, const Vect
 	SDL_RenderFillRect(this->renderer, &sdl_rect);
 }
 
-void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArgs&& args)
+void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArgs& args)
 {
 	const float max_value = static_cast<float>( std::max(this->window_width_px, this->window_height_px) );
 	const Vector clip_init = args.clip_init_norm * max_value;

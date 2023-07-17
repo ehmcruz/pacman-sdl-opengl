@@ -59,9 +59,9 @@ public:
 	~Renderer ();
 
 	void wait_next_frame () override;
-	virtual void draw_circle (const Game::ShapeCircle& circle, const Vector& offset, const Graphics::Color& color) override;
-	virtual void draw_rect (const Game::ShapeRect& rect, const Vector& offset, const Graphics::Color& color) override;
-	virtual void setup_projection_matrix (const ProjectionMatrixArgs&& args) override;
+	virtual void draw_circle (const ShapeCircle& circle, const Vector& offset, const Graphics::Color& color) override;
+	virtual void draw_rect (const ShapeRect& rect, const Vector& offset, const Graphics::Color& color) override;
+	virtual void setup_projection_matrix (const ProjectionMatrixArgs& args) override;
 	virtual void render () override;
 };
 

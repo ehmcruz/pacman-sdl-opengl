@@ -33,13 +33,14 @@ void Game::Object::physics (const float dt, const Uint8 *keys)
 
 Game::Player::Player (World *world_)
 	: Object(world_),
-	  shape(this, Config::pacman_radius)
+	  shape(Config::pacman_radius)
 {
 	this->name = "Player";
 	this->pos = Vector(0.0f, 0.0f);
 	this->vel = Vector(0.0f, 0.0f);
 	this->direction = Direction::Stopped;
 	this->target_direction = Direction::Stopped;
+	this->shape.user_data = this;
 
 	//this->base_color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
 	//this->color = this->base_color;
@@ -168,7 +169,7 @@ void Game::Player::update_color ()
 
 Game::Ghost::Ghost (World *world_)
 	: Object(world_),
-	  shape(this, Config::ghost_radius)
+	  shape(Config::ghost_radius)
 {
 	static Graphics::Color ghosts_colors[] = {
 		{ .r = 0.5f, .g = 0.1f, .b = 0.0f, .a = 1.0f },
@@ -182,6 +183,7 @@ Game::Ghost::Ghost (World *world_)
 	this->direction = Direction::Stopped;
 	this->time_last_turn = this->world->get_time_create();
 	this->time_between_turns = ClockDuration(Config::ghost_time_between_turns);
+	this->shape.user_data = this;
 
 	this->color = ghosts_colors[ ghost_i % (sizeof(ghosts_colors) / sizeof(Graphics::Color)) ];
 	ghost_i++;

@@ -319,7 +319,7 @@ void Game::World::change_wall_color (Events::Timer::Event& event)
 
 void Game::World::render_map ()
 {
-	const ShapeRect rect(Config::map_tile_size, Config::map_tile_size);
+	const Graphics::ShapeRect rect(Config::map_tile_size, Config::map_tile_size);
 	const uint32_t n_rects = this->map.get_n_walls();
 	Vector offset;
 
@@ -337,7 +337,7 @@ void Game::World::render_map ()
 
 void Game::World::render_box()
 {
-	ShapeRect rect;
+	Graphics::ShapeRect rect;
 	Vector offset;
 	float w, h;
 	const Graphics::Color color = { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
@@ -346,7 +346,7 @@ void Game::World::render_box()
 	w = this->border_thickness;
 	h = ws.y;
 	offset.set(w*0.5f, ws.y*0.5f);
-	rect = ShapeRect(w, h);
+	rect = Graphics::ShapeRect(w, h);
 	renderer->draw_rect(rect, offset, color);
 
 	offset.set(ws.x - w*0.5f, ws.y*0.5f);
@@ -355,7 +355,7 @@ void Game::World::render_box()
 	w = ws.x;
 	h = this->border_thickness;
 	offset.set(ws.x*0.5f, h*0.5f);
-	rect = ShapeRect(w, h);
+	rect = Graphics::ShapeRect(w, h);
 	renderer->draw_rect(rect, offset, color);
 
 	offset.set(ws.x*0.5f, ws.y - h*0.5f);

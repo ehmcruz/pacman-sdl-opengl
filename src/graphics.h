@@ -14,6 +14,7 @@
 
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
+#include <my-lib/any.h>
 #include <my-lib/math-matrix.h>
 #include <my-lib/math-vector.h>
 
@@ -34,6 +35,95 @@ namespace Graphics
 using Game::Vector;
 using Mylib::Math::Matrix4d;
 using Mylib::Math::Vector4d;
+
+// ---------------------------------------------------
+
+class Shape
+{
+public:
+	// let the user store a pointer for what he wants
+	Mylib::Any<sizeof(void*), sizeof(void*)> user_data;
+
+	enum class Type {
+		Circle,
+		Rect
+	};
+protected:
+	OO_ENCAPSULATE_READONLY(Type, type)
+
+	// distance from the center of the shape to the center of the object
+	OO_ENCAPSULATE_REFERENCE(Vector, delta)
+
+public:
+	inline Shape (const Type type_)
+		: type(type_)
+	{
+		this->delta = {0.0f, 0.0f};
+	}
+
+	inline float get_dx () const
+	{
+		return this->delta.x;
+	}
+
+	inline float get_dy () const
+	{
+		return this->delta.y;
+	}
+
+	inline void set_dx (const float dx)
+	{
+		this->delta.x = dx;
+	}
+
+	inline void set_dy (const float dy)
+	{
+		this->delta.y = dy;
+	}
+};
+
+// ---------------------------------------------------
+
+class ShapeCircle: public Shape
+{
+protected:
+	OO_ENCAPSULATE(float, radius)
+
+public:
+	inline ShapeCircle (const float radius_)
+		: Shape (Type::Circle),
+		  radius(radius_)
+	{
+		//dprint( "circle created r=" << this->radius << std::endl )
+	}
+
+	inline ShapeCircle ()
+		: ShapeCircle (0.0f)
+	{
+	}
+};
+
+// ---------------------------------------------------
+
+class ShapeRect: public Shape
+{
+protected:
+	OO_ENCAPSULATE(float, w)
+	OO_ENCAPSULATE(float, h)
+
+public:
+	inline ShapeRect (const float w_, const float h_)
+		: Shape (Type::Rect),
+		  w(w_), h(h_)
+	{
+		//dprint( "rect created w=" << this->w << " h=" << this->h << std::endl )
+	}
+
+	inline ShapeRect ()
+		: ShapeRect (0.0f, 0.0f)
+	{
+	}
+};
 
 // ---------------------------------------------------
 
@@ -119,9 +209,9 @@ public:
 	}
 
 	virtual void wait_next_frame () = 0;
-	virtual void draw_circle (const Game::ShapeCircle& circle, const Vector& offset, const Color& color) = 0;
-	virtual void draw_rect (const Game::ShapeRect& rect, const Vector& offset, const Color& color) = 0;
-	virtual void setup_projection_matrix (const ProjectionMatrixArgs&& args) = 0;
+	virtual void draw_circle (const ShapeCircle& circle, const Vector& offset, const Color& color) = 0;
+	virtual void draw_rect (const ShapeRect& rect, const Vector& offset, const Color& color) = 0;
+	virtual void setup_projection_matrix (const ProjectionMatrixArgs& args) = 0;
 	virtual void render () = 0;
 };
 
