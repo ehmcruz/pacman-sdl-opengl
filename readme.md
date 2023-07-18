@@ -9,10 +9,6 @@ For now, it works on the following platforms:
 
 I intend to extend it to Android latter.
 
-IMPORTANT!  
-Opengl support still not working!  
-Only SDL renderer for now!
-
 # Overall dependencies
 
 To compile, you need a C++23 capable compiler and the following libraries:
@@ -71,3 +67,9 @@ Should be easy to compile in Microsoft compiler as well.
 ## Running in Windows
 
 Just execute **pacman.exe**
+
+---
+
+# Known bugs
+
+- When setting a high zoom level, the camera seems not to be focusing correctly when PACMAN is near the borders.
