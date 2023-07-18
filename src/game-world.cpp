@@ -129,9 +129,7 @@ void Game::Main::run ()
 {
 	SDL_Event event;
 	const Uint8 *keys;
-	ClockTime tbegin, tend;
-	ClockDuration elapsed;
-	float real_dt, virtual_dt, required_dt, sleep_dt;
+	float real_dt, virtual_dt, required_dt, sleep_dt, busy_wait_dt, fps;
 
 	this->state = State::playing;
 
@@ -141,9 +139,13 @@ void Game::Main::run ()
 	virtual_dt = 0.0f;
 	required_dt = 0.0f;
 	sleep_dt = 0.0f;
+	busy_wait_dt = 0.0f;
+	fps = 0.0f;
 
 	while (this->alive) {
-		tbegin = Clock::now();
+		const ClockTime tbegin = Clock::now();
+		ClockTime tend;
+		ClockDuration elapsed;
 
 		renderer->wait_next_frame();
 
@@ -151,7 +153,7 @@ void Game::Main::run ()
 
 		virtual_dt = (real_dt > Config::max_dt) ? Config::max_dt : real_dt;
 
-		//dprintln( "start new frame render required_dt=" << required_dt << " real_dt=" << real_dt << " sleep_dt=" << sleep_dt << " virtual_dt=" << virtual_dt << " max_dt=" << Config::max_dt )
+		//dprintln( "start new frame render target_dt=" << Config::target_dt << " required_dt=" << required_dt << " real_dt=" << real_dt << " sleep_dt=" << sleep_dt << " busy_wait_dt=" << busy_wait_dt << " virtual_dt=" << virtual_dt << " max_dt=" << Config::max_dt << " target_dt=" << Config::target_dt << " fps=" << fps )
 
 		while ( SDL_PollEvent( &event ) ) {
 			switch (event.type) {
@@ -165,11 +167,6 @@ void Game::Main::run ()
 			}
 		}
 
-		//glBufferData( GL_ARRAY_BUFFER, sizeof(Vertex) * circle_factory.get_n_vertices(), g_vertex_buffer_data, GL_DYNAMIC_DRAW );
-
-		//glBindVertexArray( vao );
-		//glDrawArrays( GL_TRIANGLES, 0, circle_factory.get_n_vertices() );
-
 		switch (this->state) {
 			case State::playing:
 				this->world->physics(virtual_dt, keys);
@@ -182,24 +179,36 @@ void Game::Main::run ()
 
 		renderer->render();
 
-		tend = Clock::now();
-		elapsed = tend - tbegin;
-		required_dt = elapsed.count();
+		const ClockTime trequired = Clock::now();
+		elapsed = trequired - tbegin;
+		required_dt = ClockDuration_to_float(elapsed);
 
-		if (required_dt < Config::sleep_threshold) {
-			sleep_dt = Config::sleep_threshold - required_dt;
-			uint32_t delay = static_cast<uint32_t>(sleep_dt * 1000.0f);
-			//dprintln( "sleeping for " << delay << "ms..." )
-			SDL_Delay(delay);
+		if constexpr (Config::sleep_to_save_cpu) {
+			if (required_dt < Config::sleep_threshold) {
+				sleep_dt = Config::sleep_threshold - required_dt; // target sleep time
+				const uint32_t delay = static_cast<uint32_t>(sleep_dt * 1000.0f);
+				//dprintln( "sleeping for " << delay << "ms..." )
+				SDL_Delay(delay);
+			}
 		}
-		else
-			sleep_dt = 0.0f;
+		
+		const ClockTime tbefore_busy_wait = Clock::now();
+		elapsed = tbefore_busy_wait - trequired;
+		sleep_dt = ClockDuration_to_float(elapsed); // check exactly time sleeping
 
 		do {
 			tend = Clock::now();
 			elapsed = tend - tbegin;
-			real_dt = elapsed.count();
+			real_dt = ClockDuration_to_float(elapsed);
+
+			if constexpr (!Config::busy_wait_to_ensure_fps)
+				break;
 		} while (real_dt < Config::target_dt);
+
+		elapsed = tend - tbefore_busy_wait;
+		busy_wait_dt = ClockDuration_to_float(elapsed);
+
+		fps = 1.0f / real_dt;
 	}
 }
 
@@ -239,7 +248,7 @@ Game::World::World ()
 
 	this->wall_color = Graphics::Color { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f };
 	
-	this->event_timer_wall_color_d = Events::timer.schedule_event(Clock::now() + ClockDuration(Config::map_tile_color_change_time), Mylib::Trigger::make_callback_object<Events::Timer::Event>(*this, &World::change_wall_color));
+	this->event_timer_wall_color_d = Events::timer.schedule_event(Clock::now() + float_to_ClockDuration(Config::map_tile_color_change_time), Mylib::Trigger::make_callback_object<Events::Timer::Event>(*this, &World::change_wall_color));
 }
 
 Game::World::~World ()
@@ -308,7 +317,7 @@ void Game::World::change_wall_color (Events::Timer::Event& event)
 		};
 
 	event.re_schedule = true;
-	event.time = Clock::now() + ClockDuration(Config::map_tile_color_change_time);
+	event.time = Clock::now() + float_to_ClockDuration(Config::map_tile_color_change_time);
 }
 
 void Game::World::render_map ()

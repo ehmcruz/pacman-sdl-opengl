@@ -10,6 +10,10 @@ namespace Config
 
 // ---------------------------------------------------
 
+inline constexpr bool sleep_to_save_cpu = true;
+
+inline constexpr bool busy_wait_to_ensure_fps = true;
+
 inline constexpr uint32_t default_window_width_px = 700;
 
 inline constexpr uint32_t default_window_height_px = 700;
@@ -39,7 +43,7 @@ inline constexpr float target_dt = 1.0f / target_fps;
 
 inline constexpr float max_dt = 1.0f / min_fps;
 
-inline constexpr float sleep_threshold = max_dt * 0.9f;
+inline constexpr float sleep_threshold = target_dt * 0.9f;
 
 inline constexpr float pacman_max_delta_per_cycle = pacman_speed * max_dt;
 

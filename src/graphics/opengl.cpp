@@ -377,7 +377,7 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 
 	Vector world_camera = args.world_camera_focus - Vector(world_screen_size.x*0.5f, world_screen_size.y*0.5f);
 
-	dprintln( "------------------------------" )
+	//dprintln( "------------------------------" )
 	//dprint( "world_camera PRE: " ) Mylib::Math::println(world_camera);
 
 	if (args.force_camera_inside_world) {
@@ -394,7 +394,7 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 			world_camera.y = args.world_end.y - world_screen_size.y;
 	}
 
-#if 1
+#if 0
 	dprint( "normalized_clip_init: " ) Mylib::Math::println(normalized_clip_init);
 	dprint( "normalized_clip_end: " ) Mylib::Math::println(normalized_clip_end);
 	dprint( "normalized_clip_size: " ) Mylib::Math::println(normalized_clip_size);

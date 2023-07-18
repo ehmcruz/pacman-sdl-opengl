@@ -15,12 +15,23 @@ namespace Game
 
 // ---------------------------------------------------
 
-using Clock = std::chrono::steady_clock;
-using ClockDuration = std::chrono::duration<float>;
-//using ClockTime = Clock::time_point;
-using ClockTime = std::chrono::time_point<Clock, ClockDuration>;
-
 using Vector = Mylib::Math::Vector2d;
+
+// ---------------------------------------------------
+
+using Clock = std::chrono::steady_clock;
+using ClockDuration = Clock::duration;
+using ClockTime = Clock::time_point;
+
+inline ClockDuration float_to_ClockDuration (const float t)
+{
+	return std::chrono::duration_cast<ClockDuration>(std::chrono::duration<float>(t));
+}
+
+inline float ClockDuration_to_float (const ClockDuration& d)
+{
+	return std::chrono::duration_cast<std::chrono::duration<float>>(d).count();
+}
 
 // ---------------------------------------------------
 

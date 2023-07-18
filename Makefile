@@ -9,7 +9,7 @@ MYLIB = ../my-lib
 
 # Windows
 CPPFLAGS_WINDOWS = -DCONFIG_TARGET_WINDOWS=1 -std=c++23 `sdl2-config --cflags` -I$(MYLIB)/include -g -mconsole #-O2
-LDFLAGS_WINDOWS = -std=c++23 `sdl2-config --libs` -mconsole -lm -lboost_program_options
+LDFLAGS_WINDOWS = -std=c++23 `sdl2-config --libs` -mconsole -lm -lboost_program_options-mt
 
 # Linux
 CPPFLAGS_LINUX = -DCONFIG_TARGET_LINUX=1 -std=c++23 `sdl2-config --cflags` -I$(MYLIB)/include -g #-O2

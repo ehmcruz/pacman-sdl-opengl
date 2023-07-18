@@ -182,7 +182,7 @@ Game::Ghost::Ghost (World *world_)
 	this->vel = Vector(0.0f, 0.0f);
 	this->direction = Direction::Stopped;
 	this->time_last_turn = this->world->get_time_create();
-	this->time_between_turns = ClockDuration(Config::ghost_time_between_turns);
+	this->time_between_turns = float_to_ClockDuration(Config::ghost_time_between_turns);
 	this->shape.user_data = this;
 
 	this->color = ghosts_colors[ ghost_i % (sizeof(ghosts_colors) / sizeof(Graphics::Color)) ];

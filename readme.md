@@ -57,10 +57,12 @@ You will need the following packages in MSYS2:
 - mingw-w64-ucrt-x86_64-pkg-config
 - mingw-w64-ucrt-x86_64-glfw (I need to confirm if this one is actually required)
 - mingw-w64-ucrt-x86_64-glew
+- mingw-w64-ucrt-x86_64-boost
 
 Then, to compile:
 
-**make CONFIG_TARGET_WINDOWS=1**
+- For SDL Renderer only: **make CONFIG_TARGET_WINDOWS=1**
+- To also support Opengl: **make CONFIG_TARGET_WINDOWS=1 PACMAN_SUPPORT_OPENGL=1**
 
 Should be easy to compile in Microsoft compiler as well.
 
