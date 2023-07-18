@@ -13,6 +13,7 @@ I intend to extend it to Android latter.
 
 To compile, you need a C++23 capable compiler and the following libraries:
 
+- SDL
 - Opengl
 - My-lib (https://github.com/ehmcruz/my-lib). The Makefile is configured to search **my-lib** in the same parent folder as this repository. If you put somewhere else, just modify the Makefile.
 
@@ -39,6 +40,8 @@ Then, to compile:
 ## Running in Linux
 
 **./pacman**
+
+For help: **./pacman --help**
 
 ---
 
@@ -69,6 +72,8 @@ Should be easy to compile in Microsoft compiler as well.
 ## Running in Windows
 
 Just execute **pacman.exe**
+
+For help: **pacman.exe --help**
 
 ---
 
