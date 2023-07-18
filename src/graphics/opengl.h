@@ -161,7 +161,7 @@ protected:
 public:
 	ProgramTriangle ();
 
-	consteval static uint32_t get_stride ()
+	consteval static uint32_t get_stride_in_floats ()
 	{
 		return (sizeof(Vertex) / sizeof(GLfloat));
 	}
@@ -195,7 +195,6 @@ protected:
 	SDL_GLContext sdl_gl_context;
 	Color background_color;
 	Matrix4d projection_matrix;
-	float scale_factor;
 
 	ProgramTriangle *program_triangle;
 	CircleFactory *circle_factory_low_def;

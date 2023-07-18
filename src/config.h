@@ -10,13 +10,11 @@ namespace Config
 
 // ---------------------------------------------------
 
-inline constexpr uint32_t screen_width_px = 700;
+inline constexpr uint32_t default_window_width_px = 700;
 
-inline constexpr uint32_t screen_height_px = 700;
+inline constexpr uint32_t default_window_height_px = 700;
 
-inline constexpr uint32_t opengl_low_def_triangles = 64;
-
-inline constexpr uint32_t opengl_high_def_triangles = 1024;
+inline constexpr float default_zoom = 1.0f;
 
 inline constexpr float border_thickness_screen_fraction = 0.05f;
 
@@ -50,7 +48,6 @@ inline constexpr float pacman_turn_threshold = pacman_max_delta_per_cycle * 1.0f
 // ---------------------------------------------------
 
 } // end namespace Config
-
 } // end namespace Game
 
 #endif

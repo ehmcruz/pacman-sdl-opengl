@@ -97,17 +97,17 @@ void Game::Main::deallocate ()
 	delete instance;
 }
 
-void Game::Main::load (Graphics::Renderer::Type renderer_type)
+void Game::Main::load (const InitConfig& cfg)
 {
 	std::cout << std::setprecision(4);
 	std::cout << std::fixed;
 
 	this->state = State::initializing;
-	this->renderer_type = renderer_type;
+	this->cfg_params = cfg;
 
 	SDL_Init( SDL_INIT_VIDEO );
 
-	renderer = Graphics::init(this->renderer_type, Config::screen_width_px, Config::screen_height_px);
+	renderer = Graphics::init(cfg.renderer_type, cfg.window_width_px, cfg.window_height_px);
 
 	dprint( "chorono resolution " << (static_cast<float>(Clock::period::num) / static_cast<float>(Clock::period::den)) << std::endl );
 
@@ -121,7 +121,7 @@ void Game::Main::load (Graphics::Renderer::Type renderer_type)
 
 void Game::Main::cleanup ()
 {
-	Graphics::quit(renderer, this->renderer_type);
+	Graphics::quit(renderer, this->cfg_params.renderer_type);
 	SDL_Quit();
 }
 
@@ -360,15 +360,22 @@ void Game::World::render (const float dt)
 {
 	const Vector ws = renderer->get_normalized_window_size();
 
+	/*renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
+		.clip_init_norm = Vector(this->border_thickness, this->border_thickness),
+		.clip_end_norm = Vector(ws.x - this->border_thickness, ws.y - this->border_thickness),
+		.world_init = Vector(0.0f, 0.0f),
+		.world_end = Vector(this->w, this->h),
+		.world_camera_focus = player.get_pos(),
+		.world_screen_width = this->w * (1.0f / Main::get()->get_cfg_params().zoom)
+		} );*/
+	
 	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
-		//.clip_init_norm = Vector(this->border_thickness, this->border_thickness),
-		//.clip_end_norm = Vector(ws.x - this->border_thickness, ws.y - this->border_thickness),
 		.clip_init_norm = Vector(0.0f, 0.0f),
 		.clip_end_norm = Vector(ws.x, ws.y),
 		.world_init = Vector(0.0f, 0.0f),
 		.world_end = Vector(this->w, this->h),
 		.world_camera_focus = player.get_pos(),
-		.world_screen_width = this->w
+		.world_screen_width = this->w * (1.0f / Main::get()->get_cfg_params().zoom)
 		} );
 
 	this->render_map();

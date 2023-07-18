@@ -255,9 +255,31 @@ void Graphics::Opengl::Renderer::wait_next_frame ()
 
 void Graphics::Opengl::Renderer::draw_circle (const ShapeCircle& circle, const Vector& offset, const Graphics::Color& color)
 {
-	Graphics::ShapeRect rect(circle.get_radius()*2.0f, circle.get_radius()*2.0f);
+	/*Graphics::ShapeRect rect(circle.get_radius()*2.0f, circle.get_radius()*2.0f);
 	rect.set_delta(circle.get_delta());
-	this->draw_rect(rect, circle.get_delta(), color);
+	this->draw_rect(rect, offset, color);*/
+
+	const Vector local_pos = circle.get_delta();
+	const uint32_t n_vertices = this->circle_factory_low_def->get_n_vertices();
+	ProgramTriangle::Vertex *vertices = this->program_triangle->alloc_vertices(n_vertices);
+
+	this->circle_factory_low_def->fill_vertex_buffer(
+		circle.get_radius(),
+		&vertices[0].x,
+		&vertices[0].y,
+		ProgramTriangle::get_stride_in_floats()
+		);
+
+	for (uint32_t i=0; i<n_vertices; i++) {
+		vertices[i].x += local_pos.x;
+		vertices[i].y += local_pos.y;
+		vertices[i].offset_x = offset.x;
+		vertices[i].offset_y = offset.y;
+		vertices[i].r = color.r;
+		vertices[i].g = color.g;
+		vertices[i].b = color.b;
+		vertices[i].a = color.a;
+	}
 }
 
 void Graphics::Opengl::Renderer::draw_rect (const ShapeRect& rect, const Vector& offset, const Graphics::Color& color)
@@ -331,13 +353,13 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 
 	const Vector world_screen_size = Vector(world_screen_width, world_screen_height);
 
-	this->scale_factor = clip_size.x / world_screen_size.x;
+	const Vector scale_factor = Vector(clip_size.x / world_screen_size.x, clip_size.x / world_screen_size.x);
 
 	Vector world_camera = args.world_camera_focus - Vector(world_screen_size.x*0.5f, world_screen_size.y*0.5f);
 
 	dprint( "world_camera PRE: " ) Mylib::Math::println(world_camera);
 
-#if 0
+#if 1
 	if (world_camera.x < args.world_init.x)
 		world_camera.x = args.world_init.x;
 	else if ((world_camera.x + world_screen_size.x) > args.world_end.x)
@@ -356,16 +378,16 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 	dprint( "clip_end: " ) Mylib::Math::println(clip_end);
 	dprint( "clip_size: " ) Mylib::Math::println(clip_size);
 	dprintln( "clip_aspect_ratio: " << clip_aspect_ratio )
-	dprintln( "scale_factor: " << this->scale_factor )
+	dprint( "scale_factor: " ) Mylib::Math::println(scale_factor);
 	dprint( "world_size: " ) Mylib::Math::println(world_size);
 	dprint( "world_screen_size: " ) Mylib::Math::println(world_screen_size);
 	dprint( "args.world_camera_focus: " ) Mylib::Math::println(args.world_camera_focus);
 	dprint( "world_camera: " ) Mylib::Math::println(world_camera);
-exit(1);
+//exit(1);
 #endif
 
 	Matrix4d translate_subtract_one;
-	translate_subtract_one.set_translate( Vector(-1.0f, -1.0f) );
+	translate_subtract_one.set_translate( Vector(-1.0f, +1.0f) );
 //	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
 
 	Matrix4d translate_to_clip_init;
@@ -377,7 +399,7 @@ exit(1);
 //	dprintln( "translation matrix:" ) translate_camera.println();
 
 	Matrix4d scale;
-	scale.set_scale(Vector(this->scale_factor, -this->scale_factor));
+	scale.set_scale(Vector(scale_factor.x, -scale_factor.y));
 //	dprintln( "scale matrix:" ) Mylib::Math::println(scale);
 //exit(1);
 

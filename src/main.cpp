@@ -11,8 +11,15 @@
 #include "game-world.h"
 #include "graphics.h"
 #include "lib.h"
+#include "config.h"
 
-static Graphics::Renderer::Type renderer_type = Graphics::Renderer::Type::SDL; // default
+// initialize with default values
+static Game::Main::InitConfig cfg = {
+	.renderer_type = Graphics::Renderer::Type::SDL,
+	.window_width_px = Game::Config::default_window_width_px,
+	.window_height_px = Game::Config::default_window_height_px,
+	.zoom = Game::Config::default_zoom,
+};
 
 static bool str_i_equals (const std::string_view& a, const std::string_view& b)
 {
@@ -41,8 +48,17 @@ static void process_args (int argc, char **argv)
 		cmd_line_args.add_options()
 			( "help,h", "Help screen" )
 			( "video,v",
-				boost::program_options::value<std::string>()->default_value( Graphics::Renderer::get_type_str(renderer_type) ),
+				boost::program_options::value<std::string>()->default_value( Graphics::Renderer::get_type_str(cfg.renderer_type) ),
 				renderer_type_strs.c_str() )
+			( "width",
+				boost::program_options::value<uint32_t>()->default_value(cfg.window_width_px),
+				"Width of the window" )
+			( "height",
+				boost::program_options::value<uint32_t>()->default_value(cfg.window_height_px),
+				"Height of the window" )
+			( "zoom",
+				boost::program_options::value<float>()->default_value(cfg.zoom),
+				"Zoom level (should be equal or greater than 1.0)" )
 			;
 
 		boost::program_options::store(boost::program_options::parse_command_line(argc, argv, cmd_line_args), vm);
@@ -62,13 +78,28 @@ static void process_args (int argc, char **argv)
 	
 				if ( str_i_equals(vm["video"].as<std::string>(), std::string_view(s)) ) {
 					valid_type = true;
-					renderer_type = type;
+					cfg.renderer_type = type;
 					break;
 				}
 			}
 
 			if (!valid_type)
 				throw std::runtime_error("Bad video driver!");
+		}
+
+		if (vm.count("width")) {
+			cfg.window_width_px = vm["width"].as<uint32_t>();
+		}
+
+		if (vm.count("height")) {
+			cfg.window_height_px = vm["height"].as<uint32_t>();
+		}
+
+		if (vm.count("zoom")) {
+			cfg.zoom = vm["zoom"].as<float>();
+
+			if (cfg.zoom < 1.0f)
+				throw std::runtime_error("The zoom must be at least 1.0");
 		}
 	}
 	catch (const boost::program_options::error& ex) {
@@ -82,11 +113,11 @@ int main (int argc, char **argv)
 	try {
 		process_args(argc, argv);
 
-		std::cout << "Setting video renderer to " << Graphics::Renderer::get_type_str(renderer_type) << std::endl;
+		std::cout << "Setting video renderer to " << Graphics::Renderer::get_type_str(cfg.renderer_type) << std::endl;
 
 		Game::Main::allocate();
 
-		Game::Main::get()->load(renderer_type);
+		Game::Main::get()->load(cfg);
 		Game::Main::get()->run();
 		Game::Main::get()->cleanup();
 

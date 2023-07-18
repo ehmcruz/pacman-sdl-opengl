@@ -38,6 +38,13 @@ class World;
 class Main
 {
 public:
+	struct InitConfig {
+		Graphics::Renderer::Type renderer_type;
+		uint32_t window_width_px;
+		uint32_t window_height_px;
+		float zoom;
+	};
+
 	enum class State {
 		initializing,
 		playing
@@ -47,7 +54,7 @@ protected:
 	OO_ENCAPSULATE(World*, world)
 	OO_ENCAPSULATE(bool, alive)
 	OO_ENCAPSULATE_READONLY(State, state)
-	OO_ENCAPSULATE_READONLY(Graphics::Renderer::Type, renderer_type)
+	OO_ENCAPSULATE_READONLY(InitConfig, cfg_params)
 
 protected:
 	static Main *instance;
@@ -56,7 +63,7 @@ protected:
 	~Main ();
 
 public:
-	void load (Graphics::Renderer::Type renderer_type);
+	void load (const InitConfig& cfg);
 	void run ();
 	void cleanup ();
 
