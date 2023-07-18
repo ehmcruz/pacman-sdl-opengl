@@ -203,14 +203,14 @@ void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArg
 	translate_to_clip_init.set_translate(clip_init);
 //	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
 
-	Matrix4d translate_camera;
-	translate_camera.set_translate(-world_camera);
-//	dprintln( "translation matrix:" ) translate_camera.println();
-
 	Matrix4d scale;
 	scale.set_scale(Vector(this->scale_factor, this->scale_factor));
 //	dprintln( "scale matrix:" ) Mylib::Math::println(scale);
 //exit(1);
+
+	Matrix4d translate_camera;
+	translate_camera.set_translate(-world_camera);
+//	dprintln( "translation matrix:" ) translate_camera.println();
 
 	this->projection_matrix = (translate_to_clip_init * scale) * translate_camera;
 	//this->projection_matrix = scale * translate_camera;
