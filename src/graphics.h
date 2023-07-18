@@ -157,6 +157,7 @@ struct ProjectionMatrixArgs {
 	Vector world_init;
 	Vector world_end;
 
+	bool force_camera_inside_world;
 	Vector world_camera_focus;
 
 	/* This is the width in world coords that will fit in the clip_spice.

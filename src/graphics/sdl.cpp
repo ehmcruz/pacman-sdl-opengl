@@ -15,7 +15,7 @@
 
 // ---------------------------------------------------
 
-#define DEBUG_SHOW_CENTER_LINE
+//#define DEBUG_SHOW_CENTER_LINE
 
 // ---------------------------------------------------
 
@@ -158,17 +158,19 @@ void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArg
 
 	//dprint( "world_camera PRE: " ) world_camera.println();
 
-	if (world_camera.x < args.world_init.x)
-		world_camera.x = args.world_init.x;
-	else if ((world_camera.x + world_screen_size.x) > args.world_end.x)
-		world_camera.x = args.world_end.x - world_screen_size.x;
+	if (args.force_camera_inside_world) {
+		if (world_camera.x < args.world_init.x)
+			world_camera.x = args.world_init.x;
+		else if ((world_camera.x + world_screen_size.x) > args.world_end.x)
+			world_camera.x = args.world_end.x - world_screen_size.x;
 
-	//dprint( "world_camera POS: " ) Mylib::Math::println(world_camera);
+		//dprint( "world_camera POS: " ) Mylib::Math::println(world_camera);
 
-	if (world_camera.y < args.world_init.y)
-		world_camera.y = args.world_init.y;
-	else if ((world_camera.y + world_screen_size.y) > args.world_end.y)
-		world_camera.y = args.world_end.y - world_screen_size.y;
+		if (world_camera.y < args.world_init.y)
+			world_camera.y = args.world_init.y;
+		else if ((world_camera.y + world_screen_size.y) > args.world_end.y)
+			world_camera.y = args.world_end.y - world_screen_size.y;
+	}
 
 #if 0
 	dprint( "clip_init: " )

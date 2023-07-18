@@ -339,12 +339,20 @@ void Graphics::Opengl::Renderer::draw_rect (const ShapeRect& rect, const Vector&
 
 void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrixArgs& args)
 {
-	//const float max_value = static_cast<float>( std::max(this->window_width_px, this->window_height_px) );
 	const float max_value = 2.0f;
 	const Vector clip_init = args.clip_init_norm * max_value;
 	const Vector clip_end = args.clip_end_norm * max_value;
+	//const Vector clip_end = Vector(max_value, max_value);
+
 	const Vector clip_size = clip_end - clip_init;
 	const float clip_aspect_ratio = clip_size.x / clip_size.y;
+
+	float x_correction_factor;
+	
+	if (clip_size.x > clip_size.y)
+		x_correction_factor = 1.0f;
+	else
+		x_correction_factor = clip_size.y / clip_size.x;
 
 	const Vector world_size = args.world_end - args.world_init;
 	
@@ -353,25 +361,29 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 
 	const Vector world_screen_size = Vector(world_screen_width, world_screen_height);
 
-	const Vector scale_factor = Vector(clip_size.x / world_screen_size.x, clip_size.x / world_screen_size.x);
+	const Vector scale_factor = Vector(
+		(clip_size.x / world_screen_size.x * x_correction_factor),
+		(clip_size.x / world_screen_size.x) * clip_aspect_ratio * x_correction_factor
+		);
 
 	Vector world_camera = args.world_camera_focus - Vector(world_screen_size.x*0.5f, world_screen_size.y*0.5f);
 
-	dprint( "world_camera PRE: " ) Mylib::Math::println(world_camera);
+	dprintln( "------------------------------" )
+	//dprint( "world_camera PRE: " ) Mylib::Math::println(world_camera);
 
-#if 1
-	if (world_camera.x < args.world_init.x)
-		world_camera.x = args.world_init.x;
-	else if ((world_camera.x + world_screen_size.x) > args.world_end.x)
-		world_camera.x = args.world_end.x - world_screen_size.x;
+	if (args.force_camera_inside_world) {
+		if (world_camera.x < args.world_init.x)
+			world_camera.x = args.world_init.x;
+		else if ((world_camera.x + world_screen_size.x) > args.world_end.x)
+			world_camera.x = args.world_end.x - world_screen_size.x;
 
-	//dprint( "world_camera POS: " ) Mylib::Math::println(world_camera);
+		//dprint( "world_camera POS: " ) Mylib::Math::println(world_camera);
 
-	if (world_camera.y < args.world_init.y)
-		world_camera.y = args.world_init.y;
-	else if ((world_camera.y + world_screen_size.y) > args.world_end.y)
-		world_camera.y = args.world_end.y - world_screen_size.y;
-#endif
+		if (world_camera.y < args.world_init.y)
+			world_camera.y = args.world_init.y;
+		else if ((world_camera.y + world_screen_size.y) > args.world_end.y)
+			world_camera.y = args.world_end.y - world_screen_size.y;
+	}
 
 #if 1
 	dprint( "clip_init: " ) Mylib::Math::println(clip_init);
@@ -391,7 +403,7 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 //	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
 
 	Matrix4d translate_to_clip_init;
-	translate_to_clip_init.set_translate(clip_init);
+	translate_to_clip_init.set_translate( Vector(clip_init.x, -clip_init.y * clip_aspect_ratio) );
 //	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
 
 	Matrix4d translate_camera;

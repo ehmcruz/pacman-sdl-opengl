@@ -360,23 +360,25 @@ void Game::World::render (const float dt)
 {
 	const Vector ws = renderer->get_normalized_window_size();
 
-	/*renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
+	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
 		.clip_init_norm = Vector(this->border_thickness, this->border_thickness),
 		.clip_end_norm = Vector(ws.x - this->border_thickness, ws.y - this->border_thickness),
 		.world_init = Vector(0.0f, 0.0f),
 		.world_end = Vector(this->w, this->h),
+		.force_camera_inside_world = true,
 		.world_camera_focus = player.get_pos(),
 		.world_screen_width = this->w * (1.0f / Main::get()->get_cfg_params().zoom)
-		} );*/
+		} );
 	
-	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
+	/*renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
 		.clip_init_norm = Vector(0.0f, 0.0f),
 		.clip_end_norm = Vector(ws.x, ws.y),
 		.world_init = Vector(0.0f, 0.0f),
 		.world_end = Vector(this->w, this->h),
+		.force_camera_inside_world = true,
 		.world_camera_focus = player.get_pos(),
 		.world_screen_width = this->w * (1.0f / Main::get()->get_cfg_params().zoom)
-		} );
+		} );*/
 
 	this->render_map();
 
