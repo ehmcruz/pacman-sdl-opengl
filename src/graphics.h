@@ -188,6 +188,7 @@ public:
 	static const char* get_type_str (Type t);
 
 protected:
+	SDL_Window *sdl_window;
 	OO_ENCAPSULATE_READONLY(uint32_t, window_width_px)
 	OO_ENCAPSULATE_READONLY(uint32_t, window_height_px)
 	OO_ENCAPSULATE_READONLY(float, window_aspect_ratio)

@@ -191,7 +191,6 @@ public:
 class Renderer : public Graphics::Renderer
 {
 protected:
-	SDL_Window *sdl_window;
 	SDL_GLContext sdl_gl_context;
 	Color background_color;
 	Matrix4d projection_matrix;

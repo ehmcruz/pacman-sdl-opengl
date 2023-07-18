@@ -48,7 +48,6 @@ public:
 class Renderer : public Graphics::Renderer
 {
 protected:
-	SDL_Window *sdl_window;
 	SDL_Renderer *renderer;
 	SDL_Color background_color;
 	Matrix4d projection_matrix;

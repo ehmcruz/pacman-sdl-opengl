@@ -348,6 +348,7 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 	//const float max_norm_length = std::max(normalized_clip_size.x, normalized_clip_size.y);
 	//const float max_opengl_length = max_norm_length * 2.0f;
 	const float opengl_length = 2.0f;
+	const float opengl_window_aspect_ratio = this->window_aspect_ratio;
 
 	/*
 		1.0f (norm_length) -> 2.0f (opengl_length)
@@ -357,9 +358,9 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 	Vector opengl_clip_scale_mirror;
 
 	if (normalized_clip_aspect_ratio >= 1.0f)
-		opengl_clip_scale_mirror = Vector(opengl_length, opengl_length*normalized_clip_aspect_ratio);
+		opengl_clip_scale_mirror = Vector(opengl_length, opengl_length*opengl_window_aspect_ratio);
 	else
-		opengl_clip_scale_mirror = Vector(opengl_length/normalized_clip_aspect_ratio, opengl_length);
+		opengl_clip_scale_mirror = Vector(opengl_length/opengl_window_aspect_ratio, opengl_length);
 	
 	// mirror y axis
 	opengl_clip_scale_mirror.y = -opengl_clip_scale_mirror.y;
