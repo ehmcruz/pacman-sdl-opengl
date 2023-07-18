@@ -345,21 +345,24 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 	const Vector normalized_clip_size = normalized_clip_end - normalized_clip_init;
 	const float normalized_clip_aspect_ratio = normalized_clip_size.x / normalized_clip_size.y;
 
-	const float max_norm_length = std::max(normalized_clip_size.x, normalized_clip_size.y);
+	//const float max_norm_length = std::max(normalized_clip_size.x, normalized_clip_size.y);
 	//const float max_opengl_length = max_norm_length * 2.0f;
-	const float max_opengl_length = 2.0f;
+	const float opengl_length = 2.0f;
 
 	/*
-		1.0f -> 2.0f
-		v    -> max_norm_size
+		1.0f (norm_length) -> 2.0f (opengl_length)
+		norm_coord -> opengl_coord
 	*/
 
-	Vector opengl_clip_scale;
+	Vector opengl_clip_scale_mirror;
 
 	if (normalized_clip_aspect_ratio >= 1.0f)
-		opengl_clip_scale = Vector(max_opengl_length, -max_opengl_length*normalized_clip_aspect_ratio);
+		opengl_clip_scale_mirror = Vector(opengl_length, opengl_length*normalized_clip_aspect_ratio);
 	else
-		opengl_clip_scale = Vector(max_opengl_length/normalized_clip_aspect_ratio, -max_opengl_length);
+		opengl_clip_scale_mirror = Vector(opengl_length/normalized_clip_aspect_ratio, opengl_length);
+	
+	// mirror y axis
+	opengl_clip_scale_mirror.y = -opengl_clip_scale_mirror.y;
 
 	const Vector world_size = args.world_end - args.world_init;
 	
@@ -396,9 +399,9 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 	dprint( "normalized_clip_size: " ) Mylib::Math::println(normalized_clip_size);
 	dprintln( "normalized_clip_aspect_ratio: " << normalized_clip_aspect_ratio )
 	dprintln( "normalized_scale_factor: " << normalized_scale_factor )
-	dprintln( "max_norm_length: " << max_norm_length )
-	dprintln( "max_opengl_length: " << max_opengl_length )
-	dprint( "opengl_clip_scale: " ) Mylib::Math::println(opengl_clip_scale);
+	//dprintln( "max_norm_length: " << max_norm_length )
+	//dprintln( "max_opengl_length: " << max_opengl_length )
+	dprint( "opengl_clip_scale_mirror: " ) Mylib::Math::println(opengl_clip_scale_mirror);
 	dprint( "world_size: " ) Mylib::Math::println(world_size);
 	dprint( "world_screen_size: " ) Mylib::Math::println(world_screen_size);
 	dprint( "args.world_camera_focus: " ) Mylib::Math::println(args.world_camera_focus);
@@ -411,12 +414,12 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 //	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
 
 	Matrix4d opengl_scale_mirror;
-	opengl_scale_mirror.set_scale(opengl_clip_scale);
+	opengl_scale_mirror.set_scale(opengl_clip_scale_mirror);
 //	dprintln( "scale matrix:" ) Mylib::Math::println(scale);
 //exit(1);
 
 	Matrix4d translate_to_normalized_clip_init;
-	translate_to_normalized_clip_init.set_translate( Vector(normalized_clip_init.x, normalized_clip_init.y) );
+	translate_to_normalized_clip_init.set_translate(normalized_clip_init);
 //	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
 
 	Matrix4d scale_normalized;
@@ -429,7 +432,8 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 //	dprintln( "translation matrix:" ) translate_camera.println();
 
 	this->projection_matrix = 
-		(((translate_subtract_one * opengl_scale_mirror)
+		(((translate_subtract_one
+		* opengl_scale_mirror)
 		* translate_to_normalized_clip_init)
 		* scale_normalized)
 		* translate_camera;
