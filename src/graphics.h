@@ -34,8 +34,8 @@ namespace Graphics
 {
 
 using Game::Vector;
-using Mylib::Math::Matrix4d;
-using Mylib::Math::Vector4d;
+using Matrix4 = Mylib::Math::Matrix4f;
+using Vector4 = Mylib::Math::Vector4f;
 
 // ---------------------------------------------------
 

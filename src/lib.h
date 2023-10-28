@@ -15,7 +15,8 @@ namespace Game
 
 // ---------------------------------------------------
 
-using Vector = Mylib::Math::Vector2d;
+using Vector2 = Mylib::Math::Vector2f;
+using Vector = Vector2;
 
 // ---------------------------------------------------
 
@@ -54,11 +55,6 @@ public:
 // ---------------------------------------------------
 
 inline Vector get_cell_center (const Vector& pos)
-{
-	return Vector(std::floor(pos.x) + 0.5f, std::floor(pos.y) + 0.5f);
-}
-
-inline Vector get_cell_center (const Vector&& pos)
 {
 	return Vector(std::floor(pos.x) + 0.5f, std::floor(pos.y) + 0.5f);
 }
