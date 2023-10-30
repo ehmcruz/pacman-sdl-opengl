@@ -30,7 +30,7 @@ const char* Graphics::Renderer::get_type_str (const Type t)
 
 	const auto i = std::to_underlying(t);
 
-	ASSERT(i < std::to_underlying(Type::Unsupported))
+	mylib_assert_exception(i < std::to_underlying(Type::Unsupported))
 
 	return strs[i];
 }

@@ -62,7 +62,7 @@ Game::Map::Map ()
 				break;
 				
 				default:
-					ASSERT(0)
+					mylib_assert_exception(0)
 			}
 
 			k++;
@@ -175,7 +175,7 @@ void Game::Main::run ()
 			break;
 			
 			default:
-				ASSERT(0)
+				mylib_assert_exception(0)
 		}
 
 		renderer->render();
@@ -271,7 +271,7 @@ void Game::World::physics (const float dt, const Uint8 *keys)
 void Game::World::solve_wall_collisions ()
 {
 	for (Object *obj: this->objects) {
-		const Vector cell_center = get_cell_center(obj->get_pos());
+		const Vector cell_center = get_cell_center(obj->get_value_pos());
 		const int32_t xi = static_cast<uint32_t>( obj->get_x() );
 		const int32_t yi = static_cast<uint32_t>( obj->get_y() );
 
@@ -308,7 +308,7 @@ void Game::World::change_wall_color (Events::Timer::Event& event)
 	//dprintln("Changing wall color")
 
 	std::uniform_real_distribution<float> d (0.0f, 1.0f);
-	auto& r = probability.get_rgenerator();
+	auto& r = probability.get_ref_rgenerator();
 
 	this->wall_color = Graphics::Color {
 		.r = d(r),
@@ -376,7 +376,7 @@ void Game::World::render (const float dt)
 		.world_init = Vector(0.0f, 0.0f),
 		.world_end = Vector(this->w, this->h),
 		.force_camera_inside_world = true,
-		.world_camera_focus = player.get_pos(),
+		.world_camera_focus = player.get_value_pos(),
 		.world_screen_width = this->w * (1.0f / Main::get()->get_cfg_params().zoom)
 		} );
 	

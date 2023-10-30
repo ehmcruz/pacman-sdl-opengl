@@ -34,9 +34,9 @@ class Program;
 class Shader
 {
 protected:
-	OO_ENCAPSULATE_READONLY(GLuint, shader_id)
-	OO_ENCAPSULATE_READONLY(GLenum, shader_type)
-	OO_ENCAPSULATE_REFERENCE_READONLY(std::string, fname)
+	OO_ENCAPSULATE_SCALAR_READONLY(GLuint, shader_id)
+	OO_ENCAPSULATE_SCALAR_READONLY(GLenum, shader_type)
+	OO_ENCAPSULATE_OBJ_READONLY(std::string, fname)
 
 public:
 	Shader (const GLenum shader_type_, const char *fname_);
@@ -50,9 +50,9 @@ public:
 class Program
 {
 protected:
-	OO_ENCAPSULATE_READONLY(GLuint, program_id)
-	OO_ENCAPSULATE(Shader*, vs)
-	OO_ENCAPSULATE(Shader*, fs)
+	OO_ENCAPSULATE_SCALAR_READONLY(GLuint, program_id)
+	OO_ENCAPSULATE_PTR(Shader*, vs)
+	OO_ENCAPSULATE_PTR(Shader*, fs)
 
 public:
 	Program ();
@@ -69,8 +69,8 @@ class VertexBuffer
 protected:
 	uint32_t vertex_buffer_capacity;
 	
-	OO_ENCAPSULATE_READONLY(T*, vertex_buffer)
-	OO_ENCAPSULATE_READONLY(uint32_t, vertex_buffer_used)
+	OO_ENCAPSULATE_PTR(T*, vertex_buffer)
+	OO_ENCAPSULATE_SCALAR_READONLY(uint32_t, vertex_buffer_used)
 
 	void realloc (const uint32_t target_capacity)
 	{
@@ -152,8 +152,8 @@ public:
 		GLfloat a; // alpha
 	};
 
-	OO_ENCAPSULATE_READONLY(GLuint, vao) // vertex array descriptor id
-	OO_ENCAPSULATE_READONLY(GLuint, vbo) // vertex buffer id
+	OO_ENCAPSULATE_SCALAR_READONLY(GLuint, vao) // vertex array descriptor id
+	OO_ENCAPSULATE_SCALAR_READONLY(GLuint, vbo) // vertex buffer id
 
 protected:
 	VertexBuffer<Vertex, 8192> triangle_buffer;
@@ -180,7 +180,7 @@ public:
 	void bind_vertex_buffer ();
 	void setup_vertex_array ();
 	void upload_vertex_buffer ();
-	void upload_projection_matrix (const Matrix4d& m);
+	void upload_projection_matrix (const Matrix4& m);
 	void draw ();
 
 	void debug ();
@@ -193,7 +193,7 @@ class Renderer : public Graphics::Renderer
 protected:
 	SDL_GLContext sdl_gl_context;
 	Color background_color;
-	Matrix4d projection_matrix;
+	Matrix4 projection_matrix;
 
 	ProgramTriangle *program_triangle;
 	CircleFactory *circle_factory_low_def;

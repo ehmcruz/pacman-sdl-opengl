@@ -7,9 +7,13 @@
 #include <cstdlib>
 #include <cmath>
 
+#include "../debug.h"
 #include "opengl.h"
 
 // ---------------------------------------------------
+
+using Game::dprint;
+using Game::dprintln;
 
 #define DEBUG_SHOW_CENTER_LINE
 
@@ -24,15 +28,12 @@ Graphics::Opengl::Shader::Shader (const GLenum shader_type_, const char *fname_)
 
 void Graphics::Opengl::Shader::compile ()
 {
-	// First, read the whole shader file to memory.
-	// I usually do this in C, but wanted to do in C++ for a change, but Jesus...
-
 	std::ifstream t(this->fname);
 	std::stringstream str_stream;
 	str_stream << t.rdbuf();
 	std::string buffer = str_stream.str();
 
-	dprint( "loaded shader (" << this->fname << ")" << std::endl )
+	dprintln("loaded shader (", this->fname, ")");
 	//dprint( buffer )
 	
 	const char *c_str = buffer.c_str();
@@ -48,7 +49,7 @@ void Graphics::Opengl::Shader::compile ()
 		glGetShaderiv(this->shader_id, GL_INFO_LOG_LENGTH, &logSize);
 
 		char *berror = (char*)malloc(logSize);
-		ASSERT(berror != nullptr);
+		mylib_assert_exception(berror != nullptr);
 
 		glGetShaderInfoLog(this->shader_id, logSize, nullptr, berror);
 
@@ -143,7 +144,7 @@ void Graphics::Opengl::ProgramTriangle::upload_vertex_buffer ()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * n, this->triangle_buffer.get_vertex_buffer(), GL_DYNAMIC_DRAW);
 }
 
-void Graphics::Opengl::ProgramTriangle::upload_projection_matrix (const Matrix4d& m)
+void Graphics::Opengl::ProgramTriangle::upload_projection_matrix (const Matrix4& m)
 {
 	glUniformMatrix4fv( glGetUniformLocation(this->program_id, "u_projection_matrix"), 1, GL_TRUE, m.get_raw() );
 	//dprintln( "projection matrix sent to GPU" )
@@ -216,7 +217,7 @@ Graphics::Opengl::Renderer::Renderer (const uint32_t window_width_px_, const uin
 
 	this->load_opengl_programs();
 
-	dprintln( "loaded opengl stuff" )
+	dprintln("loaded opengl stuff");
 
 	this->wait_next_frame();
 }
@@ -225,7 +226,7 @@ void Graphics::Opengl::Renderer::load_opengl_programs ()
 {
 	this->program_triangle = new ProgramTriangle;
 
-	dprintln( "loaded opengl triangle program" )
+	dprintln("loaded opengl triangle program");
 
 	this->program_triangle->use_program();
 	
@@ -234,7 +235,7 @@ void Graphics::Opengl::Renderer::load_opengl_programs ()
 
 	this->program_triangle->setup_vertex_array();
 
-	dprintln( "generated and binded opengl world vertex array/buffer" )
+	dprintln("generated and binded opengl world vertex array/buffer");
 }
 
 Graphics::Opengl::Renderer::~Renderer ()
@@ -259,7 +260,7 @@ void Graphics::Opengl::Renderer::draw_circle (const ShapeCircle& circle, const V
 	rect.set_delta(circle.get_delta());
 	this->draw_rect(rect, offset, color);*/
 
-	const Vector local_pos = circle.get_delta();
+	const Vector local_pos = circle.get_value_delta();
 	const uint32_t n_vertices = this->circle_factory_low_def->get_n_vertices();
 	ProgramTriangle::Vertex *vertices = this->program_triangle->alloc_vertices(n_vertices);
 
@@ -285,7 +286,7 @@ void Graphics::Opengl::Renderer::draw_circle (const ShapeCircle& circle, const V
 void Graphics::Opengl::Renderer::draw_rect (const ShapeRect& rect, const Vector& offset, const Graphics::Color& color)
 {
 	const uint32_t n_vertices = 6;
-	const Vector local_pos = rect.get_delta();
+	const Vector local_pos = rect.get_value_delta();
 	//const Vector world_pos = Vector(4.0f, 4.0f);
 	
 #if 0
@@ -410,25 +411,25 @@ void Graphics::Opengl::Renderer::setup_projection_matrix (const ProjectionMatrix
 //exit(1);
 #endif
 
-	Matrix4d translate_subtract_one;
+	Matrix4 translate_subtract_one;
 	translate_subtract_one.set_translate( Vector(-1.0f, +1.0f) );
 //	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
 
-	Matrix4d opengl_scale_mirror;
+	Matrix4 opengl_scale_mirror;
 	opengl_scale_mirror.set_scale(opengl_clip_scale_mirror);
 //	dprintln( "scale matrix:" ) Mylib::Math::println(scale);
 //exit(1);
 
-	Matrix4d translate_to_normalized_clip_init;
+	Matrix4 translate_to_normalized_clip_init;
 	translate_to_normalized_clip_init.set_translate(normalized_clip_init);
 //	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
 
-	Matrix4d scale_normalized;
+	Matrix4 scale_normalized;
 	scale_normalized.set_scale(Vector(normalized_scale_factor, normalized_scale_factor));
 //	dprintln( "scale matrix:" ) Mylib::Math::println(scale);
 //exit(1);
 
-	Matrix4d translate_camera;
+	Matrix4 translate_camera;
 	translate_camera.set_translate(-world_camera);
 //	dprintln( "translation matrix:" ) translate_camera.println();
 

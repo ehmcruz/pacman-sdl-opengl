@@ -94,7 +94,7 @@ void Graphics::SDL::Renderer::wait_next_frame ()
 void Graphics::SDL::Renderer::draw_circle (const ShapeCircle& circle, const Vector& offset, const Graphics::Color& color)
 {
 	const SDL_Color sdl_color = color;
-	const Vector world_pos = offset + circle.get_delta();
+	const Vector world_pos = offset + circle.get_value_delta();
 	const Vector4 clip_pos = this->projection_matrix * Vector4(world_pos);
 
 /*	Game::ShapeRect rect(circle.get_radius()*2.0f, circle.get_radius()*2.0f);
@@ -115,7 +115,7 @@ void Graphics::SDL::Renderer::draw_rect (const ShapeRect& rect, const Vector& of
 {
 	SDL_Rect sdl_rect;
 	const SDL_Color sdl_color = color;
-	const Vector world_pos = offset + rect.get_delta();
+	const Vector world_pos = offset + rect.get_value_delta();
 	//const Vector world_pos = Vector(4.0f, 4.0f);
 	const Vector4 clip_pos = this->projection_matrix * Vector4(world_pos);
 	//const Vector4d clip_pos = translate_to_clip_init * clip_pos_;
