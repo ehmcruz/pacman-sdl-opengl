@@ -46,7 +46,7 @@ inline int32_t round_to_nearest (const float v)
 class Probability
 {
 private:
-	OO_ENCAPSULATE_REFERENCE_READONLY(std::mt19937_64, rgenerator);
+	OO_ENCAPSULATE_OBJ(std::mt19937_64, rgenerator);
 
 public:
 	Probability ();
@@ -66,7 +66,7 @@ inline float get_cell_center (const float pos)
 
 inline float get_cell_center (const uint32_t pos)
 {
-	return get_cell_center( static_cast<float>(pos) + 0.5f );
+	return static_cast<float>(pos) + 0.5f;
 }
 
 // ---------------------------------------------------

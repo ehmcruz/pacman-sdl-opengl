@@ -5,11 +5,12 @@
 
 #include <cmath>
 
+#include "debug.h"
 #include "game-world.h"
 #include "game-object.h"
 #include "lib.h"
 
-const char* Game::Object::get_direction_str (Direction d)
+const char* Game::Object::get_direction_str (const Direction d)
 {
 	static const char *strs[] = {
 		"Left",
@@ -21,7 +22,7 @@ const char* Game::Object::get_direction_str (Direction d)
 
 	const auto i = std::to_underlying(d);
 
-	ASSERT(i <= std::to_underlying(Direction::Stopped))
+	mylib_assert_exception(i <= std::to_underlying(Direction::Stopped))
 
 	return strs[i];
 }
@@ -48,7 +49,7 @@ Game::Player::Player (World *world_)
 
 	this->event_keydown_d = Events::key_down.subscribe( Mylib::Trigger::make_callback_object<Events::Keyboard::Type>(*this, &Player::event_keydown) );
 
-	dprint( "player created" << std::endl )
+	dprintln("player created");
 }
 
 Game::Player::~Player ()
@@ -64,7 +65,7 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 	const float dist_y = std::abs(dist.y);
 	const int32_t xi = static_cast<uint32_t>( this->get_x() );
 	const int32_t yi = static_cast<uint32_t>( this->get_y() );
-	const Map& map = this->world->get_map();
+	const Map& map = this->world->get_ref_map();
 
 	switch (this->target_direction) {
 		using enum Direction;
@@ -145,8 +146,8 @@ void Game::Player::update_color ()
 
 	//dprintln("min_distance: " << min_distance)
 
-	for (const Ghost& ghost : this->world->get_ghosts()) {
-		const float distance = Mylib::Math::distance(this->get_pos(), ghost.get_pos());
+	for (const Ghost& ghost : this->world->get_ref_ghosts()) {
+		const float distance = Mylib::Math::distance(this->get_value_pos(), ghost.get_value_pos());
 
 		if (distance < min_distance)
 			min_distance = distance;
@@ -192,7 +193,7 @@ Game::Ghost::Ghost (World *world_)
 
 	this->event_wall_collision_d = Events::wall_collision.subscribe( Mylib::Trigger::make_filter_callback_object<Events::WallCollision::Type>(wall_collision_filter, *this, &Ghost::collided_with_wall) );
 
-	dprint( "ghost created" << std::endl )
+	dprintln("ghost created");
 }
 
 Game::Ghost::~Ghost ()
@@ -215,7 +216,7 @@ void Game::Ghost::physics (const float dt, const Uint8 *keys)
 	const float dist_y = std::abs(dist.y);
 	const int32_t xi = static_cast<uint32_t>( this->get_x() );
 	const int32_t yi = static_cast<uint32_t>( this->get_y() );
-	const Map& map = this->world->get_map();
+	const Map& map = this->world->get_ref_map();
 
 	// check if we are in an intersection
 	if (dist_x < Config::pacman_turn_threshold && dist_y < Config::pacman_turn_threshold) {
@@ -257,7 +258,7 @@ void Game::Ghost::physics (const float dt, const Uint8 *keys)
 			//dprintln("Ghost dice_range = " << dice_range)
 
 			std::uniform_int_distribution<uint32_t> distribution (0, dice_range);
-			const uint32_t dice = distribution(probability.get_rgenerator());
+			const uint32_t dice = distribution(probability.get_ref_rgenerator());
 			//dprintln("Ghost dice = " << dice)
 			const Direction target_direction = (dice < n_possibilities)
 			                                 ? static_cast<Direction>( possibilities[dice] )

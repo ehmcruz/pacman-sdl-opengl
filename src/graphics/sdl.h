@@ -14,7 +14,8 @@ namespace SDL
 
 // ---------------------------------------------------
 
-class SDL_Color {
+class SDL_Color
+{
 private:
 	inline void copy (const Graphics::Color& other) {
 		this->r = static_cast<Uint8>(other.r * 255.0f);
@@ -50,7 +51,7 @@ class Renderer : public Graphics::Renderer
 protected:
 	SDL_Renderer *renderer;
 	SDL_Color background_color;
-	Matrix4d projection_matrix;
+	Matrix4 projection_matrix;
 	float scale_factor;
 
 public:

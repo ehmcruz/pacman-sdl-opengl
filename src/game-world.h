@@ -51,10 +51,10 @@ public:
 	};
 
 protected:
-	OO_ENCAPSULATE(World*, world)
-	OO_ENCAPSULATE(bool, alive)
-	OO_ENCAPSULATE_READONLY(State, state)
-	OO_ENCAPSULATE_READONLY(InitConfig, cfg_params)
+	OO_ENCAPSULATE_PTR(World*, world)
+	OO_ENCAPSULATE_SCALAR(bool, alive)
+	OO_ENCAPSULATE_SCALAR_READONLY(State, state)
+	OO_ENCAPSULATE_SCALAR_READONLY(InitConfig, cfg_params)
 
 protected:
 	static Main *instance;
@@ -90,11 +90,11 @@ public:
 
 protected:
 	Mylib::Matrix<Cell> map;
-	OO_ENCAPSULATE_READONLY(uint32_t, w)
-	OO_ENCAPSULATE_READONLY(uint32_t, h)
-	OO_ENCAPSULATE_READONLY(uint32_t, n_walls)
-	OO_ENCAPSULATE_READONLY(uint32_t, pacman_start_x)
-	OO_ENCAPSULATE_READONLY(uint32_t, pacman_start_y)
+	OO_ENCAPSULATE_SCALAR_READONLY(uint32_t, w)
+	OO_ENCAPSULATE_SCALAR_READONLY(uint32_t, h)
+	OO_ENCAPSULATE_SCALAR_READONLY(uint32_t, n_walls)
+	OO_ENCAPSULATE_SCALAR_READONLY(uint32_t, pacman_start_x)
+	OO_ENCAPSULATE_SCALAR_READONLY(uint32_t, pacman_start_y)
 
 public:
 	Map ();
@@ -119,14 +119,14 @@ protected:
 	// width and height of screen
 	// the screen coordinates here are in game world coords (not opengl, neither pixels)
 	// every unit corresponds to a tile
-	OO_ENCAPSULATE_READONLY(float, w)
-	OO_ENCAPSULATE_READONLY(float, h)
-	OO_ENCAPSULATE(ClockTime, time_create) // time instant of world creation
-	OO_ENCAPSULATE_READONLY(float, border_thickness)
+	OO_ENCAPSULATE_SCALAR_READONLY(float, w)
+	OO_ENCAPSULATE_SCALAR_READONLY(float, h)
+	OO_ENCAPSULATE_SCALAR(ClockTime, time_create) // time instant of world creation
+	OO_ENCAPSULATE_SCALAR_READONLY(float, border_thickness)
 
-	OO_ENCAPSULATE_REFERENCE_READONLY(Player, player)
-	OO_ENCAPSULATE_REFERENCE_READONLY(std::vector<Ghost>, ghosts)
-	OO_ENCAPSULATE_REFERENCE_READONLY(Map, map)
+	OO_ENCAPSULATE_OBJ(Player, player)
+	OO_ENCAPSULATE_OBJ_READONLY(std::vector<Ghost>, ghosts)
+	OO_ENCAPSULATE_OBJ_READONLY(Map, map)
 
 	Graphics::Color wall_color;
 	Events::Timer::Descriptor event_timer_wall_color_d;

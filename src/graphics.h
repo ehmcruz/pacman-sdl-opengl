@@ -50,10 +50,10 @@ public:
 		Rect
 	};
 protected:
-	OO_ENCAPSULATE_READONLY(Type, type)
+	OO_ENCAPSULATE_SCALAR_READONLY(Type, type)
 
 	// distance from the center of the shape to the center of the object
-	OO_ENCAPSULATE_REFERENCE(Vector, delta)
+	OO_ENCAPSULATE_OBJ(Vector, delta)
 
 public:
 	inline Shape (const Type type_)
@@ -88,7 +88,7 @@ public:
 class ShapeCircle: public Shape
 {
 protected:
-	OO_ENCAPSULATE(float, radius)
+	OO_ENCAPSULATE_SCALAR(float, radius)
 
 public:
 	inline ShapeCircle (const float radius_)
@@ -109,8 +109,8 @@ public:
 class ShapeRect: public Shape
 {
 protected:
-	OO_ENCAPSULATE(float, w)
-	OO_ENCAPSULATE(float, h)
+	OO_ENCAPSULATE_SCALAR(float, w)
+	OO_ENCAPSULATE_SCALAR(float, h)
 
 public:
 	inline ShapeRect (const float w_, const float h_)
@@ -185,13 +185,13 @@ public:
 		Unsupported // must be the last one
 	};
 
-	static const char* get_type_str (Type t);
+	static const char* get_type_str (const Type t);
 
 protected:
 	SDL_Window *sdl_window;
-	OO_ENCAPSULATE_READONLY(uint32_t, window_width_px)
-	OO_ENCAPSULATE_READONLY(uint32_t, window_height_px)
-	OO_ENCAPSULATE_READONLY(float, window_aspect_ratio)
+	OO_ENCAPSULATE_SCALAR_READONLY(uint32_t, window_width_px)
+	OO_ENCAPSULATE_SCALAR_READONLY(uint32_t, window_height_px)
+	OO_ENCAPSULATE_SCALAR_READONLY(float, window_aspect_ratio)
 
 public:
 	inline Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_)
@@ -220,8 +220,8 @@ public:
 
 // ---------------------------------------------------
 
-Renderer* init (Renderer::Type renderer_type, uint32_t screen_width_px, uint32_t screen_height_px);
-void quit (Renderer *renderer, Renderer::Type renderer_type);
+Renderer* init (const Renderer::Type renderer_type, const uint32_t screen_width_px, const uint32_t screen_height_px);
+void quit (Renderer *renderer, const Renderer::Type renderer_type);
 
 // ---------------------------------------------------
 

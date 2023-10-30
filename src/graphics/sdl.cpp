@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cmath>
 
+#include "../debug.h"
 #include "../graphics.h"
 #include "../game-object.h"
 #include "../lib.h"
@@ -94,7 +95,7 @@ void Graphics::SDL::Renderer::draw_circle (const ShapeCircle& circle, const Vect
 {
 	const SDL_Color sdl_color = color;
 	const Vector world_pos = offset + circle.get_delta();
-	const Vector4d clip_pos = this->projection_matrix * Vector4d(world_pos);
+	const Vector4 clip_pos = this->projection_matrix * Vector4(world_pos);
 
 /*	Game::ShapeRect rect(circle.get_radius()*2.0f, circle.get_radius()*2.0f);
 	rect.set_delta(circle.get_delta());
@@ -116,7 +117,7 @@ void Graphics::SDL::Renderer::draw_rect (const ShapeRect& rect, const Vector& of
 	const SDL_Color sdl_color = color;
 	const Vector world_pos = offset + rect.get_delta();
 	//const Vector world_pos = Vector(4.0f, 4.0f);
-	const Vector4d clip_pos = this->projection_matrix * Vector4d(world_pos);
+	const Vector4 clip_pos = this->projection_matrix * Vector4(world_pos);
 	//const Vector4d clip_pos = translate_to_clip_init * clip_pos_;
 
 #if 0
@@ -199,16 +200,16 @@ void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArg
 //exit(1);
 #endif
 
-	Matrix4d translate_to_clip_init;
+	Matrix4 translate_to_clip_init;
 	translate_to_clip_init.set_translate(clip_init);
 //	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
 
-	Matrix4d scale;
+	Matrix4 scale;
 	scale.set_scale(Vector(this->scale_factor, this->scale_factor));
 //	dprintln( "scale matrix:" ) Mylib::Math::println(scale);
 //exit(1);
 
-	Matrix4d translate_camera;
+	Matrix4 translate_camera;
 	translate_camera.set_translate(-world_camera);
 //	dprintln( "translation matrix:" ) translate_camera.println();
 

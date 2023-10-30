@@ -16,7 +16,7 @@
 	#include "graphics/vulkan.h"
 #endif
 
-const char* Graphics::Renderer::get_type_str (Type t)
+const char* Graphics::Renderer::get_type_str (const Type t)
 {
 	static const char *strs[] = {
 		"SDL",
@@ -35,7 +35,7 @@ const char* Graphics::Renderer::get_type_str (Type t)
 	return strs[i];
 }
 
-Graphics::Renderer* Graphics::init (Renderer::Type renderer_type, uint32_t screen_width_px, uint32_t screen_height_px)
+Graphics::Renderer* Graphics::init (const Renderer::Type renderer_type, const uint32_t screen_width_px, const uint32_t screen_height_px)
 {
 	Renderer *r;
 
@@ -63,7 +63,7 @@ Graphics::Renderer* Graphics::init (Renderer::Type renderer_type, uint32_t scree
 	return r;
 }
 
-void Graphics::quit (Renderer *renderer, Renderer::Type renderer_type)
+void Graphics::quit (Renderer *renderer, const Renderer::Type renderer_type)
 {
 
 }

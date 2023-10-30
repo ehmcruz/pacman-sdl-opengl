@@ -40,14 +40,14 @@ public:
 		Stopped // must be the last one
 	};
 
-	static const char* get_direction_str (Direction d);
+	static const char* get_direction_str (const Direction d);
 
 protected:
-	OO_ENCAPSULATE_REFERENCE(Vector, pos)
-	OO_ENCAPSULATE_REFERENCE(Vector, vel)
-	OO_ENCAPSULATE_REFERENCE(std::string, name)
-	OO_ENCAPSULATE(World*, world)
-	OO_ENCAPSULATE(Direction, direction)
+	OO_ENCAPSULATE_OBJ(Vector, pos)
+	OO_ENCAPSULATE_OBJ(Vector, vel)
+	OO_ENCAPSULATE_OBJ(std::string, name)
+	OO_ENCAPSULATE_PTR(World*, world)
+	OO_ENCAPSULATE_SCALAR(Direction, direction)
 
 public:
 	inline Object (World *world_)
@@ -112,7 +112,7 @@ namespace Events {
 
 // ---------------------------------------------------
 
-class Player: public Object
+class Player : public Object
 {
 protected:
 	Graphics::ShapeCircle shape;
@@ -125,8 +125,8 @@ public:
 	Player (World *world_);
 	~Player ();
 
-	void physics (const float dt, const Uint8 *keys) override;
-	void render (const float dt) override;
+	void physics (const float dt, const Uint8 *keys) override final;
+	void render (const float dt) override final;
 
 	void event_keydown (const Events::Keyboard::Type& key);
 
@@ -135,7 +135,7 @@ public:
 
 // ---------------------------------------------------
 
-class Ghost: public Object
+class Ghost : public Object
 {
 protected:
 	Graphics::ShapeCircle shape;

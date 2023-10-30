@@ -3,6 +3,7 @@
 #include <chrono>
 #include <limits>
 
+#include "debug.h"
 #include "game-world.h"
 #include "game-object.h"
 #include "lib.h"
@@ -32,7 +33,7 @@ Game::Map::Map ()
 	                         "0   g  0"
 	                         "00000000";
 
-	ASSERT(map_string.length() == (this->w * this->h))
+	mylib_assert_exception(map_string.length() == (this->w * this->h))
 
 	this->n_walls = 0;
 	this->pacman_start_x = std::numeric_limits<uint32_t>::max();
@@ -68,7 +69,7 @@ Game::Map::Map ()
 		}
 	}
 
-	ASSERT(this->pacman_start_x != std::numeric_limits<uint32_t>::max())
+	mylib_assert_exception(this->pacman_start_x != std::numeric_limits<uint32_t>::max())
 }
 
 Game::Map::~Map ()
@@ -85,14 +86,14 @@ Game::Main::~Main ()
 
 void Game::Main::allocate ()
 {
-	ASSERT(instance == nullptr)
+	mylib_assert_exception(instance == nullptr)
 
 	instance = new Main;
 }
 
 void Game::Main::deallocate ()
 {
-	ASSERT(instance != nullptr)
+	mylib_assert_exception(instance != nullptr)
 
 	delete instance;
 }
@@ -109,12 +110,12 @@ void Game::Main::load (const InitConfig& cfg)
 
 	renderer = Graphics::init(cfg.renderer_type, cfg.window_width_px, cfg.window_height_px);
 
-	dprint( "chorono resolution " << (static_cast<float>(Clock::period::num) / static_cast<float>(Clock::period::den)) << std::endl );
+	dprintln("chorono resolution ", (static_cast<float>(Clock::period::num) / static_cast<float>(Clock::period::den)));
 
 	this->world = nullptr;
 	this->world = new World();
 
-	dprint( "loaded world" << std::endl )
+	dprintln("loaded world");
 
 	this->alive = true;
 }
