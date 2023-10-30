@@ -16,6 +16,9 @@
 
 // ---------------------------------------------------
 
+using Game::dprint;
+using Game::dprintln;
+
 //#define DEBUG_SHOW_CENTER_LINE
 
 // ---------------------------------------------------
@@ -95,7 +98,7 @@ void Graphics::SDL::Renderer::draw_circle (const ShapeCircle& circle, const Vect
 {
 	const SDL_Color sdl_color = color;
 	const Vector world_pos = offset + circle.get_value_delta();
-	const Vector4 clip_pos = this->projection_matrix * Vector4(world_pos);
+	const Vector4 clip_pos = this->projection_matrix * Vector4(world_pos.x, world_pos.y, 0.0f, 1.0f);
 
 /*	Game::ShapeRect rect(circle.get_radius()*2.0f, circle.get_radius()*2.0f);
 	rect.set_delta(circle.get_delta());
@@ -117,7 +120,7 @@ void Graphics::SDL::Renderer::draw_rect (const ShapeRect& rect, const Vector& of
 	const SDL_Color sdl_color = color;
 	const Vector world_pos = offset + rect.get_value_delta();
 	//const Vector world_pos = Vector(4.0f, 4.0f);
-	const Vector4 clip_pos = this->projection_matrix * Vector4(world_pos);
+	const Vector4 clip_pos = this->projection_matrix * Vector4(world_pos.x, world_pos.y, 0.0f, 1.0f);
 	//const Vector4d clip_pos = translate_to_clip_init * clip_pos_;
 
 #if 0
@@ -174,48 +177,34 @@ void Graphics::SDL::Renderer::setup_projection_matrix (const ProjectionMatrixArg
 	}
 
 #if 0
-	dprint( "clip_init: " )
-	clip_init.println();
-
-	dprint( "clip_end: " )
-	clip_end.println();
-
-	dprint( "clip_size: " )
-	clip_size.println();
-
-	dprintln( "clip_aspect_ratio: " << clip_aspect_ratio )
-	dprintln( "scale_factor: " << this->scale_factor )
-
-	dprint( "world_size: " )
-	world_size.println();
-
-	dprint( "world_screen_size: " )
-	world_screen_size.println();
-
-	dprint( "args.world_camera_focus: " )
-	args.world_camera_focus.println();
-
-	dprint( "world_camera: " )
-	world_camera.println();
+	dprintln( "clip_init: ", clip_init );
+	dprintln( "clip_end: ", clip_end );
+	dprintln( "clip_size: ", clip_size );
+	dprintln( "clip_aspect_ratio: ", clip_aspect_ratio );
+	dprintln( "scale_factor: ", this->scale_factor );
+	dprintln( "world_size: ", world_size );
+	dprintln( "world_screen_size: ", world_screen_size );
+	dprintln( "args.world_camera_focus: ", args.world_camera_focus );
+	dprintln( "world_camera: ", world_camera );
 //exit(1);
 #endif
 
 	Matrix4 translate_to_clip_init;
 	translate_to_clip_init.set_translate(clip_init);
-//	dprintln( "translation to clip init:" ) translate_to_clip_init.println();
+//	dprintln( "translation to clip init:" ); dprintln( translate_to_clip_init );
 
 	Matrix4 scale;
 	scale.set_scale(Vector(this->scale_factor, this->scale_factor));
-//	dprintln( "scale matrix:" ) Mylib::Math::println(scale);
+//	dprintln( "scale matrix:" ); dprintln( scale );
 //exit(1);
 
 	Matrix4 translate_camera;
 	translate_camera.set_translate(-world_camera);
-//	dprintln( "translation matrix:" ) translate_camera.println();
+//	dprintln( "translation matrix:" ); dprintln( translate_camera );
 
 	this->projection_matrix = (translate_to_clip_init * scale) * translate_camera;
 	//this->projection_matrix = scale * translate_camera;
-	//dprintln( "final matrix:" ) this->projection_matrix.println();
+//	dprintln( "final matrix:" ); dprintln( this->projection_matrix );
 }
 
 void Graphics::SDL::Renderer::render ()
