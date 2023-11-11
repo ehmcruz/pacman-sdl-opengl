@@ -11,14 +11,21 @@ I intend to extend it to Android latter.
 
 # Overall dependencies
 
-To compile, you need a C++23 capable compiler and the following libraries:
+To compile, you need a C++23 capable compiler and the following tools and libraries:
 
+- cmake
 - SDL
 - Opengl
-- My-lib (https://github.com/ehmcruz/my-lib). The Makefile is configured to search **my-lib** in the same parent folder as this repository. If you put somewhere else, just modify the Makefile.
+- My-lib (https://github.com/ehmcruz/my-lib). Cmake is configured to search **my-lib** in the same parent folder as this repository. If you put somewhere else, just modify the Makefile.
 
-From language features, the requirement is actually C++20.  
-But I am using some standard C++23 library features.
+## Setting the compiler
+
+To select the compiler to use, just pass it to **cmake**. For instance, for **clang**:
+
+**cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ..**
+
+Warning!    
+The code was mostly tested with gcc (g++) and mingw.
 
 ---
 
@@ -34,8 +41,17 @@ First, you need to download the following packages (considering you are using Ub
 
 Then, to compile:
 
-- For SDL Renderer only: **make CONFIG_TARGET_LINUX=1**
-- To also support Opengl: **make CONFIG_TARGET_LINUX=1 PACMAN_SUPPORT_OPENGL=1**
+**mkdir build**    
+**cd build**
+
+- For SDL Renderer only: **cmake ..**
+
+- To also support Opengl: **cmake -DSUPPORT_OPENGL=ON ..**
+
+**make**
+
+And it is done!    
+You should get an executable called **pacman** in the build directory, along with a copy of the **shaders** folder.
 
 ## Running in Linux
 
