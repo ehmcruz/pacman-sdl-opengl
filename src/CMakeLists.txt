@@ -16,6 +16,11 @@ endif()
 
 #add_executable(pacman ${PACMAN_SOURCE_FILES} ${PACMAN_HEADER_FILES})
 add_executable(pacman ${PACMAN_SOURCE_FILES})
+
+#set_target_properties(
+#	pacman PROPERTIES
+#	NO_SYSTEM_FROM_IMPORTED true) # remove -isystem from system libs and use -I to include everything
+
 target_link_libraries(pacman ${SDL2_LIBRARIES} ${Boost_LIBRARIES})
 
 if (SUPPORT_OPENGL)

@@ -12,7 +12,7 @@
 #include "../graphics.h"
 #include "../game-object.h"
 #include "../lib.h"
-#include "sdl.h"
+#include "sdl_.h"
 
 // ---------------------------------------------------
 

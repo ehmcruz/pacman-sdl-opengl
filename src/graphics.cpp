@@ -8,7 +8,7 @@
 #include <cmath>
 
 #include "graphics.h"
-#include "graphics/sdl.h"
+#include "graphics/sdl_.h"
 #ifdef PACMAN_SUPPORT_OPENGL
 	#include "graphics/opengl.h"
 #endif
