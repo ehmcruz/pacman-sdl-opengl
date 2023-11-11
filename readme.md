@@ -78,10 +78,6 @@ You will need the following packages in MSYS2:
 - mingw-w64-ucrt-x86_64-glew
 - mingw-w64-ucrt-x86_64-boost
 
-eduar@titan UCRT64 /ucrt64/lib
-$ ln -s ../bin/libboost_program_options-mt.dll .
-
-
 Then, to compile:
 
 - For SDL Renderer only: **make CONFIG_TARGET_WINDOWS=1**
