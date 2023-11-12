@@ -17,6 +17,7 @@ To compile, you need a C++23 capable compiler and the following tools and librar
 - SDL
 - Opengl
 - My-lib (https://github.com/ehmcruz/my-lib). Cmake is configured to search **my-lib** in the same parent folder as this repository. If you put somewhere else, just modify the Makefile.
+- Boost. Sub-libraries: program options.
 
 ## Setting the compiler
 
@@ -25,7 +26,9 @@ To select the compiler to use, just pass it to **cmake**. For instance, for **cl
 **cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ..**
 
 Warning!    
-The code was mostly tested with gcc (g++) and mingw.
+The code was mostly tested in Linux with gcc (g++).    
+I also tested with MSVC in Windows.    
+MingW in Windows is presenting weird issues with cmake.
 
 ---
 
@@ -48,7 +51,7 @@ Then, to compile:
 
 - To also support Opengl: **cmake -DSUPPORT_OPENGL=ON ..**
 
-**make**
+**cmake --build .**
 
 And it is done!    
 You should get an executable called **pacman** in the build directory, along with a copy of the **shaders** folder.
@@ -65,25 +68,63 @@ For help: **./pacman --help**
 
 ## Compiling in Windows
 
-I used the MSYS2 toolchain with Mingw64 and UCRT64 to compile in Windows.  
-Honestly, that is a wonderful toolchain for people like myself that is more used to program in Linux.
+Now, to compile in Windows require some effort.    
+With MSYS2 would be easy, but there some weird bugs are ocurring between MingW and Cmake.    
+Therefore I decided to use MSVC as default in Windows.
 
-You will need the following packages in MSYS2:
+First, you need to install the compiler. I suggest downloading and installing Visual Studio Community Edition.
 
-- mingw-w64-ucrt-x86_64-gcc
-- make
-- mingw-w64-ucrt-x86_64-SDL2
-- mingw-w64-ucrt-x86_64-pkg-config
-- mingw-w64-ucrt-x86_64-glfw (I need to confirm if this one is actually required)
-- mingw-w64-ucrt-x86_64-glew
-- mingw-w64-ucrt-x86_64-boost
+Afterwards, you need to download the libraries.
 
-Then, to compile:
+I warn that SDL2 and Boost may require some changes to cmake scripts depending on your system.
 
-- For SDL Renderer only: **make CONFIG_TARGET_WINDOWS=1**
-- To also support Opengl: **make CONFIG_TARGET_WINDOWS=1 PACMAN_SUPPORT_OPENGL=1**
+I myself had to make some hacks in this cmake repo's script because the standard cmake code was giving linking errors in boost.
 
-Should be easy to compile in Microsoft compiler as well.
+### My-lib
+
+Go to https://github.com/ehmcruz/my-lib and clone the repository.
+
+The cmake script is configured to find My-lib in the same parent folder as this reposiory, such that the folder structure looks like this:
+
+- /path/pacman-sdl-opengl
+- /path/my-lib
+
+### SDL2
+
+Go to https://www.libsdl.org/ and download the pre-compiled development libraries for Windows.
+
+I installed it in a folder called **c:\\my-msvc-libs**.
+
+I tested with SDL2 2.28.5, but should work with other versions.
+
+### Boost
+
+Go to https://www.boost.org/ and download the pre-compiled development libraries for Windows.
+
+I installed it in a folder called **c:\\my-msvc-libs**.
+
+I tested with Boost 1.83.0, but should work with other versions.
+
+### Compiling
+
+To compile, first open a developer terminal in Windows.    
+You cand do this by clicking in the Windows menu, and typing **x64**.    
+It will appear something like **x64 Native Tools Command Prompt for VS**.    
+Open it.
+
+Then, go to this project repository within the terminal.
+
+**mkdir build**    
+**cd build**
+
+- For SDL Renderer only: **cmake ..**
+
+- To also support Opengl: I still need to add support in the cmake for Opengl in windows.
+
+**cmake --build .**
+
+And it is done!    
+You should get an executable called **pacman.exe** in the **Debug** folder inside the build directory, along with a copy of the **shaders** folder and necessary dlls.
 
 ## Running in Windows
 
