@@ -21,7 +21,11 @@ add_executable(pacman ${PACMAN_SOURCE_FILES})
 #	pacman PROPERTIES
 #	NO_SYSTEM_FROM_IMPORTED true) # remove -isystem from system libs and use -I to include everything
 
-target_link_libraries(pacman ${SDL2_LIBRARIES} ${Boost_LIBRARIES})
+if (MSVC)
+	target_link_libraries(pacman ${SDL2_LIBRARIES} ${my_Boost_LIBRARIES})
+else()
+	target_link_libraries(pacman ${SDL2_LIBRARIES} ${Boost_LIBRARIES})
+endif()
 
 if (SUPPORT_OPENGL)
 	target_link_libraries(pacman ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
