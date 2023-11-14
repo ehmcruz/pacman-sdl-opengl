@@ -35,18 +35,18 @@ const char* Graphics::Renderer::get_type_str (const Type t)
 	return strs[i];
 }
 
-Graphics::Renderer* Graphics::init (const Renderer::Type renderer_type, const uint32_t screen_width_px, const uint32_t screen_height_px)
+Graphics::Renderer* Graphics::init (const Renderer::Type renderer_type, const uint32_t screen_width_px, const uint32_t screen_height_px, const bool fullscreen)
 {
 	Renderer *r;
 
 	switch (renderer_type) {
 		case Renderer::Type::SDL:
-			r = new Graphics::SDL::Renderer(screen_width_px, screen_height_px);
+			r = new Graphics::SDL::Renderer(screen_width_px, screen_height_px, fullscreen);
 		break;
 
 	#ifdef PACMAN_SUPPORT_OPENGL
 		case Renderer::Type::Opengl:
-			r = new Graphics::Opengl::Renderer(screen_width_px, screen_height_px);
+			r = new Graphics::Opengl::Renderer(screen_width_px, screen_height_px, fullscreen);
 		break;
 	#endif
 

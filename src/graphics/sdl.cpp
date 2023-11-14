@@ -72,10 +72,28 @@ static void my_SDL_DrawFilledCircle (SDL_Renderer *renderer, const int32_t centr
 
 // ---------------------------------------------------
 
-Graphics::SDL::Renderer::Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_)
-	: Graphics::Renderer (window_width_px_, window_height_px_)
+Graphics::SDL::Renderer::Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_, const bool fullscreen_)
+	: Graphics::Renderer (window_width_px_, window_height_px_, fullscreen_)
 {
-	this->sdl_window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, this->window_width_px, this->window_height_px, SDL_WINDOW_SHOWN);
+	if (this->fullscreen) {
+		SDL_DisplayMode display_mode;
+		
+		mylib_assert_exception_msg(SDL_GetCurrentDisplayMode(0, &display_mode) == 0, "error getting display mode\n", SDL_GetError())
+
+		this->sdl_window = SDL_CreateWindow(
+			"",
+			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+			display_mode.w, display_mode.h,
+			SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN
+		);
+	}
+	else
+		this->sdl_window = SDL_CreateWindow(
+			"",
+			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+			this->window_width_px, this->window_height_px,
+			SDL_WINDOW_SHOWN);
+	
 	this->renderer = SDL_CreateRenderer(this->sdl_window, -1, 0);
 
 	this->background_color = Graphics::config_background_color;

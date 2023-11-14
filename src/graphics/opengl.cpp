@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "../debug.h"
+#include "../game-world.h"
 #include "opengl.h"
 
 // ---------------------------------------------------
@@ -42,21 +43,22 @@ void Graphics::Opengl::Shader::compile ()
 
 	GLint status;
 	glGetShaderiv(this->shader_id, GL_COMPILE_STATUS, &status);
+
 	if (status == GL_FALSE) {
-		std::cout << this->fname << " shader compilation failed" << std::endl;
+		dprintln(this->fname, " shader compilation failed");
 
 		GLint logSize = 0;
 		glGetShaderiv(this->shader_id, GL_INFO_LOG_LENGTH, &logSize);
 
-		char *berror = (char*)malloc(logSize);
-		mylib_assert_exception(berror != nullptr);
+		char *berror = new char [logSize];
 
 		glGetShaderInfoLog(this->shader_id, logSize, nullptr, berror);
 
 		printf("%s\n", berror);
-		free(berror);
 
-		exit(1);
+		delete[] berror;
+
+		Game::die();
 	}
 }
 
@@ -164,23 +166,23 @@ void Graphics::Opengl::ProgramTriangle::debug ()
 		Vertex *v = this->triangle_buffer.get_vertex(i);
 
 		if ((i % 3) == 0)
-			std::cout << std::endl;
+			dprintln();
 
-		std::cout << "vertex[" << i
-			<< "] x=" << v->x
-			<< " y= " << v->y
-			<< " offset_x= " << v->offset_x
-			<< " offset_y= " << v->offset_y
-			<< " r= " << v->r
-			<< " g= " << v->g
-			<< " b= " << v->b
-			<< " a= " << v->a
-			<< std::endl;
+		dprintln("vertex[", i,
+			"] x=", v->x,
+			" y= ", v->y,
+			" offset_x= ", v->offset_x,
+			" offset_y= ", v->offset_y,
+			" r= ", v->r,
+			" g= ", v->g,
+			" b= ", v->b,
+			" a= ", v->a
+		);
 	}
 }
 
-Graphics::Opengl::Renderer::Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_)
-	: Graphics::Renderer (window_width_px_, window_height_px_)
+Graphics::Opengl::Renderer::Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_, const bool fullscreen_)
+	: Graphics::Renderer (window_width_px_, window_height_px_, fullscreen_)
 {
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
@@ -198,12 +200,10 @@ Graphics::Opengl::Renderer::Renderer (const uint32_t window_width_px_, const uin
 	this->sdl_gl_context = SDL_GL_CreateContext(this->sdl_window);
 
 	GLenum err = glewInit();
-	if (err != GLEW_OK) {
-		std::cout << "Error: " << glewGetErrorString(err) << std::endl;
-		exit(1);
-	}
 
-	std::cout << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
+	mylib_assert_exception_msg(err == GLEW_OK, "Error: ", glewGetErrorString(err))
+
+	dprintln("Status: Using GLEW ", glewGetString(GLEW_VERSION));
 
 	glDisable(GL_DEPTH_TEST);
 

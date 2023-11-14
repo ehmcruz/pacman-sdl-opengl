@@ -191,11 +191,12 @@ protected:
 	SDL_Window *sdl_window;
 	OO_ENCAPSULATE_SCALAR_READONLY(uint32_t, window_width_px)
 	OO_ENCAPSULATE_SCALAR_READONLY(uint32_t, window_height_px)
+	OO_ENCAPSULATE_SCALAR_READONLY(bool, fullscreen)
 	OO_ENCAPSULATE_SCALAR_READONLY(float, window_aspect_ratio)
 
 public:
-	inline Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_)
-		: window_width_px(window_width_px_), window_height_px(window_height_px_)
+	inline Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_, const bool fullscreen_)
+		: window_width_px(window_width_px_), window_height_px(window_height_px_), fullscreen(fullscreen_)
 	{
 		this->window_aspect_ratio = static_cast<float>(this->window_width_px) / static_cast<float>(this->window_height_px);
 	}
@@ -220,7 +221,7 @@ public:
 
 // ---------------------------------------------------
 
-Renderer* init (const Renderer::Type renderer_type, const uint32_t screen_width_px, const uint32_t screen_height_px);
+Renderer* init (const Renderer::Type renderer_type, const uint32_t screen_width_px, const uint32_t screen_height_px, const bool fullscreen);
 void quit (Renderer *renderer, const Renderer::Type renderer_type);
 
 // ---------------------------------------------------

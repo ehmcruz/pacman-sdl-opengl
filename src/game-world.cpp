@@ -1,5 +1,4 @@
 #include <iostream>
-#include <iomanip>
 #include <chrono>
 #include <limits>
 
@@ -16,6 +15,11 @@ Game::Probability Game::probability;
 Game::Events::Timer Game::Events::timer( Clock::now() );
 Game::Events::Keyboard Game::Events::key_down;
 Game::Events::WallCollision Game::Events::wall_collision;
+
+void Game::die ()
+{
+	SDL_Quit();
+}
 
 Game::Map::Map ()
 {
@@ -100,15 +104,14 @@ void Game::Main::deallocate ()
 
 void Game::Main::load (const InitConfig& cfg)
 {
-	std::cout << std::setprecision(4);
-	std::cout << std::fixed;
+	debug_config_stream();
 
 	this->state = State::initializing;
 	this->cfg_params = cfg;
 
 	SDL_Init( SDL_INIT_VIDEO );
 
-	renderer = Graphics::init(cfg.renderer_type, cfg.window_width_px, cfg.window_height_px);
+	renderer = Graphics::init(cfg.renderer_type, cfg.window_width_px, cfg.window_height_px, cfg.fullscreen);
 
 	dprintln("chorono resolution ", (static_cast<float>(Clock::period::num) / static_cast<float>(Clock::period::den)));
 

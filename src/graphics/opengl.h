@@ -199,7 +199,7 @@ protected:
 	CircleFactory *circle_factory_low_def;
 
 public:
-	Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_);
+	Renderer (const uint32_t window_width_px_, const uint32_t window_height_px_, const bool fullscreen_);
 	~Renderer ();
 
 	void wait_next_frame () override;

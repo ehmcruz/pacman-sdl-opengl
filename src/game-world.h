@@ -42,6 +42,7 @@ public:
 		Graphics::Renderer::Type renderer_type;
 		uint32_t window_width_px;
 		uint32_t window_height_px;
+		bool fullscreen;
 		float zoom;
 	};
 
@@ -155,6 +156,10 @@ public:
 	void render_box();
 	void render (const float dt);
 };
+
+// ---------------------------------------------------
+
+void die ();
 
 // ---------------------------------------------------
 

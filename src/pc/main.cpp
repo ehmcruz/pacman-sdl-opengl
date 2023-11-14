@@ -12,12 +12,14 @@
 #include "graphics.h"
 #include "lib.h"
 #include "config.h"
+#include "debug.h"
 
 // initialize with default values
 static Game::Main::InitConfig cfg = {
 	.renderer_type = Graphics::Renderer::Type::SDL,
 	.window_width_px = Game::Config::default_window_width_px,
 	.window_height_px = Game::Config::default_window_height_px,
+	.fullscreen = false,
 	.zoom = Game::Config::default_zoom,
 };
 
@@ -65,8 +67,9 @@ static void process_args (int argc, char **argv)
 		boost::program_options::notify(vm);
 
 		if (vm.count("help")) {
-			std::cout << cmd_line_args << std::endl;
-			exit(0);
+			using namespace Game;
+			dprintln(cmd_line_args);
+			std::exit(EXIT_FAILURE);
 		}
 
 		if (vm.count("video")) {
@@ -103,17 +106,18 @@ static void process_args (int argc, char **argv)
 		}
 	}
 	catch (const boost::program_options::error& ex) {
-		std::cout << ex.what() << std::endl;
-		exit(1);
+		throw std::runtime_error(ex.what());
 	}
 }
 
-int main (int argc, char **argv)
+int main (const int argc, char **argv)
 {
+	using namespace Game;
+
 	try {
 		process_args(argc, argv);
 
-		std::cout << "Setting video renderer to " << Graphics::Renderer::get_type_str(cfg.renderer_type) << std::endl;
+		dprintln("Setting video renderer to ", Graphics::Renderer::get_type_str(cfg.renderer_type));
 
 		Game::Main::allocate();
 
@@ -123,8 +127,8 @@ int main (int argc, char **argv)
 
 		Game::Main::deallocate();
 	}
-	catch(std::exception& e) {
-		std::cout << "Something bad happened!" << std::endl << e.what() << std::endl;
+	catch (const std::exception& e) {
+		dprintln("Something bad happened!", '\n', e.what());
 		return EXIT_FAILURE;
 	}
 
