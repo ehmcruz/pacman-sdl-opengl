@@ -109,8 +109,6 @@ void Game::Main::load (const InitConfig& cfg)
 	this->state = State::initializing;
 	this->cfg_params = cfg;
 
-	SDL_Init( SDL_INIT_VIDEO );
-
 	renderer = Graphics::init(cfg.renderer_type, cfg.window_width_px, cfg.window_height_px, cfg.fullscreen);
 
 	dprintln("chorono resolution ", (static_cast<float>(Clock::period::num) / static_cast<float>(Clock::period::den)));
@@ -157,7 +155,18 @@ void Game::Main::run ()
 
 		virtual_dt = (real_dt > Config::max_dt) ? Config::max_dt : real_dt;
 
-		//dprintln( "start new frame render target_dt=" << Config::target_dt << " required_dt=" << required_dt << " real_dt=" << real_dt << " sleep_dt=" << sleep_dt << " busy_wait_dt=" << busy_wait_dt << " virtual_dt=" << virtual_dt << " max_dt=" << Config::max_dt << " target_dt=" << Config::target_dt << " fps=" << fps )
+	#if 0
+		dprintln("start new frame render target_dt=", Config::target_dt,
+			" required_dt=", required_dt,
+			" real_dt=", real_dt,
+			" sleep_dt=", sleep_dt,
+			" busy_wait_dt=", busy_wait_dt,
+			" virtual_dt=", virtual_dt,
+			" max_dt=", Config::max_dt,
+			" target_dt=", Config::target_dt,
+			" fps=", fps
+			);
+	#endif
 
 		while ( SDL_PollEvent( &event ) ) {
 			switch (event.type) {
@@ -374,6 +383,16 @@ void Game::World::render (const float dt)
 	const Vector ws = renderer->get_normalized_window_size();
 
 	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
+		.clip_init_norm = Vector(0.0f, 0.0f),
+		.clip_end_norm = Vector(ws.x, ws.y),
+		.world_init = Vector(0.0f, 0.0f),
+		.world_end = Vector(this->w, this->h),
+		.force_camera_inside_world = true,
+		.world_camera_focus = player.get_value_pos(),
+		.world_screen_width = this->w * (1.0f / Main::get()->get_cfg_params().zoom)
+		} );
+
+/*	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
 		.clip_init_norm = Vector(this->border_thickness, this->border_thickness),
 		.clip_end_norm = Vector(ws.x - this->border_thickness, ws.y - this->border_thickness),
 		.world_init = Vector(0.0f, 0.0f),
@@ -381,7 +400,7 @@ void Game::World::render (const float dt)
 		.force_camera_inside_world = true,
 		.world_camera_focus = player.get_value_pos(),
 		.world_screen_width = this->w * (1.0f / Main::get()->get_cfg_params().zoom)
-		} );
+		} );*/
 	
 	/*renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
 		.clip_init_norm = Vector(0.0f, 0.0f),

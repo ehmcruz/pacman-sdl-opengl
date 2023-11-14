@@ -20,7 +20,7 @@ option(SUPPORT_OPENGL "Include support for OpenGL" OFF)
 
 # -------------------------------------
 
-set(TARGET_PLATFORM "UNKNOWN")
+#set(TARGET_PLATFORM "UNKNOWN")
 
 #if(WIN32)
 #	set(TARGET_PLATFORM "WINDOWS")
@@ -38,6 +38,11 @@ message(STATUS "CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 
 set(MYLIB_PATH ${CMAKE_SOURCE_DIR}/../my-lib)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	find_package(SDL2 REQUIRED)
+	find_package(Boost COMPONENTS program_options REQUIRED)
+endif()
+
 if (MSVC)
 	set(WINDOWS_SDL_DEV_LIBS "C:\\my-msvc-libs\\SDL2-2.28.5")
 
@@ -46,17 +51,30 @@ if (MSVC)
 	#list(APPEND CMAKE_PREFIX_PATH "C:\\my-msvc-libs\\boost_1_83_0\\lib64-msvc-14.3\\cmake\\boost_program_options-1.83.0")
 
 	set(my_Boost_LIBRARIES "C:\\my-msvc-libs\\boost_1_83_0\\lib64-msvc-14.3\\libboost_program_options-vc143-mt-gd-x64-1_83.lib")
+
+	find_package(SDL2 REQUIRED)
+	find_package(Boost COMPONENTS program_options REQUIRED)
 endif()
 
-find_package(SDL2 REQUIRED)
-find_package(Boost COMPONENTS program_options REQUIRED)
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+	set(SDL2_INCLUDE_DIRS /home/ehmcruz/Android/SDL/SDL-release-2.28.5/include)
+	set(SDL2_LINK_DIR /home/ehmcruz/Android/SDL/lib/arm64-v8a)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+	add_library(SDL2 SHARED IMPORTED)
 
-if (MSVC)
-	set(my_OUTPUT_DIR ${CMAKE_BINARY_DIR}/Debug)
-else()
-	set(my_OUTPUT_DIR ${CMAKE_BINARY_DIR})
+	set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION ${SDL2_LINK_DIR}/libSDL2.so)
+endif()
+
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+endif()
+
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+	if (MSVC)
+		set(my_OUTPUT_DIR ${CMAKE_BINARY_DIR}/Debug)
+	else()
+		set(my_OUTPUT_DIR ${CMAKE_BINARY_DIR})
+	endif()
 endif()
 
 #message(STATUS "aki ${Boost_LIBRARIES}")
@@ -70,10 +88,12 @@ endif()
 
 # -------------------------------------
 
-file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${my_OUTPUT_DIR})
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+	file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${my_OUTPUT_DIR})
 
-if (MSVC)
-	file(COPY "${WINDOWS_SDL_DEV_LIBS}\\lib\\x64\\SDL2.dll" DESTINATION ${my_OUTPUT_DIR})
+	if (MSVC)
+		file(COPY "${WINDOWS_SDL_DEV_LIBS}\\lib\\x64\\SDL2.dll" DESTINATION ${my_OUTPUT_DIR})
+	endif()
 endif()
 
 # -------------------------------------
@@ -86,11 +106,14 @@ endif()
 
 include_directories(
 	"${SDL2_INCLUDE_DIRS}"
-	"${Boost_INCLUDE_DIRS}"
 	"${MYLIB_PATH}/include"
 	"${CMAKE_SOURCE_DIR}/src"
 	"${CMAKE_SOURCE_DIR}/src/graphics"
 	)
+
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+	include_directories("${Boost_INCLUDE_DIRS}")
+endif()
 
 if (SUPPORT_OPENGL)
 	include_directories(

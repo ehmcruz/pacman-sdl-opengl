@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <ctype.h>
 
+#include <SDL.h>
+
 #include "game-world.h"
 #include "graphics.h"
 #include "lib.h"
@@ -20,11 +22,13 @@ static Game::Main::InitConfig cfg = {
 	.zoom = Game::Config::default_zoom,
 };
 
-int main (const int argc, const char **argv)
+static int cpp_main (int argc, char **argv)
 {
 	using namespace Game;
 	
 	try {
+		SDL_Init( SDL_INIT_VIDEO );
+
 		dprintln("Setting video renderer to ", Graphics::Renderer::get_type_str(cfg.renderer_type));
 
 		Game::Main::allocate();
@@ -41,4 +45,12 @@ int main (const int argc, const char **argv)
 	}
 
 	return EXIT_SUCCESS;
+}
+
+extern "C"
+{
+	int main (int argc, char **argv)
+	{
+		return cpp_main(argc, argv);
+	}
 }

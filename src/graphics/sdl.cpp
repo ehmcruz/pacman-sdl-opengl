@@ -77,24 +77,31 @@ Graphics::SDL::Renderer::Renderer (const uint32_t window_width_px_, const uint32
 {
 	if (this->fullscreen) {
 		SDL_DisplayMode display_mode;
+
+		const auto error = SDL_GetCurrentDisplayMode(0, &display_mode);
 		
-		mylib_assert_exception_msg(SDL_GetCurrentDisplayMode(0, &display_mode) == 0, "error getting display mode\n", SDL_GetError())
+		mylib_assert_exception_msg(error == 0, "error getting display mode\n", SDL_GetError())
+
+		this->window_width_px = display_mode.w;
+		this->window_height_px = display_mode.h;
 
 		this->sdl_window = SDL_CreateWindow(
-			"",
+			"Pacman",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			display_mode.w, display_mode.h,
-			SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN
+			this->window_width_px, this->window_height_px,
+			SDL_WINDOW_FULLSCREEN
 		);
+
+		dprintln("fullscrren window created with width=", this->window_width_px, " height=", this->window_height_px);
 	}
 	else
 		this->sdl_window = SDL_CreateWindow(
-			"",
+			"Pacman",
 			SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 			this->window_width_px, this->window_height_px,
 			SDL_WINDOW_SHOWN);
 	
-	this->renderer = SDL_CreateRenderer(this->sdl_window, -1, 0);
+	this->renderer = SDL_CreateRenderer(this->sdl_window, -1, SDL_RENDERER_ACCELERATED);
 
 	this->background_color = Graphics::config_background_color;
 	this->wait_next_frame();

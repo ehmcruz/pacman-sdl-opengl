@@ -14,6 +14,8 @@
 
 #include <my-lib/std.h>
 
+#include <SDL.h>
+
 namespace Game
 {
 
@@ -24,7 +26,7 @@ namespace Game
 		template <typename... Types>
 		void dprint (Types&&... vars)
 		{
-			const std::string str = build_str_from_stream(vars...);
+			const std::string str = Mylib::build_str_from_stream("PACMAN: ", vars...);
 			SDL_Log("%s", str.data());
 		}
 
@@ -34,7 +36,7 @@ namespace Game
 			dprint(vars..., '\n');
 		}
 
-		inline constexpr debug_config_stream ()
+		inline constexpr void debug_config_stream ()
 		{
 		}
 	#else

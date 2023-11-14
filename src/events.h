@@ -1,5 +1,5 @@
 #ifndef __PACMAN_SD_EVENTS_HEADER_H__
-#define __PACMAN_SD_EVENTS_HEADER_H__S
+#define __PACMAN_SD_EVENTS_HEADER_H__
 
 #ifdef __MINGW32__
 	#define SDL_MAIN_HANDLED
