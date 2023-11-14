@@ -119,6 +119,8 @@ int main (const int argc, char **argv)
 
 		dprintln("Setting video renderer to ", Graphics::Renderer::get_type_str(cfg.renderer_type));
 
+		SDL_Init( SDL_INIT_VIDEO );
+
 		Game::Main::allocate();
 
 		Game::Main::get()->load(cfg);
