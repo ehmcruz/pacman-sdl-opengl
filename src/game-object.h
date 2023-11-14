@@ -32,15 +32,7 @@ class Object;
 class Object
 {
 public:
-	enum class Direction {  // any change here will need a change in get_direction_str
-		Left,
-		Right,
-		Up,
-		Down,
-		Stopped // must be the last one
-	};
-
-	static const char* get_direction_str (const Direction d);
+	using Direction = Events::MoveData::Direction;
 
 protected:
 	OO_ENCAPSULATE_OBJ(Vector, pos)
@@ -120,6 +112,7 @@ protected:
 	Graphics::Color color;
 	//Graphics::Color base_color;
 	Events::Keyboard::Descriptor event_keydown_d;
+	Events::Move::Descriptor event_move_d;
 
 public:
 	Player (World *world_);
@@ -129,6 +122,7 @@ public:
 	void render (const float dt) override final;
 
 	void event_keydown (const Events::Keyboard::Type& key);
+	void event_move (const Events::Move::Type& move_data);
 
 	void update_color ();
 };

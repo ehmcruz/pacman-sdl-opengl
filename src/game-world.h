@@ -67,11 +67,12 @@ public:
 	void load (const InitConfig& cfg);
 	void run ();
 	void cleanup ();
+	void event_quit ();
 
 	static inline Main* get ()
 	{
 		return instance;
-	}
+	}	
 
 	static void allocate ();
 	static void deallocate ();

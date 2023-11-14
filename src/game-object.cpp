@@ -10,22 +10,6 @@
 #include "game-object.h"
 #include "lib.h"
 
-const char* Game::Object::get_direction_str (const Direction d)
-{
-	static const char *strs[] = {
-		"Left",
-		"Right",
-		"Up",
-		"Down",
-		"Stopped"
-	};
-
-	const auto i = std::to_underlying(d);
-
-	mylib_assert_exception(i <= std::to_underlying(Direction::Stopped))
-
-	return strs[i];
-}
 
 void Game::Object::physics (const float dt, const Uint8 *keys)
 {
@@ -47,14 +31,16 @@ Game::Player::Player (World *world_)
 	//this->color = this->base_color;
 	this->color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
 
-	this->event_keydown_d = Events::key_down.subscribe( Mylib::Trigger::make_callback_object<Events::Keyboard::Type>(*this, &Player::event_keydown) );
+	this->event_keydown_d = Events::keydown.subscribe( Mylib::Trigger::make_callback_object<Events::Keyboard::Type>(*this, &Player::event_keydown) );
+	this->event_move_d = Events::move.subscribe( Mylib::Trigger::make_callback_object<Events::Move::Type>(*this, &Player::event_move) );
 
 	dprintln("player created");
 }
 
 Game::Player::~Player ()
 {
-	Events::key_down.unsubscribe(this->event_keydown_d);
+	Events::keydown.unsubscribe(this->event_keydown_d);
+	Events::move.unsubscribe(this->event_move_d);
 }
 
 void Game::Player::physics (const float dt, const Uint8 *keys)
@@ -118,23 +104,12 @@ void Game::Player::render (const float dt)
 
 void Game::Player::event_keydown (const Events::Keyboard::Type& key)
 {
-	switch (key) {
-		case SDLK_LEFT:
-			this->target_direction = Direction::Left;
-		break;
 
-		case SDLK_RIGHT:
-			this->target_direction = Direction::Right;
-		break;
+}
 
-		case SDLK_UP:
-			this->target_direction = Direction::Up;
-		break;
-
-		case SDLK_DOWN:
-			this->target_direction = Direction::Down;
-		break;
-	}
+void Game::Player::event_move (const Events::Move::Type& move_data)
+{
+	this->target_direction = move_data.direction;
 }
 
 void Game::Player::update_color ()

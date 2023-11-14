@@ -12,9 +12,6 @@ Game::Main *Game::Main::instance = nullptr;
 Graphics::Renderer *Game::renderer = nullptr;
 Game::Probability Game::probability;
 
-Game::Events::Timer Game::Events::timer( Clock::now() );
-Game::Events::Keyboard Game::Events::key_down;
-Game::Events::WallCollision Game::Events::wall_collision;
 
 void Game::die ()
 {
@@ -118,6 +115,8 @@ void Game::Main::load (const InitConfig& cfg)
 
 	dprintln("loaded world");
 
+	set trigger to quit
+
 	this->alive = true;
 }
 
@@ -127,9 +126,13 @@ void Game::Main::cleanup ()
 	SDL_Quit();
 }
 
+void Game::Main::event_quit ()
+{
+	this->alive = false;
+}
+
 void Game::Main::run ()
 {
-	SDL_Event event;
 	const Uint8 *keys;
 	float real_dt, virtual_dt, required_dt, sleep_dt, busy_wait_dt, fps;
 
@@ -168,17 +171,7 @@ void Game::Main::run ()
 			);
 	#endif
 
-		while ( SDL_PollEvent( &event ) ) {
-			switch (event.type) {
-				case SDL_QUIT:
-					this->alive = false;
-				break;
-				
-				case SDL_KEYDOWN:
-					Events::key_down.publish(event.key.keysym.sym);
-				break;
-			}
-		}
+		Events::process_events();
 
 		switch (this->state) {
 			case State::playing:
