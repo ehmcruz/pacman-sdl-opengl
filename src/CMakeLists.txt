@@ -3,9 +3,13 @@ set(PACMAN_SOURCE_FILES
 	game-world.cpp
 	graphics.cpp
 	lib.cpp
-	main.cpp
 	graphics/sdl.cpp
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	set(PACMAN_SOURCE_FILES ${PACMAN_SOURCE_FILES}
+		pc/main.cpp)
+endif()
 
 if (SUPPORT_OPENGL)
 	set(PACMAN_SOURCE_FILES ${PACMAN_SOURCE_FILES}

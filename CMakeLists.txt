@@ -20,6 +20,22 @@ option(SUPPORT_OPENGL "Include support for OpenGL" OFF)
 
 # -------------------------------------
 
+set(TARGET_PLATFORM "UNKNOWN")
+
+#if(WIN32)
+#	set(TARGET_PLATFORM "WINDOWS")
+#endif()
+
+#if(UNIX AND NOT APPLE)
+	# for Linux, BSD, Solaris, Minix
+#	set(TARGET_PLATFORM "LINUX")
+#endif()
+
+#message(STATUS "Target platform: ${TARGET_PLATFORM}")
+message(STATUS "CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+
+# -------------------------------------
+
 set(MYLIB_PATH ${CMAKE_SOURCE_DIR}/../my-lib)
 
 if (MSVC)
