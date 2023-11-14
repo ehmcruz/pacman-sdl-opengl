@@ -45,8 +45,6 @@ void Graphics::Opengl::Shader::compile ()
 	glGetShaderiv(this->shader_id, GL_COMPILE_STATUS, &status);
 
 	if (status == GL_FALSE) {
-		dprintln(this->fname, " shader compilation failed");
-
 		GLint logSize = 0;
 		glGetShaderiv(this->shader_id, GL_INFO_LOG_LENGTH, &logSize);
 
@@ -54,11 +52,7 @@ void Graphics::Opengl::Shader::compile ()
 
 		glGetShaderInfoLog(this->shader_id, logSize, nullptr, berror);
 
-		printf("%s\n", berror);
-
-		delete[] berror;
-
-		Game::die();
+		mylib_throw_exception_msg(this->fname, " shader compilation failed", '\n', berror);
 	}
 }
 
