@@ -4,20 +4,21 @@ Just a small game I am writing to learn the basics of Opengl and new features of
 I plan also to use it to learn (the basics of) Vulkan.
 
 For now, it works on the following platforms:
-- Linux
-- Windows
+- Linux (SDL and Opengl)
+- Windows (SDL only for now)
+- Android (SDL only for now)
 
-I intend to extend it to Android latter.
+It is possible to compile in macOS and iOS as well, but since I don't have any Apple hardware, I could not try that.
 
-# Overall dependencies
+## Overall dependencies
 
 To compile, you need a C++23 capable compiler and the following tools and libraries:
 
 - cmake
 - SDL
 - Opengl
-- My-lib (https://github.com/ehmcruz/my-lib). Cmake is configured to search **my-lib** in the same parent folder as this repository. If you put somewhere else, just modify the Makefile.
-- Boost. Sub-libraries: program options.
+- My-lib (https://github.com/ehmcruz/my-lib). Cmake is configured to search **my-lib** in the same parent folder as this repository. If you put somewhere else, just modify **CMakeLists.txt**.
+- Boost (for Linux and Windows only). Sub-libraries: program options.
 
 ## Setting the compiler
 
@@ -32,105 +33,13 @@ MingW in Windows is presenting weird issues with cmake.
 
 ---
 
-# Linux Guide
+## Compiling guide
 
-## Compiling in Linux
+- Linux: [a relative link](linux.md)
 
-First, you need to download the following packages (considering you are using Ubuntu):
+- Windows: [a relative link](windows.md)
 
-- libglew-dev
-- libsdl2-dev
-- libboost-program-options-dev
-
-Then, to compile:
-
-**mkdir build**    
-**cd build**
-
-- For SDL Renderer only: **cmake ..**
-
-- To also support Opengl: **cmake -DSUPPORT_OPENGL=ON ..**
-
-**cmake --build .**
-
-And it is done!    
-You should get an executable called **pacman** in the build directory, along with a copy of the **shaders** folder.
-
-## Running in Linux
-
-**./pacman**
-
-For help: **./pacman --help**
-
----
-
-# Windows Guide
-
-## Compiling in Windows
-
-Now, to compile in Windows require some effort.    
-With MSYS2 would be easy, but there some weird bugs are ocurring between MingW and Cmake.    
-Therefore I decided to use MSVC as default in Windows.
-
-First, you need to install the compiler. I suggest downloading and installing Visual Studio Community Edition.
-
-Afterwards, you need to download the libraries.
-
-I warn that SDL2 and Boost may require some changes to cmake scripts depending on your system.
-
-I myself had to make some hacks in this cmake repo's script because the standard cmake code was giving linking errors in boost.
-
-### My-lib
-
-Go to https://github.com/ehmcruz/my-lib and clone the repository.
-
-The cmake script is configured to find My-lib in the same parent folder as this reposiory, such that the folder structure looks like this:
-
-- /path/pacman-sdl-opengl
-- /path/my-lib
-
-### SDL2
-
-Go to https://www.libsdl.org/ and download the pre-compiled development libraries for Windows.
-
-I installed it in a folder called **c:\\my-msvc-libs**.
-
-I tested with SDL2 2.28.5, but should work with other versions.
-
-### Boost
-
-Go to https://www.boost.org/ and download the pre-compiled development libraries for Windows.
-
-I installed it in a folder called **c:\\my-msvc-libs**.
-
-I tested with Boost 1.83.0, but should work with other versions.
-
-### Compiling
-
-To compile, first open a developer terminal in Windows.    
-You cand do this by clicking in the Windows menu, and typing **x64**.    
-It will appear something like **x64 Native Tools Command Prompt for VS**.    
-Open it.
-
-Then, go to this project repository within the terminal.
-
-**mkdir build**    
-**cd build**
-
-- For SDL Renderer only: **cmake ..**
-
-- To also support Opengl: I still need to add support in the cmake for Opengl in windows.
-
-**cmake --build .**
-
-And it is done!    
-You should get an executable called **pacman.exe** in the **Debug** folder inside the build directory, along with a copy of the **shaders** folder and necessary dlls.
-
-## Running in Windows
-
-Just execute **pacman.exe**
-
-For help: **pacman.exe --help**
+- Android: [a relative link](android.md)
 
 ---
 
