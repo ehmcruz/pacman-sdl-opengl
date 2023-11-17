@@ -5,8 +5,14 @@
 First, you need to download the following packages (considering you are using Ubuntu):
 
 - libglew-dev
+
 - libsdl2-dev
+
 - libboost-program-options-dev
+
+You also need libraries not included in your distro:
+
+- My-lib (https://github.com/ehmcruz/my-lib). Cmake is configured to search **my-lib** in the same parent folder as this repository. If you put somewhere else, just modify **CMakeLists.txt**.
 
 Then, to compile:
 

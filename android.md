@@ -24,6 +24,8 @@ You are also going to need:
 
 - SDL2 Library source files (I used version 2.28.5).
 
+- My-lib (https://github.com/ehmcruz/my-lib). Cmake is configured to search **my-lib** in the same parent folder as this repository. If you put somewhere else, just modify **CMakeLists.txt**.
+
 ## Compiling in Android
 
 First, you actually need to compile SDL2. I will leave a link to guide I followed to do that: https://github.com/AlexanderAgd/SDL2-Android
