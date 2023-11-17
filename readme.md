@@ -17,7 +17,7 @@ To compile, you need a C++23 capable compiler and the following tools and librar
 - cmake
 - SDL
 - Opengl
-- My-lib (https://github.com/ehmcruz/my-lib).
+- My-lib (https://github.com/ehmcruz/my-lib)
 - Boost (for Linux and Windows only). Sub-libraries: program options.
 
 ## Setting the compiler
