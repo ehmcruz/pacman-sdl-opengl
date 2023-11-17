@@ -35,11 +35,11 @@ MingW in Windows is presenting weird issues with cmake.
 
 ## Compiling guide
 
-- Linux: [a relative link](linux.md)
+- [Compiling in Linux](linux.md)
 
-- Windows: [a relative link](windows.md)
+- [Compiling in Windows](windows.md)
 
-- Android: [a relative link](android.md)
+- [Compiling in Android](android.md)
 
 ---
 

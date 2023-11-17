@@ -26,7 +26,7 @@ You are also going to need:
 
 ## Compiling in Android
 
-First, you actually need to compile SDL2. I will leave a link to guide I followed to do that: [a link](https://github.com/AlexanderAgd/SDL2-Android).
+First, you actually need to compile SDL2. I will leave a link to guide I followed to do that: https://github.com/AlexanderAgd/SDL2-Android
 
 After you have the compiled **libSDL2.so**, you may need to change the include and link directories in **CMakeLists.txt**.
 
