@@ -57,6 +57,8 @@ protected:
 	OO_ENCAPSULATE_SCALAR_READONLY(State, state)
 	OO_ENCAPSULATE_SCALAR_READONLY(InitConfig, cfg_params)
 
+	Events::DataLessEvent::Descriptor event_quit_d;
+
 protected:
 	static Main *instance;
 
@@ -67,7 +69,7 @@ public:
 	void load (const InitConfig& cfg);
 	void run ();
 	void cleanup ();
-	void event_quit ();
+	void event_quit (const Events::DataLessEvent::Type);
 
 	static inline Main* get ()
 	{

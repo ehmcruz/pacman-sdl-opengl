@@ -24,7 +24,14 @@ namespace Events
 
 using Keyboard = Mylib::Trigger::EventHandler<SDL_Keycode>;
 using Timer = Mylib::Trigger::Timer<Game::ClockTime>;
-using Mylib::Trigger::DatalessEventHandler;
+
+// ---------------------------------------------------
+
+struct DataLess {
+
+};
+
+using DataLessEvent = Mylib::Trigger::EventHandler<DataLess>;
 
 // ---------------------------------------------------
 
@@ -47,9 +54,9 @@ struct MoveData {
 
 using Move = Mylib::Trigger::EventHandler<MoveData>;
 
-const char* enum_class_to_str (const Move::Direction value);
+const char* enum_class_to_str (const MoveData::Direction value);
 
-inline std::ostream& operator << (std::ostream& out, const Move::Direction value)
+inline std::ostream& operator << (std::ostream& out, const MoveData::Direction value)
 {
 	out << enum_class_to_str(value);
 	return out;
@@ -60,7 +67,7 @@ inline std::ostream& operator << (std::ostream& out, const Move::Direction value
 extern Keyboard keydown;
 extern Timer timer;
 extern Move move;
-extern DatalessEventHandler quit;
+extern DataLessEvent quit;
 
 // ---------------------------------------------------
 

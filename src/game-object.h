@@ -111,7 +111,7 @@ protected:
 	Direction target_direction;
 	Graphics::Color color;
 	//Graphics::Color base_color;
-	Events::Keyboard::Descriptor event_keydown_d;
+	//Events::Keyboard::Descriptor event_keydown_d;
 	Events::Move::Descriptor event_move_d;
 
 public:

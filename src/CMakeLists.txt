@@ -3,6 +3,7 @@ set(PACMAN_SOURCE_FILES
 	game-world.cpp
 	graphics.cpp
 	lib.cpp
+	events.cpp
 	graphics/sdl.cpp
 )
 

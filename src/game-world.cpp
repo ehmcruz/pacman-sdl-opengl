@@ -115,18 +115,19 @@ void Game::Main::load (const InitConfig& cfg)
 
 	dprintln("loaded world");
 
-	set trigger to quit
-
 	this->alive = true;
+
+	this->event_quit_d = Events::quit.subscribe( Mylib::Trigger::make_callback_object<Events::DataLessEvent::Type>(*this, &Main::event_quit) );
 }
 
 void Game::Main::cleanup ()
 {
+	Events::quit.unsubscribe(this->event_quit_d);
 	Graphics::quit(renderer, this->cfg_params.renderer_type);
 	SDL_Quit();
 }
 
-void Game::Main::event_quit ()
+void Game::Main::event_quit (const Events::DataLessEvent::Type)
 {
 	this->alive = false;
 }

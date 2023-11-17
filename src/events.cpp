@@ -4,6 +4,8 @@
 #include "debug.h"
 #include "events.h"
 #include "lib.h"
+#include "game-object.h"
+#include "game-world.h"
 
 
 namespace Game
@@ -14,14 +16,14 @@ namespace Events
 // ---------------------------------------------------
 
 Move move;
-DatalessEventHandler quit;
+DataLessEvent quit;
 Timer timer( Clock::now() );
-Keyboard Events::keydown;
+Keyboard keydown;
 WallCollision wall_collision;
 
 // ---------------------------------------------------
 
-const char* enum_class_to_str (const Move::Direction value)
+const char* enum_class_to_str (const MoveData::Direction value)
 {
 	static constexpr auto strs = std::to_array<const char*>({
 		#define _MYLIB_ENUM_CLASS_DIRECTION_VALUE_(V) #V,
@@ -36,112 +38,124 @@ const char* enum_class_to_str (const Move::Direction value)
 
 // ---------------------------------------------------
 
-static void process_keydown (const SDL_KeyboardEvent& event)
+static void process_keydown (SDL_KeyboardEvent& event)
 {
 	keydown.publish(event.keysym.sym);
 
 	switch (event.keysym.sym) {
 		case SDLK_LEFT:
-			move.publish(MoveData { .direction = Move::Direction::Left });
+			move.publish(MoveData { .direction = MoveData::Direction::Left });
 		break;
 
 		case SDLK_RIGHT:
-			move.publish(MoveData { .direction = Move::Direction::Right });
+			move.publish(MoveData { .direction = MoveData::Direction::Right });
 		break;
 
 		case SDLK_UP:
-			move.publish(MoveData { .direction = Move::Direction::Up });
+			move.publish(MoveData { .direction = MoveData::Direction::Up });
 		break;
 
 		case SDLK_DOWN:
-			move.publish(MoveData { .direction = Move::Direction::Down });
+			move.publish(MoveData { .direction = MoveData::Direction::Down });
 		break;
 	}
 }
 
 // ---------------------------------------------------
 
-struct FingerEvent {
-	bool free = true;
-	SDL_TouchID touch_id;
-	SDL_FingerID finger_id;
-	uint64_t global_id;
-	Vector norm_down_pos;
-	Vector norm_last_pos;
-};
+#ifdef __ANDROID__
+	struct FingerEvent {
+		bool free = true;
+		SDL_TouchID touch_id;
+		SDL_FingerID finger_id;
+		uint64_t global_id;
+		Vector norm_down_pos;
+		Vector norm_last_pos;
+	};
 
-static std::vector<FingerEvent> finger_events;
-static uint64_t global_touch_id = 0;
+	static std::vector<FingerEvent> finger_events;
+	static uint64_t global_touch_id = 0;
+#endif
 
 // ---------------------------------------------------
 
-static void finger_event_check_trigger (const FingerEvent& fe)
-{
-	const float dx = fe.norm_last_pos.x - fe.norm_down_pos.x;
-	const float dy = fe.norm_last_pos.y - fe.norm_down_pos.y;
-	constexpr float threshold = 0.2f;
+#ifdef __ANDROID__
+	static void finger_event_check_trigger (const FingerEvent& fe)
+	{
+		const float dx = fe.norm_last_pos.x - fe.norm_down_pos.x;
+		const float dy = fe.norm_last_pos.y - fe.norm_down_pos.y;
+		constexpr float norm_threshold = 0.2f;
 
-	if (std::abs(dx) > threshold) {
-		if (dx < 0.0f)
-			move.publish(MoveData { .direction = Move::Direction::Left });
-		else
-			move.publish(MoveData { .direction = Move::Direction::Right });
-	}
-	else if (std::abs(dy) > threshold) {
-		if (dx < 0.0f)
-			move.publish(MoveData { .direction = Move::Direction::Up });
-		else
-			move.publish(MoveData { .direction = Move::Direction::Down });
-	}
-}
+		const uint32_t window_width_px = renderer->get_window_width_px();
+		const uint32_t window_height_px = renderer->get_window_height_px();
 
-static FingerEvent& find_finger_event (const SDL_TouchID touch_id, const SDL_FingerID finger_id)
-{
-	for (auto& event : finger_events) {
-		if (event.touch_id == touch_id && event.finger_id == finger_id)
-			return event;
-	}
+		const float dx_px = dx * static_cast<float>(window_width_px);
+		const float dy_px = dy * static_cast<float>(window_height_px);
 
-	mylib_assert_exception_msg(false, "finger event not found: touch_id=", touch_id, " finger_id=", finger_id)
-}
+		const float threshold = norm_threshold * static_cast<float>(std::min(window_width_px, window_height_px));
 
-static void process_fingerdown (const SDL_TouchFingerEvent& event)
-{
-	FingerEvent *fe = nullptr;
-
-	// check for a free slot
-	for (auto& event : finger_events) {
-		if (event.free) {
-			fe = &event;
-			break;
+		if (std::abs(dx_px) > threshold) {
+			if (dx_px < 0.0f)
+				move.publish(MoveData { .direction = MoveData::Direction::Left });
+			else
+				move.publish(MoveData { .direction = MoveData::Direction::Right });
+		}
+		else if (std::abs(dy_px) > threshold) {
+			if (dy_px < 0.0f)
+				move.publish(MoveData { .direction = MoveData::Direction::Up });
+			else
+				move.publish(MoveData { .direction = MoveData::Direction::Down });
 		}
 	}
 
-	if (fe == nullptr) // no free slot, allocate one
-		fe = &finger_events.emplace_back();
-	
-	fe->free = false;
-	fe->touch_id = event.touchId;
-	fe->finger_id = event.fingerId;
-	fe->global_id = global_touch_id++;
-	fe->norm_down_pos = Vector(event.x, event.y);
-	fe->norm_last_pos = fe->norm_down_pos;
-}
+	static FingerEvent& find_finger_event (const SDL_TouchID touch_id, const SDL_FingerID finger_id)
+	{
+		for (auto& event : finger_events) {
+			if (event.touch_id == touch_id && event.finger_id == finger_id)
+				return event;
+		}
 
-static void process_fingermotion (const SDL_TouchFingerEvent& event_)
-{
+		mylib_assert_exception_msg(false, "finger event not found: touch_id=", touch_id, " finger_id=", finger_id)
+	}
 
-}
+	static void process_fingerdown (const SDL_TouchFingerEvent& event)
+	{
+		FingerEvent *fe = nullptr;
 
-static void process_fingerup (const SDL_TouchFingerEvent& event_)
-{
-	FingerEvent& fe = find_finger_event(event_.touchId, event_.fingerId);
+		// check for a free slot
+		for (auto& event : finger_events) {
+			if (event.free) {
+				fe = &event;
+				break;
+			}
+		}
 
-	fe.norm_last_pos = Vector(event_.x, event_.y);
-	finger_event_check_trigger(fe);
+		if (fe == nullptr) // no free slot, allocate one
+			fe = &finger_events.emplace_back();
+		
+		fe->free = false;
+		fe->touch_id = event.touchId;
+		fe->finger_id = event.fingerId;
+		fe->global_id = global_touch_id++;
+		fe->norm_down_pos = Vector(event.x, event.y);
+		fe->norm_last_pos = fe->norm_down_pos;
+	}
 
-	fe.free = true;
-}
+	static void process_fingermotion (const SDL_TouchFingerEvent& event_)
+	{
+
+	}
+
+	static void process_fingerup (const SDL_TouchFingerEvent& event_)
+	{
+		FingerEvent& fe = find_finger_event(event_.touchId, event_.fingerId);
+
+		fe.norm_last_pos = Vector(event_.x, event_.y);
+		finger_event_check_trigger(fe);
+
+		fe.free = true;
+	}
+#endif
 
 // ---------------------------------------------------
 
@@ -152,7 +166,7 @@ void process_events ()
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 			case SDL_QUIT:
-				quit.publish();
+				quit.publish({});
 			break;
 			
 			case SDL_KEYDOWN:
@@ -172,8 +186,6 @@ void process_events ()
 				process_fingerup(event.tfinger);
 			break;
 		#endif
-
-			default:
 		}
 	}
 }

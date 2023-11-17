@@ -31,7 +31,7 @@ Game::Player::Player (World *world_)
 	//this->color = this->base_color;
 	this->color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
 
-	this->event_keydown_d = Events::keydown.subscribe( Mylib::Trigger::make_callback_object<Events::Keyboard::Type>(*this, &Player::event_keydown) );
+	//this->event_keydown_d = Events::keydown.subscribe( Mylib::Trigger::make_callback_object<Events::Keyboard::Type>(*this, &Player::event_keydown) );
 	this->event_move_d = Events::move.subscribe( Mylib::Trigger::make_callback_object<Events::Move::Type>(*this, &Player::event_move) );
 
 	dprintln("player created");
@@ -39,7 +39,7 @@ Game::Player::Player (World *world_)
 
 Game::Player::~Player ()
 {
-	Events::keydown.unsubscribe(this->event_keydown_d);
+//	Events::keydown.unsubscribe(this->event_keydown_d);
 	Events::move.unsubscribe(this->event_move_d);
 }
 
@@ -102,10 +102,12 @@ void Game::Player::render (const float dt)
 	renderer->draw_circle(this->shape, this->pos, this->color);
 }
 
+/*
 void Game::Player::event_keydown (const Events::Keyboard::Type& key)
 {
 
 }
+*/
 
 void Game::Player::event_move (const Events::Move::Type& move_data)
 {
