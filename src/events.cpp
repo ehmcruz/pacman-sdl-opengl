@@ -17,7 +17,6 @@ namespace Events
 
 Move move;
 DataLessEvent quit;
-Timer timer( Clock::now() );
 Keyboard keydown;
 WallCollision wall_collision;
 

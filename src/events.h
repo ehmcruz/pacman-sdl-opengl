@@ -23,7 +23,12 @@ namespace Events
 // ---------------------------------------------------
 
 using Keyboard = Mylib::Trigger::EventHandler<SDL_Keycode>;
-using Timer = Mylib::Trigger::Timer<Game::ClockTime>;
+
+// ---------------------------------------------------
+
+inline Mylib::Trigger::Timer timer( Clock::now );
+
+using Timer = decltype(timer);
 
 // ---------------------------------------------------
 
@@ -65,7 +70,6 @@ inline std::ostream& operator << (std::ostream& out, const MoveData::Direction v
 // ---------------------------------------------------
 
 extern Keyboard keydown;
-extern Timer timer;
 extern Move move;
 extern DataLessEvent quit;
 

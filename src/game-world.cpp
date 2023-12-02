@@ -155,7 +155,7 @@ void Game::Main::run ()
 
 		renderer->wait_next_frame();
 
-		Events::timer.trigger_events(tbegin);
+		Events::timer.trigger_events();
 
 		virtual_dt = (real_dt > Config::max_dt) ? Config::max_dt : real_dt;
 
@@ -255,7 +255,7 @@ Game::World::World ()
 
 	this->wall_color = Graphics::Color { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f };
 	
-	this->event_timer_wall_color_d = Events::timer.schedule_event(Clock::now() + float_to_ClockDuration(Config::map_tile_color_change_time), Mylib::Trigger::make_callback_object<Events::Timer::Event>(*this, &World::change_wall_color));
+	this->event_timer_wall_color_d = Events::timer.schedule_event(Events::timer.get_current_time() + float_to_ClockDuration(Config::map_tile_color_change_time), Mylib::Trigger::make_callback_object<Events::Timer::Event>(*this, &World::change_wall_color));
 }
 
 Game::World::~World ()
@@ -324,7 +324,7 @@ void Game::World::change_wall_color (Events::Timer::Event& event)
 		};
 
 	event.re_schedule = true;
-	event.time = Clock::now() + float_to_ClockDuration(Config::map_tile_color_change_time);
+	event.time = Events::timer.get_current_time() + float_to_ClockDuration(Config::map_tile_color_change_time);
 }
 
 void Game::World::render_map ()
