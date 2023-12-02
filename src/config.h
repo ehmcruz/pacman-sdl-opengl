@@ -32,6 +32,8 @@ inline constexpr float ghost_time_between_turns = 0.5f; // in seconds
 
 inline constexpr float map_tile_color_change_time = 2.0f; // in seconds
 
+inline constexpr float ghost_color_change_time = 0.2f; // in seconds
+
 inline constexpr float map_tile_size = 1.0f;
 
 inline constexpr float target_fps = 60.0f;

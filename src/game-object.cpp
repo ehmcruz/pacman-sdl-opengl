@@ -149,13 +149,9 @@ Game::Ghost::Ghost (World *world_)
 	: Object(world_),
 	  shape(Config::ghost_radius)
 {
-	static Graphics::Color ghosts_colors[] = {
-		{ .r = 0.5f, .g = 0.1f, .b = 0.0f, .a = 1.0f },
-		{ .r = 0.0f, .g = 0.5f, .b = 0.0f, .a = 1.0f },
-	};
 	static uint32_t ghost_i = 0;
 
-	this->name = "Ghost_" + std::to_string(ghost_i);
+	this->name = "Ghost_" + std::to_string(ghost_i++);
 	this->pos = Vector(0.0f, 0.0f);
 	this->vel = Vector(0.0f, 0.0f);
 	this->direction = Direction::Stopped;
@@ -163,12 +159,36 @@ Game::Ghost::Ghost (World *world_)
 	this->time_between_turns = float_to_ClockDuration(Config::ghost_time_between_turns);
 	this->shape.user_data = this;
 
-	this->color = ghosts_colors[ ghost_i % (sizeof(ghosts_colors) / sizeof(Graphics::Color)) ];
-	ghost_i++;
+	this->color = Graphics::Color { .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
 
 	WallCollisionFilter wall_collision_filter = WallCollisionFilter { .myself = *this };
 
 	this->event_wall_collision_d = Events::wall_collision.subscribe( Mylib::Trigger::make_filter_callback_object<Events::WallCollision::Type>(wall_collision_filter, *this, &Ghost::collided_with_wall) );
+
+	/*
+		Let's change ghost colors randomly using a coroutine lambda.
+	*/
+	auto coro = [] (Ghost& ghost) -> Events::Timer::Coroutine {
+		dprintln("Ghost ", ghost.name, " coroutine started");
+
+		constexpr ClockDuration wait_time = float_to_ClockDuration(Config::ghost_color_change_time);
+
+		std::uniform_real_distribution<float> d (0.0f, 1.0f);
+		auto& r = probability.get_ref_rgenerator();
+
+		while (true) {
+			co_await Events::timer.coroutine_wait(wait_time);
+
+			ghost.color = Graphics::Color {
+				.r = d(r),
+				.g = d(r),
+				.b = d(r),
+				.a = 1.0f
+				};
+		}
+	}(*this);
+
+	Events::timer.register_coroutine(coro);
 
 	dprintln("ghost created");
 }

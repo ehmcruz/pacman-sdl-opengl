@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <random>
+#include <ostream>
 
 #include <cmath>
 
@@ -24,14 +25,36 @@ using Clock = std::chrono::steady_clock;
 using ClockDuration = Clock::duration;
 using ClockTime = Clock::time_point;
 
-inline ClockDuration float_to_ClockDuration (const float t)
+constexpr ClockDuration float_to_ClockDuration (const float t)
 {
 	return std::chrono::duration_cast<ClockDuration>(std::chrono::duration<float>(t));
 }
 
-inline float ClockDuration_to_float (const ClockDuration& d)
+constexpr float ClockDuration_to_float (const ClockDuration& d)
 {
 	return std::chrono::duration_cast<std::chrono::duration<float>>(d).count();
+}
+
+constexpr double ClockDuration_to_double (const ClockDuration& d)
+{
+	return std::chrono::duration_cast<std::chrono::duration<double>>(d).count();
+}
+
+/*inline double ClockTime_to_double (const ClockTime& t)
+{
+	return std::chrono::time_point_cast<std::chrono::time_point<double>>(t);
+}*/
+
+inline std::ostream& operator << (std::ostream& out, const ClockDuration& duration)
+{
+	out << ClockDuration_to_double(duration);
+	return out;
+}
+
+inline std::ostream& operator << (std::ostream& out, const ClockTime& time)
+{
+	out << time.time_since_epoch();
+	return out;
 }
 
 // ---------------------------------------------------
@@ -72,5 +95,11 @@ inline float get_cell_center (const uint32_t pos)
 // ---------------------------------------------------
 
 } // end namespace Game
+
+namespace Mylib
+{
+	// enables Mylib to print stuff from Game
+	using Game::operator <<;
+} // end namespace Mylib
 
 #endif
