@@ -30,7 +30,7 @@ const char* enum_class_to_str (const MoveData::Direction value)
 
 // ---------------------------------------------------
 
-static void key_down_callback (const MyGlib::Event::KeyDown::Type& event)
+static void key_down_callback (const KeyDown::Type& event)
 {
 	switch (event.key_code) {
 		case SDLK_LEFT:
@@ -48,15 +48,19 @@ static void key_down_callback (const MyGlib::Event::KeyDown::Type& event)
 		case SDLK_DOWN:
 			move.publish(MoveData { .direction = MoveData::Direction::Down });
 		break;
+
+		case SDLK_ESCAPE:
+			event_manager->quit().publish( {} );
+		break;
 	}
 }
 
 // ---------------------------------------------------
 
-static void touch_screen_move_callback (const MyGlib::Event::TouchScreenMove::Type& event)
+static void touch_screen_move_callback (const TouchScreenMove::Type& event)
 {
 	switch (event.direction) {
-		using enum MyGlib::Event::TouchScreenMove::Type::Direction;
+		using enum TouchScreenMove::Type::Direction;
 
 		case Left:
 			move.publish(MoveData { .direction = MoveData::Direction::Left });
@@ -80,8 +84,8 @@ static void touch_screen_move_callback (const MyGlib::Event::TouchScreenMove::Ty
 
 void setup_events ()
 {
-	event_manager->key_down().subscribe( Mylib::Trigger::make_callback_function<MyGlib::Event::KeyDown::Type>(&key_down_callback) );
-	event_manager->touch_screen_move().subscribe( Mylib::Trigger::make_callback_function<MyGlib::Event::TouchScreenMove::Type>(&touch_screen_move_callback) );
+	event_manager->key_down().subscribe( Mylib::Trigger::make_callback_function<KeyDown::Type>(&key_down_callback) );
+	event_manager->touch_screen_move().subscribe( Mylib::Trigger::make_callback_function<TouchScreenMove::Type>(&touch_screen_move_callback) );
 }
 
 // ---------------------------------------------------

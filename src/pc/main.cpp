@@ -50,6 +50,7 @@ static void process_args (int argc, char **argv)
 	try {
 		cmd_line_args.add_options()
 			( "help,h", "Help screen" )
+			( "f", "Fullscreen" )
 			( "video,v",
 				boost::program_options::value<std::string>()->default_value( MyGlib::Graphics::Manager::get_type_str(cfg.graphics_type) ),
 				renderer_type_strs.c_str() )
@@ -71,6 +72,10 @@ static void process_args (int argc, char **argv)
 			using namespace Game;
 			dprintln(cmd_line_args);
 			std::exit(EXIT_FAILURE);
+		}
+
+		if (vm.count("f")) {
+			cfg.fullscreen = true;
 		}
 
 		if (vm.count("video")) {

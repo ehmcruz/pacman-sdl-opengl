@@ -24,6 +24,12 @@ namespace Events
 
 // ---------------------------------------------------
 
+using MyGlib::Event::Manager;
+using MyGlib::Event::KeyDown;
+using MyGlib::Event::TouchScreenMove;
+
+// ---------------------------------------------------
+
 inline Mylib::Trigger::Timer timer( Clock::now );
 using Timer = decltype(timer);
 
