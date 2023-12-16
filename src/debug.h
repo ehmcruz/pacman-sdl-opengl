@@ -26,7 +26,7 @@ namespace Game
 		template <typename... Types>
 		void dprint (Types&&... vars)
 		{
-			const std::string str = Mylib::build_str_from_stream("PACMAN: ", vars...);
+			const std::string str = Mylib::build_str_from_stream("SDL PACMAN: ", vars...);
 			SDL_Log("%s", str.data());
 		}
 

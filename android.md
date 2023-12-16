@@ -64,4 +64,14 @@ For Wifi debugging:
 1. Pair your device using `adb pair ip:port`
 1. Connect your device using `adb connect ip:port`
 
+Note: If you get the error: **"adb: unknown command kill-service"**, try `adb kill-server`.
+
+Note: Android SDK already comes with **adb**.
+
 It is also possible to use a USB cable instead of Wifi, but I haven't tried that.
+
+## Accessing debug information
+
+Just type `adb logcat`.    
+You can filter anything you want using **grep**.    
+To filter messages from this project, look for **SDL** or **PACMAN**.
