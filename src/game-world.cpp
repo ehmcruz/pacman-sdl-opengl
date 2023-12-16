@@ -256,11 +256,14 @@ World::World ()
 	for (uint32_t y=0; y<this->map.get_h(); y++) {
 		for (uint32_t x=0; x<this->map.get_w(); x++) {
 			switch (this->map(y, x)) {
-				case Map::Cell::Ghost_start:
+				case Map::Cell::Ghost_start: {
 					Ghost& ghost = this->ghosts.emplace_back(this);
 					ghost.set_pos(Vector( get_cell_center(x), get_cell_center(y) ));
 					this->add_object(ghost);
+				}
 				break;
+
+				default: break; // clear warnings
 			}
 		}
 	}
@@ -352,6 +355,8 @@ void World::render_map ()
 					offset.set(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f);
 					renderer->draw_rect2D(rect, offset, this->wall_color);
 				break;
+
+				default: break; // clear warnings
 			}
 		}
 	}

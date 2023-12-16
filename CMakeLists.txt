@@ -64,12 +64,14 @@ if (MSVC)
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-	set(SDL2_INCLUDE_DIRS /home/ehmcruz/Android/SDL/SDL-release-2.28.5/include)
+	set(SDL2_INCLUDE_DIRS /home/ehmcruz/Android/SDL/include)
 	set(SDL2_LINK_DIR /home/ehmcruz/Android/SDL/lib/arm64-v8a)
 
 	add_library(SDL2 SHARED IMPORTED)
-
 	set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION ${SDL2_LINK_DIR}/libSDL2.so)
+
+	add_library(SDL2_MIXER SHARED IMPORTED)
+	set_target_properties(SDL2_MIXER PROPERTIES IMPORTED_LOCATION ${SDL2_LINK_DIR}/libSDL2_mixer.so)
 endif()
 
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")

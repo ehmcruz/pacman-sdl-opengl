@@ -7,15 +7,16 @@
 
 #include <SDL.h>
 
+#include <my-game-lib/my-game-lib.h>
+
 #include "game-world.h"
-#include "graphics.h"
 #include "lib.h"
 #include "config.h"
 #include "debug.h"
 
 // initialize with default values
 static Game::Main::InitConfig cfg = {
-	.renderer_type = Graphics::Renderer::Type::SDL,
+	.graphics_type = MyGlib::Graphics::Manager::Type::SDL,
 	.window_width_px = 0,
 	.window_height_px = 0,
 	.fullscreen = true,
@@ -29,7 +30,7 @@ static int cpp_main (int argc, char **argv)
 	try {
 		SDL_Init( SDL_INIT_VIDEO );
 
-		dprintln("Setting video renderer to ", Graphics::Renderer::get_type_str(cfg.renderer_type));
+		dprintln("Setting video renderer to ", MyGlib::Graphics::Manager::get_type_str(cfg.graphics_type));
 
 		Game::Main::allocate();
 

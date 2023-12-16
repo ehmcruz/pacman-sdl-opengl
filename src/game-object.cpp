@@ -89,6 +89,8 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 				this->direction = Down;
 			}
 		break;
+
+		case Stopped: break; // clear warnings
 	}
 
 	this->Object::physics(dt, keys);
@@ -283,6 +285,8 @@ void Game::Ghost::physics (const float dt, const Uint8 *keys)
 					this->vel.y = Config::pacman_speed;
 					this->direction = Down;
 				break;
+
+				case Stopped: break; // clear warnings
 			}
 		}
 	}

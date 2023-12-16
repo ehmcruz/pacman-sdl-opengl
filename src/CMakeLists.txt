@@ -49,7 +49,7 @@ if (MSVC)
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-	target_link_libraries(main SDL2)
+	target_link_libraries(main SDL2 SDL2_MIXER)
 endif()
 
 if (SUPPORT_OPENGL)
