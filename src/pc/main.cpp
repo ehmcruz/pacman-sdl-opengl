@@ -4,19 +4,20 @@
 #include <string_view>
 #include <algorithm>
 #include <ctype.h>
-#include <boost/algorithm/string.hpp>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 
+#include <my-game-lib/my-game-lib.h>
+
 #include "game-world.h"
-#include "graphics.h"
 #include "lib.h"
 #include "config.h"
 #include "debug.h"
 
 // initialize with default values
 static Game::Main::InitConfig cfg = {
-	.renderer_type = Graphics::Renderer::Type::SDL,
+	.graphics_type = MyGlib::Graphics::Manager::Type::SDL,
 	.window_width_px = Game::Config::default_window_width_px,
 	.window_height_px = Game::Config::default_window_height_px,
 	.fullscreen = false,
@@ -37,10 +38,10 @@ static void process_args (int argc, char **argv)
 	boost::program_options::options_description cmd_line_args("Pacman -- Options");
 	boost::program_options::variables_map vm;
 	std::string renderer_type_strs = "Renderer type. Available renderers: ";
-	const uint32_t n_types = std::to_underlying(Graphics::Renderer::Type::Unsupported);
+	const uint32_t n_types = std::to_underlying(MyGlib::Graphics::Manager::Type::Unsupported);
 
 	for (uint32_t i = 0; i < n_types; i++) {
-		renderer_type_strs += Graphics::Renderer::get_type_str( static_cast<Graphics::Renderer::Type>(i) );
+		renderer_type_strs += MyGlib::Graphics::Manager::get_type_str( static_cast<MyGlib::Graphics::Manager::Type>(i) );
 
 		if (i < (n_types-1))
 			renderer_type_strs += ", ";
@@ -50,7 +51,7 @@ static void process_args (int argc, char **argv)
 		cmd_line_args.add_options()
 			( "help,h", "Help screen" )
 			( "video,v",
-				boost::program_options::value<std::string>()->default_value( Graphics::Renderer::get_type_str(cfg.renderer_type) ),
+				boost::program_options::value<std::string>()->default_value( MyGlib::Graphics::Manager::get_type_str(cfg.graphics_type) ),
 				renderer_type_strs.c_str() )
 			( "width",
 				boost::program_options::value<uint32_t>()->default_value(cfg.window_width_px),
@@ -76,12 +77,12 @@ static void process_args (int argc, char **argv)
 			bool valid_type = false;
 
 			for (uint32_t i = 0; i < n_types; i++) {
-				const auto type = static_cast<Graphics::Renderer::Type>(i);
-				const char *s = Graphics::Renderer::get_type_str(type);
+				const auto type = static_cast<MyGlib::Graphics::Manager::Type>(i);
+				const char *s = MyGlib::Graphics::Manager::get_type_str(type);
 	
 				if ( str_i_equals(vm["video"].as<std::string>(), std::string_view(s)) ) {
 					valid_type = true;
-					cfg.renderer_type = type;
+					cfg.graphics_type = type;
 					break;
 				}
 			}
@@ -117,7 +118,7 @@ int main (const int argc, char **argv)
 	try {
 		process_args(argc, argv);
 
-		dprintln("Setting video renderer to ", Graphics::Renderer::get_type_str(cfg.renderer_type));
+		dprintln("Setting video renderer to ", MyGlib::Graphics::Manager::get_type_str(cfg.graphics_type));
 
 		SDL_Init( SDL_INIT_VIDEO );
 

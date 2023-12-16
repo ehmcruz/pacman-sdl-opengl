@@ -10,14 +10,19 @@
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
 #include <my-lib/math-vector.h>
+#include <my-lib/math.h>
+
+#include <my-game-lib/my-game-lib.h>
+
 
 namespace Game
 {
 
 // ---------------------------------------------------
 
-using Vector2 = Mylib::Math::Vector2f;
+using MyGlib::Graphics::Vector2;
 using Vector = Vector2;
+using MyGlib::Graphics::Color;
 
 // ---------------------------------------------------
 
@@ -59,9 +64,9 @@ inline std::ostream& operator << (std::ostream& out, const ClockTime& time)
 
 // ---------------------------------------------------
 
-inline int32_t round_to_nearest (const float v)
+constexpr int32_t round_to_nearest (const float v)
 {
-	return static_cast<int32_t>(v + 0.5f);
+	return Mylib::Math::round_to_nearest<int32_t>(v);
 }
 
 // ---------------------------------------------------

@@ -25,13 +25,11 @@ Game::Player::Player (World *world_)
 	this->vel = Vector(0.0f, 0.0f);
 	this->direction = Direction::Stopped;
 	this->target_direction = Direction::Stopped;
-	this->shape.user_data = this;
 
 	//this->base_color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
 	//this->color = this->base_color;
-	this->color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
+	this->color = Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
 
-	//this->event_keydown_d = Events::keydown.subscribe( Mylib::Trigger::make_callback_object<Events::Keyboard::Type>(*this, &Player::event_keydown) );
 	this->event_move_d = Events::move.subscribe( Mylib::Trigger::make_callback_object<Events::Move::Type>(*this, &Player::event_move) );
 
 	dprintln("player created");
@@ -99,15 +97,8 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 void Game::Player::render (const float dt)
 {
 	this->update_color();
-	renderer->draw_circle(this->shape, this->pos, this->color);
+	renderer->draw_circle2D(this->shape, this->pos, this->color);
 }
-
-/*
-void Game::Player::event_keydown (const Events::Keyboard::Type& key)
-{
-
-}
-*/
 
 void Game::Player::event_move (const Events::Move::Type& move_data)
 {
@@ -157,9 +148,8 @@ Game::Ghost::Ghost (World *world_)
 	this->direction = Direction::Stopped;
 	this->time_last_turn = this->world->get_time_create();
 	this->time_between_turns = float_to_ClockDuration(Config::ghost_time_between_turns);
-	this->shape.user_data = this;
 
-	this->color = Graphics::Color { .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
+	this->color = Color { .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
 
 	WallCollisionFilter wall_collision_filter = WallCollisionFilter { .myself = *this };
 
@@ -179,7 +169,7 @@ Game::Ghost::Ghost (World *world_)
 		while (true) {
 			co_await Events::timer.coroutine_wait(wait_time);
 
-			ghost.color = Graphics::Color {
+			ghost.color = Color {
 				.r = d(r),
 				.g = d(r),
 				.b = d(r),
@@ -302,5 +292,5 @@ void Game::Ghost::physics (const float dt, const Uint8 *keys)
 
 void Game::Ghost::render (const float dt)
 {
-	renderer->draw_circle(this->shape, this->pos, this->color);
+	renderer->draw_circle2D(this->shape, this->pos, this->color);
 }

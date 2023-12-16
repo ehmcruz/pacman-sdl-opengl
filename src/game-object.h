@@ -13,14 +13,20 @@
 #include <my-lib/macros.h>
 #include <my-lib/matrix.h>
 
+#include <my-game-lib/my-game-lib.h>
+
 #include "config.h"
 #include "lib.h"
-#include "graphics.h"
 #include "events.h"
 
 
 namespace Game
 {
+
+// ---------------------------------------------------
+
+using MyGlib::Graphics::Rect2D;
+using MyGlib::Graphics::Circle2D;
 
 // ---------------------------------------------------
 
@@ -91,27 +97,15 @@ public:
 	virtual void render (const float dt) = 0;
 };
 
-namespace Events {
-	struct WallCollisionData {
-		Object& coll_obj;
-		Object::Direction direction;
-	};
-
-	using WallCollision = Mylib::Trigger::EventHandler<WallCollisionData>;
-	
-	extern WallCollision wall_collision;
-}
-
 // ---------------------------------------------------
 
 class Player : public Object
 {
 protected:
-	Graphics::ShapeCircle shape;
+	Circle2D shape;
 	Direction target_direction;
-	Graphics::Color color;
+	Color color;
 	//Graphics::Color base_color;
-	//Events::Keyboard::Descriptor event_keydown_d;
 	Events::Move::Descriptor event_move_d;
 
 public:
@@ -121,7 +115,6 @@ public:
 	void physics (const float dt, const Uint8 *keys) override final;
 	void render (const float dt) override final;
 
-	void event_keydown (const Events::Keyboard::Type& key);
 	void event_move (const Events::Move::Type& move_data);
 
 	void update_color ();
@@ -132,8 +125,8 @@ public:
 class Ghost : public Object
 {
 protected:
-	Graphics::ShapeCircle shape;
-	Graphics::Color color;
+	Circle2D shape;
+	Color color;
 	ClockTime time_last_turn;
 	ClockDuration time_between_turns;
 	Events::WallCollision::Descriptor event_wall_collision_d;

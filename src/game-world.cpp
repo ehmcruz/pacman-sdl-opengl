@@ -2,23 +2,24 @@
 #include <chrono>
 #include <limits>
 
+#include <my-game-lib/my-game-lib.h>
+
 #include "debug.h"
 #include "game-world.h"
 #include "game-object.h"
 #include "lib.h"
 
+namespace Game
+{
 
-Game::Main *Game::Main::instance = nullptr;
-Graphics::Renderer *Game::renderer = nullptr;
-Game::Probability Game::probability;
+// ---------------------------------------------------
 
-
-void Game::die ()
+void die ()
 {
 	SDL_Quit();
 }
 
-Game::Map::Map ()
+Map::Map ()
 {
 	this->w = 8;
 	this->h = 8;
@@ -73,40 +74,51 @@ Game::Map::Map ()
 	mylib_assert_exception(this->pacman_start_x != std::numeric_limits<uint32_t>::max())
 }
 
-Game::Map::~Map ()
+Map::~Map ()
 {
 }
 
-Game::Main::Main ()
+Main::Main ()
 {
 }
 
-Game::Main::~Main ()
+Main::~Main ()
 {
 }
 
-void Game::Main::allocate ()
+void Main::allocate ()
 {
 	mylib_assert_exception(instance == nullptr)
 
 	instance = new Main;
 }
 
-void Game::Main::deallocate ()
+void Main::deallocate ()
 {
 	mylib_assert_exception(instance != nullptr)
 
 	delete instance;
 }
 
-void Game::Main::load (const InitConfig& cfg)
+void Main::load (const InitConfig& cfg)
 {
 	debug_config_stream();
 
 	this->state = State::initializing;
 	this->cfg_params = cfg;
 
-	renderer = Graphics::init(cfg.renderer_type, cfg.window_width_px, cfg.window_height_px, cfg.fullscreen);
+	this->lib = &MyGlib::Lib::init({
+		.graphics_type = cfg.graphics_type,
+		.window_name = "Pacman",
+		.window_width_px = cfg.window_width_px,
+		.window_height_px = cfg.window_height_px,
+		.fullscreen = cfg.fullscreen
+	});
+
+	renderer = &this->lib->get_graphics_manager();
+	event_manager = &this->lib->get_event_manager();
+
+	Events::setup_events();
 
 	dprintln("chorono resolution ", (static_cast<float>(Clock::period::num) / static_cast<float>(Clock::period::den)));
 
@@ -117,22 +129,21 @@ void Game::Main::load (const InitConfig& cfg)
 
 	this->alive = true;
 
-	this->event_quit_d = Events::quit.subscribe( Mylib::Trigger::make_callback_object<Events::DataLessEvent::Type>(*this, &Main::event_quit) );
+	this->event_quit_d = event_manager->quit().subscribe( Mylib::Trigger::make_callback_object<MyGlib::Event::Quit::Type>(*this, &Main::event_quit) );
 }
 
-void Game::Main::cleanup ()
+void Main::cleanup ()
 {
-	Events::quit.unsubscribe(this->event_quit_d);
-	Graphics::quit(renderer, this->cfg_params.renderer_type);
-	SDL_Quit();
+	event_manager->quit().unsubscribe(this->event_quit_d);
+	MyGlib::Lib::quit();
 }
 
-void Game::Main::event_quit (const Events::DataLessEvent::Type)
+void Main::event_quit (const MyGlib::Event::Quit::Type)
 {
 	this->alive = false;
 }
 
-void Game::Main::run ()
+void Main::run ()
 {
 	const Uint8 *keys;
 	float real_dt, virtual_dt, required_dt, sleep_dt, busy_wait_dt, fps;
@@ -172,7 +183,7 @@ void Game::Main::run ()
 			);
 	#endif
 
-		Events::process_events();
+		event_manager->process_events();
 
 		switch (this->state) {
 			case State::playing:
@@ -185,6 +196,7 @@ void Game::Main::run ()
 		}
 
 		renderer->render();
+		renderer->update_screen();
 
 		const ClockTime trequired = Clock::now();
 		elapsed = trequired - tbegin;
@@ -219,7 +231,7 @@ void Game::Main::run ()
 	}
 }
 
-Game::World::World ()
+World::World ()
 	: time_create( Clock::now() )
 	, player(this)
 {
@@ -253,17 +265,17 @@ Game::World::World ()
 		}
 	}
 
-	this->wall_color = Graphics::Color { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f };
+	this->wall_color = Color { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f };
 	
 	this->event_timer_wall_color_d = Events::timer.schedule_event(Events::timer.get_current_time() + float_to_ClockDuration(Config::map_tile_color_change_time), Mylib::Trigger::make_callback_object<Events::Timer::Event>(*this, &World::change_wall_color));
 }
 
-Game::World::~World ()
+World::~World ()
 {
 	Events::timer.unschedule_event(this->event_timer_wall_color_d);
 }
 
-void Game::World::physics (const float dt, const Uint8 *keys)
+void World::physics (const float dt, const Uint8 *keys)
 {
 //	dprintln( "distance between player and ghost[0]: " << Mylib::Math::distance(this->player.get_pos(), this->ghosts[0].get_pos()) )
 
@@ -274,7 +286,7 @@ void Game::World::physics (const float dt, const Uint8 *keys)
 	this->solve_wall_collisions();
 }
 
-void Game::World::solve_wall_collisions ()
+void World::solve_wall_collisions ()
 {
 	for (Object *obj: this->objects) {
 		const Vector cell_center = get_cell_center(obj->get_value_pos());
@@ -309,14 +321,14 @@ void Game::World::solve_wall_collisions ()
 	}
 }
 
-void Game::World::change_wall_color (Events::Timer::Event& event)
+void World::change_wall_color (Events::Timer::Event& event)
 {
 	//dprintln("Changing wall color")
 
 	std::uniform_real_distribution<float> d (0.0f, 1.0f);
 	auto& r = probability.get_ref_rgenerator();
 
-	this->wall_color = Graphics::Color {
+	this->wall_color = Color {
 		.r = d(r),
 		.g = d(r),
 		.b = d(r),
@@ -327,9 +339,9 @@ void Game::World::change_wall_color (Events::Timer::Event& event)
 	event.time = Events::timer.get_current_time() + float_to_ClockDuration(Config::map_tile_color_change_time);
 }
 
-void Game::World::render_map ()
+void World::render_map ()
 {
-	const Graphics::ShapeRect rect(Config::map_tile_size, Config::map_tile_size);
+	const Rect2D rect(Config::map_tile_size, Config::map_tile_size);
 	const uint32_t n_rects = this->map.get_n_walls();
 	Vector offset;
 
@@ -338,45 +350,45 @@ void Game::World::render_map ()
 			switch (this->map(y, x)) {
 				case Map::Cell::Wall:
 					offset.set(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f);
-					renderer->draw_rect(rect, offset, this->wall_color);
+					renderer->draw_rect2D(rect, offset, this->wall_color);
 				break;
 			}
 		}
 	}
 }
 
-void Game::World::render_box()
+void World::render_box()
 {
-	Graphics::ShapeRect rect;
+	Rect2D rect;
 	Vector offset;
 	float w, h;
-	const Graphics::Color color = { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
+	const Color color = { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
 	const Vector ws = renderer->get_normalized_window_size();
 	
 	w = this->border_thickness;
 	h = ws.y;
 	offset.set(w*0.5f, ws.y*0.5f);
-	rect = Graphics::ShapeRect(w, h);
-	renderer->draw_rect(rect, offset, color);
+	rect = Rect2D(w, h);
+	renderer->draw_rect2D(rect, offset, color);
 
 	offset.set(ws.x - w*0.5f, ws.y*0.5f);
-	renderer->draw_rect(rect, offset, color);
+	renderer->draw_rect2D(rect, offset, color);
 
 	w = ws.x;
 	h = this->border_thickness;
 	offset.set(ws.x*0.5f, h*0.5f);
-	rect = Graphics::ShapeRect(w, h);
-	renderer->draw_rect(rect, offset, color);
+	rect = Rect2D(w, h);
+	renderer->draw_rect2D(rect, offset, color);
 
 	offset.set(ws.x*0.5f, ws.y - h*0.5f);
-	renderer->draw_rect(rect, offset, color);
+	renderer->draw_rect2D(rect, offset, color);
 }
 
-void Game::World::render (const float dt)
+void World::render (const float dt)
 {
 	const Vector ws = renderer->get_normalized_window_size();
 
-	renderer->setup_projection_matrix( Graphics::ProjectionMatrixArgs {
+	renderer->setup_render_2D( {
 		.clip_init_norm = Vector(0.0f, 0.0f),
 		.clip_end_norm = Vector(ws.x, ws.y),
 		.world_init = Vector(0.0f, 0.0f),
@@ -425,3 +437,7 @@ void Game::World::render (const float dt)
 	this->render_box();
 #endif
 }
+
+// ---------------------------------------------------
+
+} // end namespace Game

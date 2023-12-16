@@ -1,10 +1,8 @@
 set(PACMAN_SOURCE_FILES
 	game-object.cpp
 	game-world.cpp
-	graphics.cpp
 	lib.cpp
 	events.cpp
-	graphics/sdl.cpp
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -22,23 +20,18 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
 		android/main.cpp)
 endif()
 
-if (SUPPORT_OPENGL)
-	set(PACMAN_SOURCE_FILES ${PACMAN_SOURCE_FILES}
-		graphics/opengl.cpp)
-endif()
-
 # -------------------------------------
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	add_executable(pacman ${PACMAN_SOURCE_FILES})
+	add_executable(pacman ${MYGAMELIB_SOURCE_FILES} ${PACMAN_SOURCE_FILES})
 endif()
 
 if (MSVC)
-	add_executable(pacman ${PACMAN_SOURCE_FILES})
+	add_executable(pacman ${MYGAMELIB_SOURCE_FILES} ${PACMAN_SOURCE_FILES})
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-	add_library(main SHARED ${PACMAN_SOURCE_FILES})
+	add_library(main SHARED ${MYGAMELIB_SOURCE_FILES} ${PACMAN_SOURCE_FILES})
 endif()
 
 # -------------------------------------
@@ -48,7 +41,7 @@ endif()
 #	NO_SYSTEM_FROM_IMPORTED true) # remove -isystem from system libs and use -I to include everything
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	target_link_libraries(pacman ${SDL2_LIBRARIES} ${Boost_LIBRARIES})
+	target_link_libraries(pacman ${SDL2_LIBRARIES} ${Boost_LIBRARIES} ${SDL2_MIXER_LIBRARIES})
 endif()
 
 if (MSVC)

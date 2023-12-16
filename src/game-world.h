@@ -16,7 +16,6 @@
 #include <my-lib/matrix.h>
 #include <my-lib/trigger.h>
 
-#include "graphics.h"
 #include "game-object.h"
 #include "lib.h"
 #include "events.h"
@@ -26,8 +25,9 @@ namespace Game
 
 // ---------------------------------------------------
 
-extern Graphics::Renderer *renderer;
-extern Probability probability;
+inline MyGlib::Graphics::Manager *renderer = nullptr;
+inline MyGlib::Event::Manager *event_manager = nullptr;
+inline Probability probability;
 
 // ---------------------------------------------------
 
@@ -39,7 +39,7 @@ class Main
 {
 public:
 	struct InitConfig {
-		Graphics::Renderer::Type renderer_type;
+		MyGlib::Graphics::Manager::Type graphics_type;
 		uint32_t window_width_px;
 		uint32_t window_height_px;
 		bool fullscreen;
@@ -57,10 +57,11 @@ protected:
 	OO_ENCAPSULATE_SCALAR_READONLY(State, state)
 	OO_ENCAPSULATE_SCALAR_READONLY(InitConfig, cfg_params)
 
-	Events::DataLessEvent::Descriptor event_quit_d;
+	MyGlib::Event::Quit::Descriptor event_quit_d;
+	MyGlib::Lib *lib;
 
 protected:
-	static Main *instance;
+	static inline Main *instance = nullptr;
 
 	Main ();
 	~Main ();
@@ -69,7 +70,7 @@ public:
 	void load (const InitConfig& cfg);
 	void run ();
 	void cleanup ();
-	void event_quit (const Events::DataLessEvent::Type);
+	void event_quit (const MyGlib::Event::Quit::Type);
 
 	static inline Main* get ()
 	{
@@ -132,7 +133,7 @@ protected:
 	OO_ENCAPSULATE_OBJ_READONLY(std::vector<Ghost>, ghosts)
 	OO_ENCAPSULATE_OBJ_READONLY(Map, map)
 
-	Graphics::Color wall_color;
+	Color wall_color;
 	Events::Timer::Descriptor event_timer_wall_color_d;
 
 protected:

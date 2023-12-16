@@ -17,26 +17,15 @@
 
 namespace Game
 {
+	class Object;
+
 namespace Events
 {
 
 // ---------------------------------------------------
 
-using Keyboard = Mylib::Trigger::EventHandler<SDL_Keycode>;
-
-// ---------------------------------------------------
-
 inline Mylib::Trigger::Timer timer( Clock::now );
-
 using Timer = decltype(timer);
-
-// ---------------------------------------------------
-
-struct DataLess {
-
-};
-
-using DataLessEvent = Mylib::Trigger::EventHandler<DataLess>;
 
 // ---------------------------------------------------
 
@@ -67,15 +56,22 @@ inline std::ostream& operator << (std::ostream& out, const MoveData::Direction v
 	return out;
 }
 
-// ---------------------------------------------------
-
-extern Keyboard keydown;
-extern Move move;
-extern DataLessEvent quit;
+inline Move move;
 
 // ---------------------------------------------------
 
-void process_events ();
+struct WallCollisionData {
+	Object& coll_obj;
+	MoveData::Direction direction;
+};
+
+using WallCollision = Mylib::Trigger::EventHandler<WallCollisionData>;
+
+inline WallCollision wall_collision;
+
+// ---------------------------------------------------
+
+void setup_events ();
 
 // ---------------------------------------------------
 

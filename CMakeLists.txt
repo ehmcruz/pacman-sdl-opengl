@@ -16,6 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # -------------------------------------
 
+# cmake .. -DSUPPORT_OPENGL=1
 option(SUPPORT_OPENGL "Include support for OpenGL" OFF)
 
 # -------------------------------------
@@ -37,10 +38,15 @@ message(STATUS "CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 # -------------------------------------
 
 set(MYLIB_PATH ${CMAKE_SOURCE_DIR}/../my-lib)
+set(MYGAMELIB_PATH ${CMAKE_SOURCE_DIR}/../my-game-lib)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	find_package(SDL2 REQUIRED)
 	find_package(Boost COMPONENTS program_options REQUIRED)
+
+	# SDL2 mixer
+	set(SDL2_MIXER_LINK_FLAGS "-lSDL2_mixer")
+	set(SDL2_MIXER_LIBRARIES "${SDL2_MIXER_LINK_FLAGS}")
 endif()
 
 if (MSVC)
@@ -53,6 +59,7 @@ if (MSVC)
 	set(my_Boost_LIBRARIES "C:\\my-msvc-libs\\boost_1_83_0\\lib64-msvc-14.3\\libboost_program_options-vc143-mt-gd-x64-1_83.lib")
 
 	find_package(SDL2 REQUIRED)
+	find_package(SDL2_mixer REQUIRED)
 	find_package(Boost COMPONENTS program_options REQUIRED)
 endif()
 
@@ -89,7 +96,7 @@ endif()
 # -------------------------------------
 
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
-	file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${my_OUTPUT_DIR})
+	file(COPY ${MYGAMELIB_PATH}/shaders DESTINATION ${my_OUTPUT_DIR})
 
 	if (MSVC)
 		file(COPY "${WINDOWS_SDL_DEV_LIBS}\\lib\\x64\\SDL2.dll" DESTINATION ${my_OUTPUT_DIR})
@@ -107,20 +114,43 @@ endif()
 include_directories(
 	"${SDL2_INCLUDE_DIRS}"
 	"${MYLIB_PATH}/include"
+	"${MYGAMELIB_PATH}/include"
 	"${CMAKE_SOURCE_DIR}/src"
-	"${CMAKE_SOURCE_DIR}/src/graphics"
 	)
 
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
 	include_directories("${Boost_INCLUDE_DIRS}")
 endif()
 
+set(MYGAMELIB_SOURCE_FILES
+	"${MYGAMELIB_PATH}/src/my-game-lib.cpp"
+	"${MYGAMELIB_PATH}/src/graphics.cpp"
+	"${MYGAMELIB_PATH}/src/events.cpp"
+	"${MYGAMELIB_PATH}/src/sdl/sdl.cpp"
+	"${MYGAMELIB_PATH}/src/sdl/sdl-audio.cpp"
+	"${MYGAMELIB_PATH}/src/sdl/sdl-graphics.cpp"
+)
+
 if (SUPPORT_OPENGL)
 	include_directories(
 		"${OPENGL_INCLUDE_DIR}"
 		"${GLEW_INCLUDE_DIRS}"
 		)
+
+	set(MYGAMELIB_SOURCE_FILES ${MYGAMELIB_SOURCE_FILES}
+		"${MYGAMELIB_PATH}/src/opengl/opengl.cpp")
 endif()
+
+# -------------------------------------
+
+add_compile_definitions(MYGLIB_FP_TYPE=float)
+add_compile_definitions(MYGLIB_SUPPORT_SDL=1)
+
+if (SUPPORT_OPENGL)
+	add_compile_definitions(MYGLIB_SUPPORT_OPENGL=1)
+endif()
+
+# -------------------------------------
 
 add_subdirectory(src)
 
