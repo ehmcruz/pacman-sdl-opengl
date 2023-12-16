@@ -16,7 +16,7 @@
 
 // initialize with default values
 static Game::Main::InitConfig cfg = {
-	.graphics_type = MyGlib::Graphics::Manager::Type::SDL,
+	.graphics_type = MyGlib::Graphics::Manager::Type::Opengl,
 	.window_width_px = 0,
 	.window_height_px = 0,
 	.fullscreen = true,

@@ -16,8 +16,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # -------------------------------------
 
-# cmake .. -DSUPPORT_OPENGL=1
-option(SUPPORT_OPENGL "Include support for OpenGL" OFF)
+# To build without OpenGL support:
+# cmake .. -DSUPPORT_OPENGL=OFF
+option(SUPPORT_OPENGL "Include support for OpenGL" ON)
 
 # -------------------------------------
 
@@ -90,9 +91,10 @@ endif()
 
 if (SUPPORT_OPENGL)
 	find_package(OpenGL REQUIRED)
-	find_package(GLEW REQUIRED)
 
-	add_compile_definitions(PACMAN_SUPPORT_OPENGL=1)
+	if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+		find_package(GLEW REQUIRED)
+	endif()
 endif()
 
 # -------------------------------------
@@ -136,9 +138,19 @@ set(MYGAMELIB_SOURCE_FILES
 if (SUPPORT_OPENGL)
 	include_directories(
 		"${OPENGL_INCLUDE_DIR}"
-		"${GLEW_INCLUDE_DIRS}"
 		)
 
+	if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+		include_directories(
+			"${GLEW_INCLUDE_DIRS}"
+			)
+	endif()
+
+	set(MYGAMELIB_SOURCE_FILES ${MYGAMELIB_SOURCE_FILES}
+		"${MYGAMELIB_PATH}/src/opengl/opengl.cpp")
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
 	set(MYGAMELIB_SOURCE_FILES ${MYGAMELIB_SOURCE_FILES}
 		"${MYGAMELIB_PATH}/src/opengl/opengl.cpp")
 endif()
@@ -149,6 +161,10 @@ add_compile_definitions(MYGLIB_FP_TYPE=float)
 add_compile_definitions(MYGLIB_SUPPORT_SDL=1)
 
 if (SUPPORT_OPENGL)
+	add_compile_definitions(MYGLIB_SUPPORT_OPENGL=1)
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Android")
 	add_compile_definitions(MYGLIB_SUPPORT_OPENGL=1)
 endif()
 
