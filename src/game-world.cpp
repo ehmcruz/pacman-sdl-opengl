@@ -88,7 +88,7 @@ Main::~Main ()
 
 void Main::allocate ()
 {
-	mylib_assert_exception(instance == nullptr)
+	mylib_assert_exception_msg(instance == nullptr, "Main already allocated!")
 
 	instance = new Main;
 }

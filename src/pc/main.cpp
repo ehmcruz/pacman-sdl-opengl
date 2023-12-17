@@ -125,7 +125,12 @@ int main (const int argc, char **argv)
 
 		dprintln("Setting video renderer to ", MyGlib::Graphics::Manager::get_type_str(cfg.graphics_type));
 
-		SDL_Init( SDL_INIT_VIDEO );
+		dprintln("Initializing SDL...");
+		
+		if (SDL_Init(0) < 0)
+			mylib_throw_exception_msg("SDL could not initialize! SDL_Error: ", SDL_GetError());
+		
+		dprintln("SDL initialized!");
 
 		Game::Main::allocate();
 

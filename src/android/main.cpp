@@ -28,9 +28,10 @@ static int cpp_main (int argc, char **argv)
 	using namespace Game;
 	
 	try {
-		SDL_Init( SDL_INIT_VIDEO );
-
-		dprintln("Setting video renderer to ", MyGlib::Graphics::Manager::get_type_str(cfg.graphics_type));
+		if (SDL_Init(0) < 0)
+			mylib_throw_exception_msg("SDL could not initialize! SDL_Error: ", SDL_GetError());
+		
+		dprintln("SDL initialized!");
 
 		Game::Main::allocate();
 
@@ -42,6 +43,10 @@ static int cpp_main (int argc, char **argv)
 	}
 	catch (const std::exception& e) {
 		dprintln("Something bad happened!", '\n', e.what());
+		return EXIT_FAILURE;
+	}
+	catch (...) {
+		dprintln("Something bad happened!", '\n', "Unknown exception!");
 		return EXIT_FAILURE;
 	}
 
