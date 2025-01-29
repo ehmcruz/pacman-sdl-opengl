@@ -41,11 +41,11 @@ public:
 	using Direction = Events::MoveData::Direction;
 
 protected:
-	OO_ENCAPSULATE_OBJ(Vector, pos)
-	OO_ENCAPSULATE_OBJ(Vector, vel)
-	OO_ENCAPSULATE_OBJ(std::string, name)
-	OO_ENCAPSULATE_PTR(World*, world)
-	OO_ENCAPSULATE_SCALAR(Direction, direction)
+	MYLIB_OO_ENCAPSULATE_OBJ_WITH_COPY_MOVE(Vector, pos)
+	MYLIB_OO_ENCAPSULATE_OBJ_WITH_COPY_MOVE(Vector, vel)
+	MYLIB_OO_ENCAPSULATE_OBJ_WITH_COPY_MOVE(std::string, name)
+	MYLIB_OO_ENCAPSULATE_PTR(World*, world)
+	MYLIB_OO_ENCAPSULATE_SCALAR(Direction, direction)
 
 public:
 	inline Object (World *world_)

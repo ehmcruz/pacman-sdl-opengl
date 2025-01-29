@@ -41,7 +41,7 @@ endif()
 #	NO_SYSTEM_FROM_IMPORTED true) # remove -isystem from system libs and use -I to include everything
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	target_link_libraries(pacman ${SDL2_LIBRARIES} ${Boost_LIBRARIES} ${SDL2_MIXER_LIBRARIES})
+	target_link_libraries(pacman ${SDL2_LIBRARIES} ${Boost_LIBRARIES} ${SDL2_MIXER_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
 endif()
 
 if (MSVC)
@@ -54,4 +54,12 @@ endif()
 
 if (SUPPORT_OPENGL)
 	target_link_libraries(pacman ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
+endif()
+
+# -------------------------------------
+
+if(MSVC)
+	target_compile_options(pacman PRIVATE /W4 /WX)
+else()
+	target_compile_options(pacman PRIVATE -Wall) # -Wextra -Wpedantic -Werror
 endif()

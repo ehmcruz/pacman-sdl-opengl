@@ -74,7 +74,7 @@ constexpr int32_t round_to_nearest (const float v)
 class Probability
 {
 private:
-	OO_ENCAPSULATE_OBJ(std::mt19937_64, rgenerator);
+	MYLIB_OO_ENCAPSULATE_OBJ(std::mt19937_64, rgenerator);
 
 public:
 	Probability ();

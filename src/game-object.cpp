@@ -55,7 +55,7 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 		using enum Direction;
 
 		case Left:
-			if (dist_y < Config::pacman_turn_threshold && map(yi, xi-1) != Map::Cell::Wall) {
+			if (dist_y < Config::pacman_turn_threshold && map[yi, xi-1] != Map::Cell::Wall) {
 				this->pos.y = cell_center.y; // teleport to center of cell
 				this->vel.x = -Config::pacman_speed;
 				this->vel.y = 0.0f;
@@ -64,7 +64,7 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 		break;
 
 		case Right:
-			if (dist_y < Config::pacman_turn_threshold && map(yi, xi+1) != Map::Cell::Wall) {
+			if (dist_y < Config::pacman_turn_threshold && map[yi, xi+1] != Map::Cell::Wall) {
 				this->pos.y = cell_center.y; // teleport to center of cell
 				this->vel.x = Config::pacman_speed;
 				this->vel.y = 0.0f;
@@ -73,7 +73,7 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 		break;
 
 		case Up:
-			if (dist_x < Config::pacman_turn_threshold && map(yi-1, xi) != Map::Cell::Wall) {
+			if (dist_x < Config::pacman_turn_threshold && map[yi-1, xi] != Map::Cell::Wall) {
 				this->pos.x = cell_center.x; // teleport to center of cell
 				this->vel.x = 0.0f;
 				this->vel.y = -Config::pacman_speed;
@@ -82,7 +82,7 @@ void Game::Player::physics (const float dt, const Uint8 *keys)
 		break;
 
 		case Down:
-			if (dist_x < Config::pacman_turn_threshold && map(yi+1, xi) != Map::Cell::Wall) {
+			if (dist_x < Config::pacman_turn_threshold && map[yi+1, xi] != Map::Cell::Wall) {
 				this->pos.x = cell_center.x; // teleport to center of cell
 				this->vel.x = 0.0f;
 				this->vel.y = Config::pacman_speed;
@@ -217,13 +217,13 @@ void Game::Ghost::physics (const float dt, const Uint8 *keys)
 			std::array<Direction, 4> possibilities; // max of 4 possible directions
 			uint32_t n_possibilities = 0;
 
-			if (map(xi-1, yi) == Map::Cell::Empty)
+			if (map[xi-1, yi] == Map::Cell::Empty)
 				possibilities[n_possibilities++] = Direction::Left;
-			if (map(xi+1, yi) == Map::Cell::Empty)
+			if (map[xi+1, yi] == Map::Cell::Empty)
 				possibilities[n_possibilities++] = Direction::Right;
-			if (map(xi, yi-1) == Map::Cell::Empty)
+			if (map[xi, yi-1] == Map::Cell::Empty)
 				possibilities[n_possibilities++] = Direction::Up;
-			if (map(xi, yi+1) == Map::Cell::Empty)
+			if (map[xi, yi+1] == Map::Cell::Empty)
 				possibilities[n_possibilities++] = Direction::Down;
 
 			//dprint("Ghost n_possibilities = " << n_possibilities << " (")

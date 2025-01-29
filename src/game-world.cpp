@@ -45,22 +45,22 @@ Map::Map ()
 		for (uint32_t x=0; x<this->w; x++) {
 			switch (map_string[k]) {
 				case ' ':
-					m(y, x) = Cell::Empty;
+					m[y, x] = Cell::Empty;
 				break;
 				
 				case '0':
-					m(y, x) = Cell::Wall;
+					m[y, x] = Cell::Wall;
 					this->n_walls++;
 				break;
 				
 				case 'p':
-					m(y, x) = Cell::Pacman_start;
+					m[y, x] = Cell::Pacman_start;
 					this->pacman_start_x = x;
 					this->pacman_start_y = y;
 				break;
 
 				case 'g':
-					m(y, x) = Cell::Ghost_start;
+					m[y, x] = Cell::Ghost_start;
 				break;
 				
 				default:
@@ -242,7 +242,6 @@ World::World ()
 
 	// avoid vector re-allocations
 	this->objects.reserve(100);
-	this->ghosts.reserve(10);
 
 	this->add_object(player);
 
@@ -255,7 +254,7 @@ World::World ()
 
 	for (uint32_t y=0; y<this->map.get_h(); y++) {
 		for (uint32_t x=0; x<this->map.get_w(); x++) {
-			switch (this->map(y, x)) {
+			switch (this->map[y, x]) {
 				case Map::Cell::Ghost_start: {
 					Ghost& ghost = this->ghosts.emplace_back(this);
 					ghost.set_pos(Vector( get_cell_center(x), get_cell_center(y) ));
@@ -263,7 +262,8 @@ World::World ()
 				}
 				break;
 
-				default: break; // clear warnings
+				default:
+				break; // clear warnings
 			}
 		}
 	}
@@ -296,26 +296,26 @@ void World::solve_wall_collisions ()
 		const int32_t xi = static_cast<uint32_t>( obj->get_x() );
 		const int32_t yi = static_cast<uint32_t>( obj->get_y() );
 
-		if (obj->get_x() < cell_center.x && this->map(yi, xi-1) == Map::Cell::Wall) {
+		if (obj->get_x() < cell_center.x && this->map[yi, xi-1] == Map::Cell::Wall) {
 			obj->set_x(cell_center.x);
 			obj->set_vx(0.0f);
 			Events::wall_collision.publish( Events::WallCollisionData { .coll_obj = *obj, .direction = Object::Direction::Left } );
 			obj->set_direction(Object::Direction::Stopped);
 		}
-		else if (obj->get_x() > cell_center.x && this->map(yi, xi+1) == Map::Cell::Wall) {
+		else if (obj->get_x() > cell_center.x && this->map[yi, xi+1] == Map::Cell::Wall) {
 			obj->set_x(cell_center.x);
 			obj->set_vx(0.0f);
 			Events::wall_collision.publish( Events::WallCollisionData { .coll_obj = *obj, .direction = Object::Direction::Right } );
 			obj->set_direction(Object::Direction::Stopped);
 		}
 
-		if (obj->get_y() < cell_center.y && this->map(yi-1, xi) == Map::Cell::Wall) {
+		if (obj->get_y() < cell_center.y && this->map[yi-1, xi] == Map::Cell::Wall) {
 			obj->set_y(cell_center.y);
 			obj->set_vy(0.0f);
 			Events::wall_collision.publish( Events::WallCollisionData { .coll_obj = *obj, .direction = Object::Direction::Up } );
 			obj->set_direction(Object::Direction::Stopped);
 		}
-		else if (obj->get_y() > cell_center.y && this->map(yi+1, xi) == Map::Cell::Wall) {
+		else if (obj->get_y() > cell_center.y && this->map[yi+1, xi] == Map::Cell::Wall) {
 			obj->set_y(cell_center.y);
 			obj->set_vy(0.0f);
 			Events::wall_collision.publish( Events::WallCollisionData { .coll_obj = *obj, .direction = Object::Direction::Down } );
@@ -344,13 +344,13 @@ void World::change_wall_color (Events::Timer::Event& event)
 
 void World::render_map ()
 {
-	const Rect2D rect(Config::map_tile_size, Config::map_tile_size);
+	Rect2D rect(Config::map_tile_size, Config::map_tile_size);
 	const uint32_t n_rects = this->map.get_n_walls();
 	Vector offset;
 
 	for (uint32_t y=0; y<this->map.get_h(); y++) {
 		for (uint32_t x=0; x<this->map.get_w(); x++) {
-			switch (this->map(y, x)) {
+			switch (this->map[y, x]) {
 				case Map::Cell::Wall:
 					offset.set(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f);
 					renderer->draw_rect2D(rect, offset, this->wall_color);

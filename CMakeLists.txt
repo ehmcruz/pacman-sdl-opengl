@@ -48,6 +48,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	# SDL2 mixer
 	set(SDL2_MIXER_LINK_FLAGS "-lSDL2_mixer")
 	set(SDL2_MIXER_LIBRARIES "${SDL2_MIXER_LINK_FLAGS}")
+
+	# SDL2 image
+	set(SDL2_IMAGE_LINK_FLAGS "-lSDL2_image")
+	set(SDL2_IMAGE_LIBRARIES "${SDL2_IMAGE_LINK_FLAGS}")
 endif()
 
 if (MSVC)
@@ -127,9 +131,10 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
 endif()
 
 set(MYGAMELIB_SOURCE_FILES
-	"${MYGAMELIB_PATH}/src/my-game-lib.cpp"
-	"${MYGAMELIB_PATH}/src/graphics.cpp"
 	"${MYGAMELIB_PATH}/src/events.cpp"
+	"${MYGAMELIB_PATH}/src/graphics.cpp"
+	"${MYGAMELIB_PATH}/src/my-game-lib.cpp"
+	"${MYGAMELIB_PATH}/src/texture-atlas.cpp"
 	"${MYGAMELIB_PATH}/src/sdl/sdl.cpp"
 	"${MYGAMELIB_PATH}/src/sdl/sdl-audio.cpp"
 	"${MYGAMELIB_PATH}/src/sdl/sdl-graphics.cpp"
@@ -147,7 +152,9 @@ if (SUPPORT_OPENGL)
 	endif()
 
 	set(MYGAMELIB_SOURCE_FILES ${MYGAMELIB_SOURCE_FILES}
-		"${MYGAMELIB_PATH}/src/opengl/opengl.cpp")
+		"${MYGAMELIB_PATH}/src/opengl/program.cpp"
+		"${MYGAMELIB_PATH}/src/opengl/renderer.cpp"
+		)
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")

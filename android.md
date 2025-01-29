@@ -36,7 +36,13 @@ You may also need to take a look at **android/build.gradle**.
 
 Then, to compile:
 
-**cd android**    
+**cd android**
+
+Copy SDL Java interface:
+
+**cp -r /path/to/SDL-release-2.28.x/android-project/app/src/main/java app/src/main**
+
+Compile:
 
 **./gradlew build**
 
