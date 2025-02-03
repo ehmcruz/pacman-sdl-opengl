@@ -53,6 +53,8 @@ public:
 	{
 	}
 
+	virtual ~Object () = default;
+
 	inline float get_x () const
 	{
 		return this->pos.x;
@@ -147,8 +149,8 @@ public:
 	~Ghost ();
 
 	void collided_with_wall (const Events::WallCollision::Type& event, const WallCollisionFilter& filter);
-	void physics (const float dt, const Uint8 *keys) override;
-	void render (const float dt) override;
+	void physics (const float dt, const Uint8 *keys) override final;
+	void render (const float dt) override final;
 };
 
 // ---------------------------------------------------
