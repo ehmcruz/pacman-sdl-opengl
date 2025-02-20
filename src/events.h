@@ -10,8 +10,8 @@
 #include <SDL.h>
 
 #include <my-lib/std.h>
-#include <my-lib/trigger.h>
-#include <my-lib/timer.h>
+#include <my-lib/event.h>
+#include <my-lib/event-timer.h>
 
 #include "lib.h"
 
@@ -30,7 +30,7 @@ using MyGlib::Event::TouchScreenMove;
 
 // ---------------------------------------------------
 
-inline Mylib::Trigger::Timer timer( Clock::now );
+inline Mylib::Event::Timer timer( Clock::now );
 using Timer = decltype(timer);
 
 // ---------------------------------------------------
@@ -52,7 +52,7 @@ struct MoveData {
 	Direction direction;
 };
 
-using Move = Mylib::Trigger::EventHandler<MoveData>;
+using Move = Mylib::Event::Handler<MoveData>;
 
 const char* enum_class_to_str (const MoveData::Direction value);
 
@@ -71,7 +71,7 @@ struct WallCollisionData {
 	MoveData::Direction direction;
 };
 
-using WallCollision = Mylib::Trigger::EventHandler<WallCollisionData>;
+using WallCollision = Mylib::Event::Handler<WallCollisionData>;
 
 inline WallCollision wall_collision;
 

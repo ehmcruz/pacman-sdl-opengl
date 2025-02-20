@@ -84,8 +84,8 @@ static void touch_screen_move_callback (const TouchScreenMove::Type& event)
 
 void setup_events ()
 {
-	event_manager->key_down().subscribe( Mylib::Trigger::make_callback_function<KeyDown::Type>(&key_down_callback) );
-	event_manager->touch_screen_move().subscribe( Mylib::Trigger::make_callback_function<TouchScreenMove::Type>(&touch_screen_move_callback) );
+	event_manager->key_down().subscribe( Mylib::Event::make_callback_function<KeyDown::Type>(&key_down_callback) );
+	event_manager->touch_screen_move().subscribe( Mylib::Event::make_callback_function<TouchScreenMove::Type>(&touch_screen_move_callback) );
 }
 
 // ---------------------------------------------------

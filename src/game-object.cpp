@@ -28,9 +28,9 @@ Game::Player::Player (World *world_)
 
 	//this->base_color = Graphics::Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
 	//this->color = this->base_color;
-	this->color = Color { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
+	this->color = Color(0.0f, 1.0f, 0.0f, 1.0f);
 
-	this->event_move_d = Events::move.subscribe( Mylib::Trigger::make_callback_object<Events::Move::Type>(*this, &Player::event_move) );
+	this->event_move_d = Events::move.subscribe( Mylib::Event::make_callback_object<Events::Move::Type>(*this, &Player::event_move) );
 
 	dprintln("player created");
 }
@@ -151,16 +151,14 @@ Game::Ghost::Ghost (World *world_)
 	this->time_last_turn = this->world->get_time_create();
 	this->time_between_turns = float_to_ClockDuration(Config::ghost_time_between_turns);
 
-	this->color = Color { .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
+	this->color = Color(0.0f, 0.0f, 0.0f, 1.0f);
 
-	WallCollisionFilter wall_collision_filter = WallCollisionFilter { .myself = *this };
-
-	this->event_wall_collision_d = Events::wall_collision.subscribe( Mylib::Trigger::make_filter_callback_object<Events::WallCollision::Type>(wall_collision_filter, *this, &Ghost::collided_with_wall) );
+	this->event_wall_collision_d = Events::wall_collision.subscribe( Mylib::Event::make_callback_object<Events::WallCollision::Type>(*this, &Ghost::collided_with_wall) );
 
 	/*
 		Let's change ghost colors randomly using a coroutine lambda.
 	*/
-	auto coro = [] (Ghost& ghost) -> Events::Timer::Coroutine {
+	auto coro = [] (Ghost& ghost) -> Mylib::Coroutine {
 		dprintln("Ghost ", ghost.name, " coroutine started");
 
 		constexpr ClockDuration wait_time = float_to_ClockDuration(Config::ghost_color_change_time);
@@ -171,16 +169,11 @@ Game::Ghost::Ghost (World *world_)
 		while (true) {
 			co_await Events::timer.coroutine_wait(wait_time);
 
-			ghost.color = Color {
-				.r = d(r),
-				.g = d(r),
-				.b = d(r),
-				.a = 1.0f
-				};
+			ghost.color = Color(d(r), d(r), d(r), 1.0f);
 		}
 	}(*this);
 
-	Events::timer.register_coroutine(coro);
+	Mylib::initialize_coroutine(coro);
 
 	dprintln("ghost created");
 }
@@ -190,8 +183,11 @@ Game::Ghost::~Ghost ()
 	Events::wall_collision.unsubscribe(this->event_wall_collision_d);
 }
 
-void Game::Ghost::collided_with_wall (const Events::WallCollision::Type& event, const WallCollisionFilter& filter)
+void Game::Ghost::collided_with_wall (const Events::WallCollision::Type& event)
 {
+	if (&event.coll_obj != this)
+		return;
+
 	this->time_last_turn = this->world->get_time_create();
 
 //	dprintln("------- Ghost " << this->name << " collided with wall")

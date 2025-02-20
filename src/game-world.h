@@ -15,7 +15,7 @@
 #include <my-lib/std.h>
 #include <my-lib/macros.h>
 #include <my-lib/matrix.h>
-#include <my-lib/trigger.h>
+#include <my-lib/event.h>
 
 #include "game-object.h"
 #include "lib.h"

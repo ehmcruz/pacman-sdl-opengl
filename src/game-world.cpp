@@ -129,7 +129,7 @@ void Main::load (const InitConfig& cfg)
 
 	this->alive = true;
 
-	this->event_quit_d = event_manager->quit().subscribe( Mylib::Trigger::make_callback_object<MyGlib::Event::Quit::Type>(*this, &Main::event_quit) );
+	this->event_quit_d = event_manager->quit().subscribe( Mylib::Event::make_callback_object<MyGlib::Event::Quit::Type>(*this, &Main::event_quit) );
 }
 
 void Main::cleanup ()
@@ -268,9 +268,9 @@ World::World ()
 		}
 	}
 
-	this->wall_color = Color { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f };
+	this->wall_color = Color(0.0f, 0.0f, 1.0f, 1.0f);
 	
-	this->event_timer_wall_color_d = Events::timer.schedule_event(Events::timer.get_current_time() + float_to_ClockDuration(Config::map_tile_color_change_time), Mylib::Trigger::make_callback_object<Events::Timer::Event>(*this, &World::change_wall_color));
+	this->event_timer_wall_color_d = Events::timer.schedule_event(Events::timer.get_current_time() + float_to_ClockDuration(Config::map_tile_color_change_time), Mylib::Event::make_callback_object<Events::Timer::Event>(*this, &World::change_wall_color));
 }
 
 World::~World ()
@@ -331,12 +331,7 @@ void World::change_wall_color (Events::Timer::Event& event)
 	std::uniform_real_distribution<float> d (0.0f, 1.0f);
 	auto& r = probability.get_ref_rgenerator();
 
-	this->wall_color = Color {
-		.r = d(r),
-		.g = d(r),
-		.b = d(r),
-		.a = 1.0f
-		};
+	this->wall_color = Color(d(r), d(r), d(r), 1.0f);
 
 	event.re_schedule = true;
 	event.time = Events::timer.get_current_time() + float_to_ClockDuration(Config::map_tile_color_change_time);
@@ -367,7 +362,7 @@ void World::render_box()
 	Rect2D rect;
 	Vector offset;
 	float w, h;
-	const Color color = { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
+	const auto color = Color(0.0f, 1.0f, 0.0f, 1.0f);
 	const Vector ws = renderer->get_normalized_window_size();
 	
 	w = this->border_thickness;

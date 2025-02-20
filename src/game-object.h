@@ -133,22 +133,11 @@ protected:
 	ClockDuration time_between_turns;
 	Events::WallCollision::Descriptor event_wall_collision_d;
 
-	struct WallCollisionFilter
-	{
-		Object& myself;
-
-		inline bool operator() (const Events::WallCollision::Type& event)
-		{
-			//dprintln("test-coll " << event.coll_obj->get_name() << "   myself is " << this->myself->get_name())
-			return (&this->myself == &event.coll_obj);
-		}
-	};
-
 public:
 	Ghost (World *world_);
 	~Ghost ();
 
-	void collided_with_wall (const Events::WallCollision::Type& event, const WallCollisionFilter& filter);
+	void collided_with_wall (const Events::WallCollision::Type& event);
 	void physics (const float dt, const Uint8 *keys) override final;
 	void render (const float dt) override final;
 };
